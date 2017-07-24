@@ -1,4 +1,5 @@
 ﻿using CefSharp;
+using MaterialSkin;
 using Nacollector.Browser;
 using Nacollector.Spiders;
 using Nacollector.Util;
@@ -45,15 +46,16 @@ namespace Nacollector
             // 窗体标题
             this.Text = _actionLabel + " 任务ID：" + TaskId;
 
+            Logging.Info($"[{TaskId}] 创建任务 {_actionLabel} {_spiderClassName} Parms: {_parmsJson}");
+
             // 初始化内置浏览器
-            string htmlFilePath = string.Format(@"{0}\html_res\terminal.html", Application.StartupPath);
-            if (!File.Exists(htmlFilePath))
+            string htmlPath = Utils.GetHtmlResPath("terminal.html");
+            if (string.IsNullOrEmpty(htmlPath))
             {
-                MessageBox.Show("由于文件丢失，任务终端界面无法正常显示\n文件路径：" + htmlFilePath, "文件丢失", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 this.Dispose(); // 流放窗体
             }
 
-            crBrowser = new CrBrowser(htmlFilePath, MainForm.crDlHandler);
+            crBrowser = new CrBrowser(htmlPath, MainForm.crDlHandler);
             crBrowser.GetBrowser().FrameLoadEnd += new EventHandler<FrameLoadEndEventArgs>(BrowserFrameLoadEnd); // 浏览器初始化完毕时执行
             ContentPanel.Controls.Add(crBrowser.GetBrowser());
         }
@@ -78,21 +80,28 @@ namespace Nacollector
             Spider spider = null;
 
             // 实例化 Spider 对象
-            string typeName = string.Format(@"{0}.Spiders.{1}", this.GetType().Namespace, _spiderClassName);
+            string typeName = $"{this.GetType().Namespace}.Spiders.{_spiderClassName}";
             try
             {
                 spider = (Spider)Activator.CreateInstance(Type.GetType(typeName));
                 spider.setParentForm(this); // 设置父窗体
-                spider.SetParms(_parmsJson); // 设置参数
+                spider.setTaskConfig(TaskId, _parmsJson); // 配置任务
             }
             catch
             {
-                MessageBox.Show("无法实例化对象 " + typeName, "任务新建失败", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                string errorText = "任务新建失败，无法实例化对象 " + typeName;
+                Logging.Error(errorText);
+                MessageBox.Show(errorText, "Nacollector 错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
             // 开始工作
-            spider.BeginWork();
+            try
+            {
+                spider.BeginWork();
+            }
+            catch (Exception e) { spider.LogError(e.Message); return; }
+            
             // 工作结束
             spider.LogInfo("任务执行完毕");
         }

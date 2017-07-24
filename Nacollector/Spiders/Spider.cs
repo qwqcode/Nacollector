@@ -27,26 +27,27 @@ namespace Nacollector.Spiders
         {
             this.ParentForm = pf;
         }
-        
+
+        string TaskId = null; // 任务ID
         Hashtable parms = new Hashtable(); // 参数哈希表
 
         /// <summary>
-        /// 2.设置参数
+        /// 2.设置任务配置
         /// </summary>
         /// <param name="parmsJsonStr"></param>
-        public void SetParms(string parmsJsonStr)
+        public void setTaskConfig(string taskId, string parmsJsonStr)
         {
+            TaskId = taskId;
+
             JArray ja = (JArray)JsonConvert.DeserializeObject(parmsJsonStr);
             foreach (JObject item in ja)
             {
                 string parmName = item["name"].ToString();
-                string parValue = item["value"].ToString();
-                parms[parmName] = parValue;
+                string parmValue = item["value"].ToString();
+                parms[parmName] = parmValue;
             }
         }
-
         
-
         /// <summary>
         /// 3.开始工作
         /// </summary>
@@ -104,6 +105,7 @@ namespace Nacollector.Spiders
         {
             string jsCode = string.Format("Te.log(\"{0}\", Te.lt['{1}'], \"{2}\");", Utils.Base64Encode(content), type, Utils.GetTimeStamp());
             ParentForm.crBrowser.RunJS(jsCode);
+            Logging.Info($"[{TaskId}][{type}] {content}");
             // TaskTerminal.browserRunJS(string.Format("console.log(\"{0}\");", jsCode.Replace("\\", "\\\\").Replace("\"", "\\\"")));
         }
         

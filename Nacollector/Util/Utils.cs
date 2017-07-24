@@ -78,6 +78,29 @@ namespace Nacollector.Util
         }
 
         /// <summary>
+        /// 获取HTML资源路径
+        /// </summary>
+        /// <param name="filename"></param>
+        /// <returns></returns>
+        public static string GetHtmlResPath(string filename)
+        {
+            string path = Path.Combine(Application.StartupPath, "html_res", filename);
+
+            if (!File.Exists(path))
+            {
+                string errorText = "由于文件丢失，程序界面无法正常显示"
+                    + Environment.NewLine
+                    + $"路径：{path}";
+
+                Logging.Error(errorText);
+                MessageBox.Show(errorText, "Nacollector 错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return null;
+            }
+
+            return path;
+        }
+
+        /// <summary>
         /// Base 64 编码
         /// </summary>
         /// <param name="str"></param>

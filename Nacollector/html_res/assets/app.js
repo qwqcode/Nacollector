@@ -12,7 +12,7 @@ $(document).ready(function () {
     $('[data-toggle="tooltip"]').tooltip();
     // 浏览器初始化时白色闪光 减少违和感
     setTimeout(function () {
-        $('body,html').css("opacity","1");
+        $(WRAP_CONT).css("opacity","1");
     }, 10);
 });
 

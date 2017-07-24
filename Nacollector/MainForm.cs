@@ -50,17 +50,16 @@ namespace Nacollector
             MaterialSkinManager skinManager = MaterialSkinManager.Instance;
             skinManager.AddFormToManage(this);
             skinManager.Theme = MaterialSkinManager.Themes.DARK;
-            skinManager.ColorScheme = new ColorScheme(Primary.Blue800, Primary.Blue900, Primary.Blue500, Accent.LightBlue200, TextShade.WHITE);
+            skinManager.ColorScheme = new ColorScheme(Primary.Blue800, Primary.Blue800, Primary.Blue500, Accent.LightBlue200, TextShade.WHITE);
         }
 
         #region 浏览器
         private void InitBrowser()
         {
             // 初始化内置浏览器
-            string htmlFilePath = string.Format(@"{0}\html_res\home.html", Application.StartupPath);
-            if (!File.Exists(htmlFilePath))
+            string htmlPath = Utils.GetHtmlResPath("home.html");
+            if (string.IsNullOrEmpty(htmlPath))
             {
-                MessageBox.Show("由于文件丢失，主界面无法正常显示\n文件路：" + htmlFilePath, "文件丢失", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Application.Exit(); // 退出程序
             }
 
@@ -69,7 +68,7 @@ namespace Nacollector
             crDlHandler.OnBeforeDownloadFired += Browser_onBeforeDownloadFired;
             crDlHandler.OnDownloadUpdatedFired += Browser_onDownloadUpdatedFired;
 
-            crBrowser = new CrBrowser(htmlFilePath, crDlHandler);
+            crBrowser = new CrBrowser(htmlPath, crDlHandler);
             crBrowser.GetBrowser().RegisterAsyncJsObject("MainFormCallBack", new JsCallbackObj());
             crBrowser.GetBrowser().FrameLoadEnd += new EventHandler<FrameLoadEndEventArgs>(BrowserFrameLoadEnd); // 浏览器初始化完毕时执行\
 

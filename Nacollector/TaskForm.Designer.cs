@@ -40,7 +40,7 @@
             this.ContentPanel.Location = new System.Drawing.Point(0, 23);
             this.ContentPanel.Margin = new System.Windows.Forms.Padding(0);
             this.ContentPanel.Name = "ContentPanel";
-            this.ContentPanel.Size = new System.Drawing.Size(1124, 592);
+            this.ContentPanel.Size = new System.Drawing.Size(1124, 527);
             this.ContentPanel.TabIndex = 0;
             // 
             // TaskForm
@@ -48,7 +48,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(1124, 615);
+            this.ClientSize = new System.Drawing.Size(1124, 550);
             this.Controls.Add(this.ContentPanel);
             this.Icon = global::Nacollector.Properties.Resources.app_ico;
             this.Name = "TaskForm";

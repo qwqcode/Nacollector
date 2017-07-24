@@ -1,13 +1,11 @@
 html,body {
     margin: 0;
-    opacity: 0;
     font-family: "Microsoft YaHei", "Helvitica Neue", Helvitica, Arial, "Hiragino Sans GB", "SimHei", sans-serif;
     background: #333333;
     font-size: 14px;
     line-height: 1.42857143;
     color: rgba(0, 0, 0, 0.6);
     height: 100%;
-    -webkit-transition: opacity .2s ease-in-out, background .2s ease-in-out;
     transition: opacity .2s ease-in-out, background .2s ease-in-out;
     overflow: hidden;
 }
@@ -29,6 +27,8 @@ html,body {
     overflow-y: auto;
     width: 100%;
     height: 100%;
+    opacity: 0;
+    transition: opacity .4s cubic-bezier(0.65, 0.05, 0.36, 1), background .4s cubic-bezier(0.65, 0.05, 0.36, 1);
 }
 
 .container {
@@ -113,6 +113,7 @@ html,body {
     background: #1565c0;
     display: flex;
     align-items: center;
+    box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 6px, rgba(0, 0, 0, 0.12) 0px 1px 4px;
 }
 
 .top-nav-bar .left-items, .top-nav-bar .right-items {
@@ -196,31 +197,43 @@ html,body {
     width: 340px;
 }
 
-.app-select > a {
+.app-select .btn-list {
+    background: rgb(47, 47, 47);
+    padding: 7px 0;
+    box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 6px, rgba(0, 0, 0, 0.12) 0px 1px 4px;
+    border-radius: 2px;
+}
+
+.app-select .btn-list a {
     position: relative;
     display: block;
     cursor: pointer;
-    padding: 8px 14px;
-    margin-bottom: 15px;
+    padding: 10px 20px;
+    margin-bottom: 10px;
     -webkit-transition: all .2s ease-in-out;
     transition: all .2s ease-in-out;
-    border: 1px solid #383838;
     background: #2f2f2f;
-    color: #97a4ab;
+    color: #75838a;
     text-align: center;
+    border-left: 2px solid transparent;
 }
 
-.app-select > a.active, .app-select > a:hover {
-    color: #3492de;
-    background: rgb(37, 40, 55);
-    border: 1px solid #204563;
-    text-shadow: 0px 0px 14px rgba(52, 146, 222, 0.63);
+.app-select .btn-list a:last-child {
+    margin-bottom: 0;
+}
+
+.app-select .btn-list a:hover {
+    color: #2588f3;
+}
+
+.app-select .btn-list a.active {
+    color: #2588f3;
+    border-left: 2px solid #2d4558;
 }
 
 .app-main {
     background: #2f2f2f;
     padding: 0;
-    border: 1px solid #35393c;
 }
 
 .app-form {
@@ -228,12 +241,14 @@ html,body {
     margin-right: auto;
     float: none;
     padding: 30px;
+    box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 6px, rgba(0, 0, 0, 0.12) 0px 1px 4px;
+    border-radius: 2px;
 }
 
 .app-form label {
     display: inline-block;
     margin-bottom: 8px;
-    color: #afafaf;
+    color: #75838a;
 }
 
 button, input, select, textarea {
@@ -249,22 +264,22 @@ button, input, select, textarea {
 }
 
 .form-control {
-    padding: 6px 12px;
+    padding: 5px 17px;
     width: 100%;
     height: 34px;
-    border: 1px solid #383838;
+    border: 1px solid transparent;
     font-size: 14px;
     line-height: 1.42857143;
     -webkit-transition: all .2s ease-in-out;
     transition: all .2s ease-in-out;
     color: #2588f3;
-    background: rgba(26, 91, 146, 0.17);
+    background: #32363c;
     resize: none;
 }
 
 .form-control.has-error {
     color: #EF5350;
-    background: rgba(148, 30, 30, 0.17);
+    background: rgb(80, 49, 49);
 }
 
 .form-control:focus {
@@ -273,6 +288,7 @@ button, input, select, textarea {
 }
 
 textarea.form-control {
+    padding: 13px 17px;
     height: 240px;
     overflow-x: hidden;
 }
@@ -285,10 +301,10 @@ textarea.form-control {
 
 .start-task-btn {
     display: inline-block;
-    padding: 6px 35px;
-    border: 1px solid #2d495d;
+    padding: 7px 50px;
+    border: none;
     color: #3492de;
-    background: rgba(28, 63, 90, 0.62);
+    background: rgb(50, 54, 60);
     outline: none;
     font-size: 13.3333px;
     cursor: pointer;
@@ -308,9 +324,7 @@ textarea.form-control {
 }
 
 .start-task-btn:hover, .start-task-btn:active {
-    background: rgba(47, 234, 183, 0.57);
-    border: 1px solid rgba(0, 230, 168, 0.62);
-    color: #00ffbb;
+    color: #2fc798;
 }
 
 .app-terminal {
@@ -504,7 +518,7 @@ textarea.form-control {
     padding: 20px 25px;
     text-align: center;
     font-size: 16px;
-    border-bottom: 1px solid #e0e0e0;
+    /* border-bottom: 1px solid #efefef; */
     color: #2196f3;
 }
 
@@ -518,7 +532,7 @@ textarea.form-control {
 
 .download-panel .downloads-list .download-item {
     position: relative;
-    border-bottom: 1px dashed #e6e6e6;
+    border-top: 1px solid #efefef;
 }
 
 .download-panel .downloads-list .download-item a {
@@ -693,5 +707,5 @@ textarea.form-control {
     border: none;
     padding: 0;
     cursor: pointer;
-    color: #607d8b;
+    color: #93adb9;
 }

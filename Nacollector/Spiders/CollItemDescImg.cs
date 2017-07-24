@@ -48,9 +48,7 @@ namespace Nacollector.Spiders
             LogSuccess("下载完毕");
             pageDom = CQ.CreateDocument(pageContent);
             // 调用指定方法
-            try {
-                this.GetType().GetMethod(PageType + ImgType, BindingFlags.NonPublic | BindingFlags.Instance).Invoke(this, new object[] { });
-            } catch (Exception e) { LogError(e.Message);return; }
+            this.GetType().GetMethod(PageType + ImgType, BindingFlags.NonPublic | BindingFlags.Instance).Invoke(this, new object[] { });
             // 显示&采集
             AfterGetImgUrl();
         }

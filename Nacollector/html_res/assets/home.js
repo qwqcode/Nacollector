@@ -19,7 +19,7 @@ $(document).ready(function () {
     downloads.init();
 });
 
-const BTNS_CONT = '.app-select';
+const BTNS_CONT = '.app-select .btn-list';
 const FORM_CONT = '.app-form';
 
 // 当前操作
@@ -286,7 +286,7 @@ window.downloads = {
 
         var fileName = $(selItem+' .file-name');
         var progress = $(selItem+' .progress');
-        var progressBar = $(selItem+' .progress .progressBar');
+        var progressBar = $(selItem+' .progress .progress-bar');
         var description = $(selItem+' .description');
         var actionBar = $(selItem+' .action-bar');
 
