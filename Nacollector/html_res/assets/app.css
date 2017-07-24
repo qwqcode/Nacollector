@@ -1,0 +1,697 @@
+html,body {
+    margin: 0;
+    opacity: 0;
+    font-family: "Microsoft YaHei", "Helvitica Neue", Helvitica, Arial, "Hiragino Sans GB", "SimHei", sans-serif;
+    background: #333333;
+    font-size: 14px;
+    line-height: 1.42857143;
+    color: rgba(0, 0, 0, 0.6);
+    height: 100%;
+    -webkit-transition: opacity .2s ease-in-out, background .2s ease-in-out;
+    transition: opacity .2s ease-in-out, background .2s ease-in-out;
+    overflow: hidden;
+}
+
+* {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box
+}
+
+:after,:before {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box
+}
+
+.wrap {
+    overflow-x: hidden;
+    overflow-y: auto;
+    width: 100%;
+    height: 100%;
+}
+
+.container {
+    overflow: hidden;
+    padding-right: 15px;
+    padding-left: 15px;
+    padding-top: 75px;
+    padding-bottom: 35px;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+@media (min-width: 768px) {
+    .container {
+        width:750px
+    }
+}
+
+@media (min-width: 992px) {
+    .container {
+        width:970px
+    }
+}
+
+@media (min-width: 1150px) {
+    .container {
+        width:1100px
+    }
+}
+
+@media (min-width: 1200px) {
+    .container {
+        width:1170px
+    }
+}
+
+::-webkit-scrollbar {
+    width: 4px;
+    background: rgba(130, 130, 130, 0.45);
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+::-webkit-scrollbar-thumb:window-inactive {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+::-webkit-scrollbar-thumb:vertical:hover {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+::-webkit-scrollbar-thumb:vertical:active {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+::-webkit-input-placeholder {
+    color: #97a4ab;
+}
+
+.row {
+    margin-left: -15px;
+    margin-right: -15px;
+}
+
+/* user-select disable */
+.top-nav-bar, .big-header, .app-select, .app-form label, ::-webkit-input-placeholder {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    cursor: default;
+}
+
+/* nav-bar */
+.top-nav-bar {
+    z-index: 999;
+    position: fixed;
+    height: 40px;
+    width: 100%;
+    background: #1565c0;
+    display: flex;
+    align-items: center;
+}
+
+.top-nav-bar .left-items, .top-nav-bar .right-items {
+    -webkit-box-flex: 1;
+    -ms-flex: 1;
+    flex: 1;
+    padding: 0 15px;
+}
+
+.top-nav-bar .left-items {
+    float: left;
+}
+
+.top-nav-bar .left-items .nav-title {
+    color: #FFF;
+    font-size: 14px;
+}
+
+.top-nav-bar .right-items {
+    float: right;
+}
+
+.top-nav-bar .right-items .nav-btns {
+    float: right;
+    overflow: hidden;
+    border-radius: 0;
+}
+
+.top-nav-bar .right-items .nav-btns > a {
+    font-size: 15px;
+    color: #FFF;
+    cursor: pointer;
+    padding: 3px;
+    display: inline-block;
+    transition: background .2s ease-in-out;
+    border-radius: 2px;
+    margin-left: 10px;
+}
+
+.top-nav-bar .right-items .nav-btns > a:first-child {
+    margin-left: 0;
+}
+
+.top-nav-bar .right-items .nav-btns > a > i {
+    width: 20px;
+    text-align: center;
+}
+
+.top-nav-bar .right-items .nav-btns > a:hover {
+    background: rgba(52, 146, 222, 0.72);
+}
+
+.app-select, .app-main {
+    position: relative;
+    min-height: 1px;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+@media (min-width: 992px) {
+    .app-main {
+        width: 73.66666667%;
+        float: left;
+    }
+
+    .app-select {
+        width: 26.33333333%;
+        float: left;
+    }
+}
+
+.big-header {
+    display: block;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.app-logo {
+    margin-bottom: 20px;
+    margin-top: 20px;
+    width: 340px;
+}
+
+.app-select > a {
+    position: relative;
+    display: block;
+    cursor: pointer;
+    padding: 8px 14px;
+    margin-bottom: 15px;
+    -webkit-transition: all .2s ease-in-out;
+    transition: all .2s ease-in-out;
+    border: 1px solid #383838;
+    background: #2f2f2f;
+    color: #97a4ab;
+    text-align: center;
+}
+
+.app-select > a.active, .app-select > a:hover {
+    color: #3492de;
+    background: rgb(37, 40, 55);
+    border: 1px solid #204563;
+    text-shadow: 0px 0px 14px rgba(52, 146, 222, 0.63);
+}
+
+.app-main {
+    background: #2f2f2f;
+    padding: 0;
+    border: 1px solid #35393c;
+}
+
+.app-form {
+    margin-left: auto;
+    margin-right: auto;
+    float: none;
+    padding: 30px;
+}
+
+.app-form label {
+    display: inline-block;
+    margin-bottom: 8px;
+    color: #afafaf;
+}
+
+button, input, select, textarea {
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+}
+
+.form-group {
+    margin-bottom: 18px;
+    position: relative;
+    overflow: hidden;
+}
+
+.form-control {
+    padding: 6px 12px;
+    width: 100%;
+    height: 34px;
+    border: 1px solid #383838;
+    font-size: 14px;
+    line-height: 1.42857143;
+    -webkit-transition: all .2s ease-in-out;
+    transition: all .2s ease-in-out;
+    color: #2588f3;
+    background: rgba(26, 91, 146, 0.17);
+    resize: none;
+}
+
+.form-control.has-error {
+    color: #EF5350;
+    background: rgba(148, 30, 30, 0.17);
+}
+
+.form-control:focus {
+    outline: none;
+    border: 1px solid #4285f4;
+}
+
+textarea.form-control {
+    height: 240px;
+    overflow-x: hidden;
+}
+
+.form-btns {
+    display: block;
+    overflow: hidden;
+    margin-top: 25px;
+}
+
+.start-task-btn {
+    display: inline-block;
+    padding: 6px 35px;
+    border: 1px solid #2d495d;
+    color: #3492de;
+    background: rgba(28, 63, 90, 0.62);
+    outline: none;
+    font-size: 13.3333px;
+    cursor: pointer;
+    -webkit-transition: all .2s ease-in-out;
+    transition: all .2s ease-in-out;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.42857143;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    background-image: none;
+}
+
+.start-task-btn:hover, .start-task-btn:active {
+    background: rgba(47, 234, 183, 0.57);
+    border: 1px solid rgba(0, 230, 168, 0.62);
+    color: #00ffbb;
+}
+
+.app-terminal {
+}
+
+.terminal-content {
+    color: #a7a7a7;
+    font-size: 16px;
+    line-height: 1.7;
+}
+
+.terminal-content .line {
+    margin-bottom: 7px;
+    word-wrap: break-word;
+}
+
+.terminal-content .line.normal {
+    color: #cacaca;
+}
+
+.terminal-content .line.success {
+    color: #32f388;
+}
+
+.terminal-content .line.info {
+    color: #38a5ff;
+}
+
+.terminal-content .line.warning {
+    color: #ffc761;
+}
+
+.terminal-content .line.error {
+    color: #ff4545;
+}
+
+.terminal-content .line .tag {
+    margin-right: 10px;
+}
+
+/* tooltip */
+.tooltip {
+    position: absolute;
+    z-index: 1070;
+    display: block;
+    font-family: inherit;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: normal;
+    line-height: 1.42857143;
+    text-align: left;
+    text-align: start;
+    text-decoration: none;
+    text-shadow: none;
+    text-transform: none;
+    letter-spacing: normal;
+    word-break: normal;
+    word-spacing: normal;
+    word-wrap: normal;
+    white-space: normal;
+    filter: alpha(opacity=0);
+    opacity: 0;
+    line-break: auto;
+}
+
+.tooltip.in {
+    filter: alpha(opacity=90);
+    opacity: .9;
+}
+
+.tooltip.top {
+    padding: 5px 0;
+    margin-top: -3px;
+}
+
+.tooltip.right {
+    padding: 0 5px;
+    margin-left: 3px;
+}
+
+.tooltip.bottom {
+    padding: 5px 0;
+    margin-top: 3px;
+}
+
+.tooltip.left {
+    padding: 0 5px;
+    margin-left: -3px;
+}
+
+.tooltip-inner {
+    max-width: 200px;
+    padding: 3px 8px;
+    color: #fff;
+    text-align: center;
+    background-color: #000;
+    border-radius: 2px;
+}
+
+.tooltip-arrow {
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-color: transparent;
+    border-style: solid;
+}
+
+.tooltip.top .tooltip-arrow {
+    bottom: 0;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px 5px 0;
+    border-top-color: #000;
+}
+
+.tooltip.top-left .tooltip-arrow {
+    right: 5px;
+    bottom: 0;
+    margin-bottom: -5px;
+    border-width: 5px 5px 0;
+    border-top-color: #000;
+}
+
+.tooltip.top-right .tooltip-arrow {
+    bottom: 0;
+    left: 5px;
+    margin-bottom: -5px;
+    border-width: 5px 5px 0;
+    border-top-color: #000;
+}
+
+.tooltip.right .tooltip-arrow {
+    top: 50%;
+    left: 0;
+    margin-top: -5px;
+    border-width: 5px 5px 5px 0;
+    border-right-color: #000;
+}
+
+.tooltip.left .tooltip-arrow {
+    top: 50%;
+    right: 0;
+    margin-top: -5px;
+    border-width: 5px 0 5px 5px;
+    border-left-color: #000;
+}
+
+.tooltip.bottom .tooltip-arrow {
+    top: 0;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 0 5px 5px;
+    border-bottom-color: #000;
+}
+
+.tooltip.bottom-left .tooltip-arrow {
+    top: 0;
+    right: 5px;
+    margin-top: -5px;
+    border-width: 0 5px 5px;
+    border-bottom-color: #000;
+}
+
+.tooltip.bottom-right .tooltip-arrow {
+    top: 0;
+    left: 5px;
+    margin-top: -5px;
+    border-width: 0 5px 5px;
+    border-bottom-color: #000;
+}
+
+/* download-panel */
+.download-panel {
+    position: absolute;
+    display: block;
+    background: #FFF;
+    width: 400px;
+    height: 430px;
+    z-index: 998;
+    margin-top: 7px;
+    color: #757e91;
+    word-break: break-all;
+    overflow: hidden;
+    overflow-y: auto;
+}
+
+.download-panel .panel-header {
+}
+
+.download-panel .panel-title {
+    padding: 20px 25px;
+    text-align: center;
+    font-size: 16px;
+    border-bottom: 1px solid #e0e0e0;
+    color: #2196f3;
+}
+
+.download-panel .panel-title > i {
+    margin-right: 5px;
+    vertical-align: middle;
+}
+
+.download-panel .downloads-list {
+}
+
+.download-panel .downloads-list .download-item {
+    position: relative;
+    border-bottom: 1px dashed #e6e6e6;
+}
+
+.download-panel .downloads-list .download-item a {
+    cursor: pointer;
+}
+
+.download-panel .downloads-list .download-item .details {
+    padding: 10px 10px;
+}
+
+.download-panel .downloads-list .download-item .details .header {
+    margin-bottom: 10px;
+}
+
+.download-panel .downloads-list .download-item .details .header .file-name {
+    color: #2196f3;
+    display: block;
+    font-size: 16px;
+    margin-bottom: 6px;
+}
+
+.download-panel .downloads-list .download-item .details .header .file-name:hover {}
+
+.download-panel .downloads-list .download-item .details .header .download-url {
+    display: block;
+    font-size: 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: rgba(27, 27, 27, 0.6);
+}
+
+.download-panel .downloads-list .download-item .details .header .download-url:hover {}
+
+.download-panel .downloads-list .download-item .details .description {
+    margin-top: 5px;
+    margin-bottom: 5px;
+    font-size: 12px;
+    color: #717171;
+}
+
+.download-panel .downloads-list .download-item .details .progress {
+    background-color: #e2e2e2;
+    position: relative;
+    height: 2px;
+}
+
+.download-panel .downloads-list .download-item .details .progress.indeterminate {
+    overflow: hidden;
+}
+
+.download-panel .downloads-list .download-item .details .progress .progress-bar {
+    position: absolute;
+    width: 0;
+    max-width: 100%;
+    height: 100%;
+    text-align: right;
+    background-color: #2196f3;
+    transition: all .3s;
+    text-align: right;
+}
+
+.download-panel .downloads-list .download-item .details .progress .progress-bar .progress-text {
+    position: relative;
+    top: -18px;
+    line-height: 18px;
+    font-size: 12px;
+    color: #666;
+    display: inline-block;
+    vertical-align: top;
+}
+
+.download-panel .downloads-list .download-item .details .progress.indeterminate .progress-bar {
+    animation: progress-bar-indeterminate 2.1s cubic-bezier(0.65, 0.815, 0.735, 0.395) infinite;
+    transition: all 0.2s linear;
+    will-change: left, right;
+    width: 30% !important;
+}
+
+@-webkit-keyframes progress-bar-indeterminate {
+    0% {
+        left: -35%;
+        right: 100%;
+    }
+
+    60% {
+        left: 100%;
+        right: -90%;
+    }
+
+    100% {
+        left: 100%;
+        right: -90%;
+    }
+}
+
+.download-panel .downloads-list .download-item .details .action-bar {
+    margin-top: 5px;
+}
+
+.download-panel .downloads-list .download-item .details .action-bar a {
+    color: #2196f3;
+    margin-right: 10px;
+}
+
+.download-panel .downloads-list .download-item .details .action-bar a:last-child {
+    margin-right: 0;
+}
+
+.download-panel .downloads-list .download-item .details .action-bar a:hover {
+}
+
+/* download-panel-status */
+.download-panel .downloads-list .download-item[dl-status="downloading"] {}
+
+.download-panel .downloads-list .download-item[dl-status="pause"] {}
+
+.download-panel .downloads-list .download-item[dl-status="pause"] .details .progress {}
+
+.download-panel .downloads-list .download-item[dl-status="pause"] .details .progress .progress-bar {
+    background-color: #b7b7b7;
+}
+
+.download-panel .downloads-list .download-item[dl-status="done"] {
+}
+
+.download-panel .downloads-list .download-item[dl-status="done"] .details .progress {
+    display: none;
+}
+
+.download-panel .downloads-list .download-item[dl-status="done"] .details .progress .progress-bar {}
+
+.download-panel .downloads-list .download-item[dl-status="fail"] .details .progress .progress-bar {
+    background: #f95c57;
+}
+
+.download-panel .downloads-list .download-item[dl-status="fail"] .details .progress.indeterminate .progress-bar {
+    width: 100% !important;
+    animation: none;
+}
+
+.download-panel .downloads-list .download-item[dl-status="cancelled"] {}
+
+.download-panel .downloads-list .download-item[dl-status="cancelled"] .details .header .file-name {
+    color: rgba(19, 19, 19, 0.6);
+    text-decoration: line-through;
+}
+
+.download-panel .downloads-list .download-item[dl-status="cancelled"] .details .description {
+    display: none;
+}
+
+.download-panel .downloads-list .download-item[dl-status="cancelled"] .details .progress {
+    display: none;
+}
+
+.download-panel .downloads-list .download-item .icon-wrapper {
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+
+.download-panel .downloads-list .download-item .icon-wrapper .remove-btn {
+    font-size: 16px;
+    line-height: 17px;
+    vertical-align: middle;
+    outline: none;
+    width: 30px;
+    height: 30px;
+    background: none;
+    margin: 0;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    color: #607d8b;
+}
