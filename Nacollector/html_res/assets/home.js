@@ -160,6 +160,17 @@ window.AppUi = {
                 input: selectInput.find('.form-control')
             };
         }
+    },
+    cardBlockLayer: {
+        layerList: {
+
+        },
+        newLayer: function (key) {
+
+        },
+        removeLayer: function (key) {
+
+        }
     }
 };
 
@@ -180,53 +191,16 @@ window.downloads = {
         cancel: 3
     },
     sel: {
-        panel: '.download-panel',
-        downloadsList: '.download-panel .downloads-list',
-        toggleBtn: NavBar.btnGetSelector('downloadManager')
+        downloadsList: null
     },
+    panelKey: 'downloads',
     // 初始化
     init: function () {
-        $(this.sel.toggleBtn).bind('click', function () {
-            downloads.panelToggle();
-        });
-
-        $(NAVBAR_CONT).after('<div class="download-panel" style="display: none;">\n<div class="panel-header"><div class="panel-title"><i class="zmdi zmdi-download"></i> 下载内容</div></div>\n<div class="downloads-list"></div>\n</div>');
-    },
-    // 显示/隐藏 面板
-    panelToggle: function () {
-        if (!this.isPanelShow()) {
-            downloads.setPanelPos();
-            $(this.sel.panel).fadeIn(200);
-            // 若点按的元素非下载面板内元素
-            setTimeout(function () {
-                $(document).bind('click.download-panel', function (e) {
-                    var panelSel = downloads.sel.panel;
-                    if(!$(e.target).is(panelSel) && !$(e.target).closest(panelSel).length) {
-                        downloads.panelToggle();
-                    }
-                });
-            }, 300);
-            // 自动调整面板位置
-            $(window).bind('resize.download-panel', function () {
-                downloads.setPanelPos();
-            });
-        } else {
-            $(this.sel.panel).fadeOut(200);
-            $(window).unbind('resize.download-panel');
-            $(document).unbind('click.download-panel'); // 解绑事件
-        }
-    },
-    // 是否已显示面板
-    isPanelShow: function () {
-        return !($(this.sel.panel).css('display') === 'none');
-    },
-    // 调整面板位置
-    setPanelPos: function () {
-        var position = $.getPosition($(this.sel.toggleBtn));
-        var panelWidth = $(this.sel.panel).outerWidth();
-        $(this.sel.panel)
-            .css('top', position['bottom'] + 'px')
-            .css('left', position['right'] - panelWidth + 'px');
+        var panelObj = NavBar.panel.register(this.panelKey, 'downloadManager');
+        panelObj.setTitle('<i class="zmdi zmdi-download"></i> 下载内容');
+        panelObj.setInner('<div class="downloads-list"></div>');
+        panelObj.setSize(400, 430);
+        this.sel.downloadsList = panelObj.getSel() + ' .downloads-list';
     },
     // 新增任务
     addTask: function (json) {

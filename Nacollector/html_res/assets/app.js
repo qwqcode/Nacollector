@@ -94,13 +94,98 @@ var NavBar = {
             NavBar.btnAdd(name, value['icon'], value['title'], value['onClick']);
         });
     },
-    // 获取按钮 Dom
-    btnGet: function (name) {
-        return $('[data-nav-btn="'+name+'"]');
-    },
     // 获取按钮 Selector
-    btnGetSelector: function (name) {
+    getBtnSel: function (name) {
         return '[data-nav-btn="'+name+'"]';
+    },
+    // 面板
+    panel: {
+        list: {},
+        // 注册新面板
+        register: function (key, btnName) {
+            var btnSel = NavBar.getBtnSel(btnName);
+            $(btnSel).after('<div class="navbar-panel" data-navbar-panel="'+key+'" />');
+
+            var panelSel = '[data-navbar-panel="'+key+'"]';
+            var panelObj = {};
+            // 设置标题
+            panelObj.setTitle = function (val) {
+                $('<div class="panel-header"><div class="panel-title">'+val+'</div></div>').prependTo(panelSel);
+            };
+            // 设置内容
+            panelObj.setInner = function (val) {
+                $('<div class="panel-inner">'+val+'</div>').appendTo(panelSel);
+            };
+            // 设置尺寸
+            panelObj.setSize = function (width, height) {
+                $(panelSel).css('width', width + 'px');
+                $(panelSel).css('height', height + 'px');
+            };
+            // 自动调整位置
+            panelObj.setPosition = function () {
+                var position = $.getPosition($(btnSel));
+                var panelWidth = $(panelSel).outerWidth();
+                $(panelSel)
+                    .css('top', position['top'] + 'px')
+                    .css('left', position['right'] - panelWidth + 'px');
+            };
+            // 显示
+            panelObj.show = function () {
+                this.setPosition();
+                $(panelSel).addClass('show');
+                // 若点按的元素非下载面板内元素
+                setTimeout(function () {
+                    $(document).bind('click.nav-panel-' + key, function (e) {
+                        if(!$(e.target).is(panelSel) && !$(e.target).closest(panelSel).length) {
+                            NavBar.panel.getPanel(key).hide();
+                        }
+                    });
+                }, 300);
+                // 自动调整面板位置
+                $(window).bind('resize.nav-panel-' + key, function () {
+                    NavBar.panel.getPanel(key).setPosition();
+                });
+            };
+            // 隐藏
+            panelObj.hide = function () {
+                $(panelSel).removeClass('show');
+                $(window).unbind('resize.nav-panel-' + key);
+                $(document).unbind('click.nav-panel-' + key); // 解绑事件
+            };
+            // 切换
+            panelObj.toggle = function () {
+                if (!this.isShow(key)) {
+                    this.show(key);
+                } else {
+                    this.hide(key);
+                }
+            };
+            // 是否显示
+            panelObj.isShow = function () {
+                return !!($(panelSel).hasClass('show'));
+            };
+            // 获取 Selector
+            panelObj.getSel = function () {
+                return panelSel;
+            };
+
+            // 按钮点击绑定
+            $(btnSel).bind('click', function () {
+                panelObj.toggle();
+            });
+
+            // 加入 List
+            this.list[key] = panelObj;
+
+            return panelObj;
+        },
+        // 获取面板
+        getPanel: function (key) {
+            if (!this.list.hasOwnProperty(key))
+                throw ('未找到面板：' + key);
+
+            return this.list[key];
+        }
     }
 };
 
