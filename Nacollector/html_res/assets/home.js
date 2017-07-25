@@ -7,7 +7,21 @@
  */
 $(document).ready(function () {
     // 状态栏初始化
-    AppUi.navBarInit();
+    NavBar.btnsAdd({
+        downloadManager: {
+            icon: 'download',
+            title: '下载内容'
+        },
+        setting: {
+            icon: 'settings',
+            title: '设置',
+            onClick: function () {
+                if (ContentBlockLayer.sidebar.get('setting') === null)
+                    ContentBlockLayer.sidebar.register("setting").setTitle("设置");
+                ContentBlockLayer.sidebar.get("setting").show();
+            }
+        }
+    });
 
     // 操作初始化
     AppUi.actionInit();
@@ -30,22 +44,6 @@ var CurrentAction = {
 };
 
 window.AppUi = {
-    // 导航栏初始化
-    navBarInit: function () {
-        NavBar.btnsAdd({
-            downloadManager: {
-                icon: 'download',
-                title: '下载内容'
-            },
-            setting: {
-                icon: 'settings',
-                title: '设置',
-                onClick: function () {
-                    alert('ha1');
-                }
-            }
-        });
-    },
     // 操作初始化
     actionInit: function () {
         // 操作按钮
@@ -159,17 +157,6 @@ window.AppUi = {
             CurrentAction.formElements[fieldId] = {
                 input: selectInput.find('.form-control')
             };
-        }
-    },
-    cardBlockLayer: {
-        layerList: {
-
-        },
-        newLayer: function (key) {
-
-        },
-        removeLayer: function (key) {
-
         }
     }
 };

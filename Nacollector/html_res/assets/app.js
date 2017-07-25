@@ -67,6 +67,7 @@ var ActionList = {
     }
 };
 
+// 导航栏
 var NavBar = {
     $navTitle: NAVBAR_CONT+' .nav-title',
     $navBtns: NAVBAR_CONT+' .nav-btns',
@@ -103,10 +104,14 @@ var NavBar = {
         list: {},
         // 注册新面板
         register: function (key, btnName) {
+            if (this.list.hasOwnProperty(key))
+                return '导航栏面板： ' + key + ' 已存在于list中';
+
             var btnSel = NavBar.getBtnSel(btnName);
             $(btnSel).after('<div class="navbar-panel" data-navbar-panel="'+key+'" />');
 
             var panelSel = '[data-navbar-panel="'+key+'"]';
+            // 工厂模式
             var panelObj = {};
             // 设置标题
             panelObj.setTitle = function (val) {
@@ -131,33 +136,39 @@ var NavBar = {
             };
             // 显示
             panelObj.show = function () {
-                this.setPosition();
+                if (panelObj.isShow())
+                    throw ('导航栏面板：' + key + ' 已显示');
+
+                panelObj.setPosition();
                 $(panelSel).addClass('show');
-                // 若点按的元素非下载面板内元素
+                // 若点按的元素非面板内元素
                 setTimeout(function () {
                     $(document).bind('click.nav-panel-' + key, function (e) {
                         if(!$(e.target).is(panelSel) && !$(e.target).closest(panelSel).length) {
-                            NavBar.panel.getPanel(key).hide();
+                            panelObj.hide();
                         }
                     });
                 }, 300);
                 // 自动调整面板位置
                 $(window).bind('resize.nav-panel-' + key, function () {
-                    NavBar.panel.getPanel(key).setPosition();
+                    panelObj.setPosition();
                 });
             };
             // 隐藏
             panelObj.hide = function () {
+                if (!panelObj.isShow())
+                    throw ('导航栏面板：' + key + ' 未显示');
+
                 $(panelSel).removeClass('show');
                 $(window).unbind('resize.nav-panel-' + key);
                 $(document).unbind('click.nav-panel-' + key); // 解绑事件
             };
             // 切换
             panelObj.toggle = function () {
-                if (!this.isShow(key)) {
-                    this.show(key);
+                if (!panelObj.isShow(key)) {
+                    panelObj.show(key);
                 } else {
-                    this.hide(key);
+                    panelObj.hide(key);
                 }
             };
             // 是否显示
@@ -169,7 +180,7 @@ var NavBar = {
                 return panelSel;
             };
 
-            // 按钮点击绑定
+            // 导航栏按钮点击绑定
             $(btnSel).bind('click', function () {
                 panelObj.toggle();
             });
@@ -180,11 +191,123 @@ var NavBar = {
             return panelObj;
         },
         // 获取面板
-        getPanel: function (key) {
+        get: function (key) {
             if (!this.list.hasOwnProperty(key))
-                throw ('未找到面板：' + key);
+                return null;
 
             return this.list[key];
+        }
+    }
+};
+
+// 内容块层
+var ContentBlockLayer = {
+    // 侧边栏
+    sidebar: {
+        list: {},
+        // 注册新的 Sidebar
+        register: function (key) {
+            if (this.list.hasOwnProperty(key))
+                return '侧边栏层： ' + key + ' 已存在于list中';
+
+            var layerSel = this.getLayerSel();
+            $('<div class="sidebar-block" data-sidebar-layer-key="'+key+'" />')
+                .appendTo($(layerSel));
+            var sidebarSel = '[data-sidebar-layer-key="' + key + '"]';
+            var sidebarObj = {};
+            // 设置标题
+            sidebarObj.setTitle = function (val) {
+                $('<div class="sidebar-header"><div class="header-left">'+val+'</div><div class="header-right"><button type="button" data-toggle="sidebar-layer-hide"><i class="zmdi zmdi-close"></i></button></div></div>').prependTo(sidebarSel);
+                $(sidebarSel + ' [data-toggle="sidebar-layer-hide"]').click(function () {
+                    sidebarObj.hide();
+                });
+            };
+            // 设置内容
+            sidebarObj.setInner = function (val) {
+                $('<div class="sidebar-inner">'+val+'</div>').appendTo(sidebarSel);
+            };
+            // 设置宽度
+            sidebarObj.setWidth = function (width) {
+                $(sidebarSel).css('width', width + 'px');
+            };
+            // 显示
+            sidebarObj.show = function () {
+                if (sidebarObj.isShow())
+                    throw ('侧边栏层：' + key + ' 已显示');
+
+                if (!$(layerSel).hasClass('show'))
+                    $(layerSel).addClass('show');
+
+                $(sidebarSel)
+                    .css('transform', 'translate(' + ($(sidebarSel).width() + 10) + 'px, 0px)')
+                    .addClass('show');
+
+                $('body').css('overflow', 'hidden');
+
+                // 若点按的元素非 block 内元素
+                setTimeout(function () {
+                    $(document).bind('click.sidebar-layer-' + key, function (e) {
+                        if(!$(e.target).is(sidebarSel) && !$(e.target).closest(sidebarSel).length) {
+                            sidebarObj.hide();
+                        }
+                    });
+                }, 300);
+            };
+            // 隐藏
+            sidebarObj.hide = function () {
+                if (!sidebarObj.isShow())
+                    throw ('侧边栏层：' + key + ' 未显示');
+
+                $(sidebarSel).removeClass('show');
+
+                if ($('.sidebar-layer > .sidebar-block.show:last-child').length === 0) {
+                    // 若已经没有显示层
+                    $(layerSel).removeClass('show');
+                    $('body').css('overflow', '');
+                }
+
+                $(document).unbind('click.sidebar-layer-' + key); // 解绑事件
+            };
+            // 是否显示
+            sidebarObj.isShow = function () {
+                return !!($(sidebarSel).hasClass('show'));
+            };
+            // 获取 Selector
+            sidebarObj.getSel = function () {
+                return sidebarSel;
+            };
+
+            // 加入 List
+            this.list[key] = sidebarObj;
+
+            return sidebarObj;
+        },
+        // 获取 sidebarObj
+        get: function (key) {
+            if (!this.list.hasOwnProperty(key))
+                return null;
+
+            return this.list[key];
+        },
+        // 获取层 Selector
+        getLayerSel: function () {
+            var layerSel = '.sidebar-layer';
+
+            if ($(layerSel).length === 0)
+                $('<div class="sidebar-layer" />').appendTo('body');
+
+            return layerSel;
+        }
+    },
+    card: {
+        layerList: {
+
+        },
+        newLayer: function (key) {
+
+        },
+        removeLayer: function (key) {
+
         }
     }
 };
