@@ -55,7 +55,7 @@ namespace Nacollector
                 this.Dispose(); // 流放窗体
             }
 
-            crBrowser = new CrBrowser(htmlPath, MainForm.crDlHandler);
+            crBrowser = new CrBrowser(htmlPath);
             crBrowser.GetBrowser().FrameLoadEnd += new EventHandler<FrameLoadEndEventArgs>(BrowserFrameLoadEnd); // 浏览器初始化完毕时执行
             ContentPanel.Controls.Add(crBrowser.GetBrowser());
         }

@@ -161,6 +161,7 @@ window.AppUi = {
     }
 };
 
+// 浏览器下载管理器
 window.downloads = {
     data: {
         list: {}
@@ -334,7 +335,7 @@ window.downloads = {
         if (!this.data.list[key])
             throw ('任务操作失败，或许已被删除，未找到 ' + key);
 
-        MainFormCallBack.downloadTaskAction(key, action);
+        CrDownloadsCallBack.downloadingTaskAction(key, action);
     },
     // 任务从列表移除
     taskRemove: function (key) {
@@ -342,7 +343,7 @@ window.downloads = {
             throw ('任务从列表移除失败，或许已被删除，未找到 ' + key);
 
         if (this.isTaskInProgress(key)) {
-            MainFormCallBack.downloadTaskAction(key, this.actionList.cancel);
+            CrDownloadsCallBack.downloadTaskAction(key, this.actionList.cancel);
         }
 
         delete this.data.list[key];
@@ -389,7 +390,7 @@ window.downloads = {
         if (!this.data.list[key] || this.data.list[key].status !== this.statusList.done)
             return;
 
-        MainFormCallBack.fileLaunch(this.data.list[key].fullPath).then(function(isSuccess){
+        CrDownloadsCallBack.fileLaunch(this.data.list[key].fullPath).then(function(isSuccess){
             if (!isSuccess) {
                 downloads.data.list[key].status = downloads.statusList.cancelled;
                 downloads.updateItemUi(key);
@@ -401,14 +402,14 @@ window.downloads = {
         if (!this.data.list[key])
             return;
 
-        MainFormCallBack.urlOpenInDefaultBrowser(this.data.list[key].downloadUrl);
+        CrDownloadsCallBack.urlOpenInDefaultBrowser(this.data.list[key].downloadUrl);
     },
     // 文件在资源管理器中显示
     fileShowInExplorer: function (key) {
         if (!this.data.list[key])
             return;
 
-        MainFormCallBack.fileShowInExplorer(this.data.list[key].fullPath).then(function(isSuccess){
+        CrDownloadsCallBack.fileShowInExplorer(this.data.list[key].fullPath).then(function(isSuccess){
             if (!isSuccess) {
                 downloads.data.list[key].status = downloads.statusList.cancelled;
                 downloads.updateItemUi(key);

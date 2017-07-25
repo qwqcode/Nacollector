@@ -79,6 +79,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Browser\CrDownloads.cs" />
     <Compile Include="Browser\CrBrowser.cs" />
     <Compile Include="Browser\Handler\BeforeDownloadUpdatedEventArgs.cs" />
     <Compile Include="Browser\Handler\DownloadHandler.cs" />

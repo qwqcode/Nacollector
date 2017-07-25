@@ -16,7 +16,7 @@ namespace Nacollector.Browser
     {
         private ChromiumWebBrowser browser;
 
-        public CrBrowser(string address, IDownloadHandler downloadHandler)
+        public CrBrowser(string address)
         {
             // 初始化浏览器
             browser = new ChromiumWebBrowser(address);
@@ -32,7 +32,6 @@ namespace Nacollector.Browser
             
             browser.MenuHandler = new MenuHandler();
             browser.LoadHandler = new LoadHandler();
-            browser.DownloadHandler = downloadHandler;
 
             browser.FrameLoadEnd += new EventHandler<FrameLoadEndEventArgs>(Browser_onFrameLoadEnd);
             browser.IsBrowserInitializedChanged += new EventHandler<IsBrowserInitializedChangedEventArgs>(Browser_onIsBrowserInitializedChanged);
