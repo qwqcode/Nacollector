@@ -1,4 +1,5 @@
 html,body {
+    overflow: hidden;
     margin: 0;
     font-family: "Microsoft YaHei", "Helvitica Neue", Helvitica, Arial, "Hiragino Sans GB", "SimHei", sans-serif;
     background: #333333;
@@ -7,7 +8,6 @@ html,body {
     color: rgba(0, 0, 0, 0.6);
     height: 100%;
     transition: opacity .2s ease-in-out, background .2s ease-in-out;
-    overflow: hidden;
 }
 
 * {
@@ -20,6 +20,12 @@ html,body {
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box
+}
+
+button, input, select, textarea {
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
 }
 
 .wrap {
@@ -67,23 +73,23 @@ html,body {
 
 ::-webkit-scrollbar {
     width: 4px;
-    background: rgba(130, 130, 130, 0.45);
+    background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.3);
+    background: rgba(86, 86, 86, 0.25);
 }
 
 ::-webkit-scrollbar-thumb:window-inactive {
-    background: rgba(0, 0, 0, 0.3);
+    background: rgba(86, 86, 86, 0.25);
 }
 
 ::-webkit-scrollbar-thumb:vertical:hover {
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(74, 121, 167, 0.77);
 }
 
 ::-webkit-scrollbar-thumb:vertical:active {
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(52, 127, 197, 0.77);
 }
 
 ::-webkit-input-placeholder {
@@ -93,6 +99,15 @@ html,body {
 .row {
     margin-left: -15px;
     margin-right: -15px;
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0
+    }
+    to {
+        opacity: 1
+    }
 }
 
 /* user-select disable */
@@ -130,6 +145,12 @@ html,body {
 .top-nav-bar .left-items .nav-title {
     color: #FFF;
     font-size: 14px;
+    padding: 0 10px;
+    transition: transform .3s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.top-nav-bar .left-items .nav-title.changing {
+    transform: translateY(-100%);
 }
 
 .top-nav-bar .right-items {
@@ -166,7 +187,20 @@ html,body {
     background: rgba(255,255,255,.2);;
 }
 
-.app-select, .app-main {
+/* Taskgen */
+.taskgen-header {
+    display: block;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.taskgen-header .app-logo {
+    margin-bottom: 20px;
+    margin-top: 20px;
+    width: 340px;
+}
+
+.taskgen-form-toggle, .taskgen-main {
     position: relative;
     min-height: 1px;
     padding-left: 15px;
@@ -174,38 +208,25 @@ html,body {
 }
 
 @media (min-width: 992px) {
-    .app-main {
+    .taskgen-main {
         width: 73.66666667%;
         float: left;
     }
 
-    .app-select {
+    .taskgen-form-toggle {
         width: 26.33333333%;
         float: left;
     }
 }
 
-/* App Home */
-.big-header {
-    display: block;
-    margin-bottom: 20px;
-    text-align: center;
-}
-
-.app-logo {
-    margin-bottom: 20px;
-    margin-top: 20px;
-    width: 340px;
-}
-
-.app-select .btn-list {
+.taskgen-form-toggle .btn-list {
     background: rgb(47, 47, 47);
     padding: 7px 0;
     box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 6px, rgba(0, 0, 0, 0.12) 0px 1px 4px;
     border-radius: 2px;
 }
 
-.app-select .btn-list a {
+.taskgen-form-toggle .btn-list a {
     position: relative;
     display: block;
     cursor: pointer;
@@ -219,25 +240,25 @@ html,body {
     border-left: 2px solid transparent;
 }
 
-.app-select .btn-list a:last-child {
+.taskgen-form-toggle .btn-list a:last-child {
     margin-bottom: 0;
 }
 
-.app-select .btn-list a:hover {
+.taskgen-form-toggle .btn-list a:hover {
     color: #2588f3;
 }
 
-.app-select .btn-list a.active {
+.taskgen-form-toggle .btn-list a.active {
     color: #2588f3;
     border-left: 2px solid #2d4558;
 }
 
-.app-main {
+.taskgen-main {
     background: #2f2f2f;
     padding: 0;
 }
 
-.app-form {
+.taskgen-form {
     margin-left: auto;
     margin-right: auto;
     float: none;
@@ -246,25 +267,19 @@ html,body {
     border-radius: 2px;
 }
 
-.app-form label {
+.taskgen-form label {
     display: inline-block;
     margin-bottom: 8px;
     color: #75838a;
 }
 
-button, input, select, textarea {
-    font-family: inherit;
-    font-size: inherit;
-    line-height: inherit;
-}
-
-.form-group {
+.taskgen-form .form-group {
     margin-bottom: 18px;
     position: relative;
     overflow: hidden;
 }
 
-.form-control {
+.taskgen-form .form-control {
     padding: 5px 17px;
     width: 100%;
     height: 34px;
@@ -278,29 +293,29 @@ button, input, select, textarea {
     resize: none;
 }
 
-.form-control.has-error {
+.taskgen-form .form-control.has-error {
     color: #EF5350;
     background: rgb(80, 49, 49);
 }
 
-.form-control:focus {
+.taskgen-form .form-control:focus {
     outline: none;
     border: 1px solid #4285f4;
 }
 
-textarea.form-control {
+.taskgen-form textarea.form-control {
     padding: 13px 17px;
     height: 240px;
     overflow-x: hidden;
 }
 
-.form-btns {
+.taskgen-form .form-btns {
     display: block;
     overflow: hidden;
     margin-top: 25px;
 }
 
-.start-task-btn {
+.taskgen-form .submit-btn {
     display: inline-block;
     padding: 7px 50px;
     border: none;
@@ -324,7 +339,7 @@ textarea.form-control {
     background-image: none;
 }
 
-.start-task-btn:hover, .start-task-btn:active {
+.taskgen-form .submit-btn:hover, .taskgen-form .submit-btn:active {
     color: #2fc798;
 }
 
@@ -381,18 +396,8 @@ textarea.form-control {
     border-radius: 2px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
     display: none;
-    animation: fadeInDown .3s;
+    animation: fadeIn .3s;
 }
-
-@keyframes fadeInDown {
-    0% {
-        opacity: 0
-    }
-    to {
-        opacity: 1
-    }
-}
-
 
 .navbar-panel.show {
     display: block;
@@ -794,4 +799,47 @@ textarea.form-control {
     cursor: pointer;
     width: 25px;
     height: 25px;
+}
+
+.task-runtime {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: #2b2b2b;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    overflow-y: auto;
+}
+
+.task-runtime .task-item {}
+
+.task-runtime .task-item .task-log-table {}
+
+.task-runtime .task-item .task-log-table .line {
+    animation: fadeIn .3s;
+    color: #cacaca;
+    word-break: break-all;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.task-runtime .task-item .task-log-table [data-level="I"].line {
+    color: #38a5ff;
+}
+
+.task-runtime .task-item .task-log-table [data-level="S"].line {
+    color: #32f388;
+}
+
+.task-runtime .task-item .task-log-table [data-level="W"].line {
+    color: #ffc761;
+}
+
+.task-runtime .task-item .task-log-table [data-level="E"].line {
+    color: #ff4545;
+}
+
+.task-runtime .task-item .task-log-table .line > .tag {
+    margin-right: 7px;
 }

@@ -61,7 +61,7 @@ namespace Nacollector
             }
             
             crBrowser = new CrBrowser(htmlPath);
-            crBrowser.GetBrowser().RegisterAsyncJsObject("MainFormCallBack", new JsCallbackObj());
+            crBrowser.GetBrowser().RegisterAsyncJsObject("TaskController", new TaskControllerForJs());
             crBrowser.GetBrowser().FrameLoadEnd += new EventHandler<FrameLoadEndEventArgs>(Browser_FrameLoadEnd); // 浏览器初始化完毕时执行
 
             crDownloads = new CrDownloads(crBrowser);
@@ -76,14 +76,37 @@ namespace Nacollector
         }
 
         /// <summary>
-        /// 浏览器回调JS对象
+        /// 任务控制器
         /// </summary>
-        public class JsCallbackObj
+        public class TaskControllerForJs
         {
-            public void taskNew(string callClassName, string actionLabel, string parmsJson)
+            private Dictionary<string, Thread> taskThreads = new Dictionary<string, Thread>();
+
+            // 创建新任务
+            public void createTask(string taskId, string className, string classLabel, string parmsJsonStr)
             {
-                // MessageBox.Show(" " + key + ": " + formContent.ToString());
-                _mainForm.NewTaskForm(callClassName, actionLabel, parmsJson);
+                crBrowser.RunJS("Task.list[" + taskId + "].log('taskId="+ taskId + ", className="+className+", classLabel="+classLabel+", parmsJsonStr="+parmsJsonStr+"')");
+                crBrowser.RunJS("Task.list["+taskId+"].log('Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et"
+            + "dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip"
+            + "ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu"
+            + "fugiat nulla pariatur.')");
+                crBrowser.RunJS("Task.list[" + taskId + "].log('Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et"
+            + "dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip"
+            + "ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu"
+            + "fugiat nulla pariatur.', 'I')");
+                crBrowser.RunJS("Task.list[" + taskId + "].log('Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et"
+            + "dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip"
+            + "ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu"
+            + "fugiat nulla pariatur.', 'S')");
+                crBrowser.RunJS("Task.list[" + taskId + "].log('Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et"
+            + "dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip"
+            + "ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu"
+            + "fugiat nulla pariatur.', 'W')");
+                crBrowser.RunJS("Task.list[" + taskId + "].log('Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et"
+            + "dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip"
+            + "ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu"
+            + "fugiat nulla pariatur.', 'E')");
+                return;
             }
         }
 
