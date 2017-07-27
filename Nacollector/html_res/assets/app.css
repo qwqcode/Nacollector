@@ -163,7 +163,20 @@ button, input, select, textarea {
     border-radius: 0;
 }
 
-.top-nav-bar .right-items .nav-btns > a {
+.top-nav-bar .right-items .nav-btns .btn-group {
+    display: inline-block;
+    padding-right: 15px;
+    margin-right: 15px;
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.top-nav-bar .right-items .nav-btns .btn-group:last-child {
+    padding-right: 0;
+    margin-right: 0;
+    border: none;
+}
+
+.top-nav-bar .right-items .nav-btns .btn-group a {
     font-size: 15px;
     color: #FFF;
     cursor: pointer;
@@ -174,16 +187,16 @@ button, input, select, textarea {
     margin-left: 5px;
 }
 
-.top-nav-bar .right-items .nav-btns > a:first-child {
+.top-nav-bar .right-items .nav-btns .btn-group a:first-child {
     margin-left: 0;
 }
 
-.top-nav-bar .right-items .nav-btns > a > i {
+.top-nav-bar .right-items .nav-btns .btn-group a > i {
     width: 20px;
     text-align: center;
 }
 
-.top-nav-bar .right-items .nav-btns > a:hover {
+.top-nav-bar .right-items .nav-btns .btn-group a:hover {
     background: rgba(255,255,255,.2);;
 }
 
@@ -343,43 +356,48 @@ button, input, select, textarea {
     color: #2fc798;
 }
 
-/* App Terminal */
-.app-terminal {
+/* Task Runtime */
+.task-runtime {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: rgba(21, 29, 41, 0.88);
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    overflow-y: auto;
 }
 
-.terminal-content {
-    color: #a7a7a7;
-    font-size: 16px;
-    line-height: 1.7;
-}
+.task-runtime .task-item {}
 
-.terminal-content .line {
-    margin-bottom: 7px;
-    word-wrap: break-word;
-}
+.task-runtime .task-item .task-log-table {}
 
-.terminal-content .line.normal {
+.task-runtime .task-item .task-log-table .line {
+    animation: fadeIn .3s;
     color: #cacaca;
+    word-break: break-all;
+    margin-bottom: 8px;
+    font-size: 16px;
 }
 
-.terminal-content .line.success {
-    color: #32f388;
-}
-
-.terminal-content .line.info {
+.task-runtime .task-item .task-log-table [data-level="I"].line {
     color: #38a5ff;
 }
 
-.terminal-content .line.warning {
+.task-runtime .task-item .task-log-table [data-level="S"].line {
+    color: #32f388;
+}
+
+.task-runtime .task-item .task-log-table [data-level="W"].line {
     color: #ffc761;
 }
 
-.terminal-content .line.error {
+.task-runtime .task-item .task-log-table [data-level="E"].line {
     color: #ff4545;
 }
 
-.terminal-content .line .tag {
-    margin-right: 10px;
+.task-runtime .task-item .task-log-table .line > .tag {
+    margin-right: 7px;
 }
 
 /* Navbar Panel */
@@ -799,47 +817,4 @@ button, input, select, textarea {
     cursor: pointer;
     width: 25px;
     height: 25px;
-}
-
-.task-runtime {
-    position: absolute;
-    top: 0;
-    left: 0;
-    background: rgba(21, 29, 41, 0.88);
-    height: 100%;
-    width: 100%;
-    overflow: hidden;
-    overflow-y: auto;
-}
-
-.task-runtime .task-item {}
-
-.task-runtime .task-item .task-log-table {}
-
-.task-runtime .task-item .task-log-table .line {
-    animation: fadeIn .3s;
-    color: #cacaca;
-    word-break: break-all;
-    margin-bottom: 8px;
-    font-size: 16px;
-}
-
-.task-runtime .task-item .task-log-table [data-level="I"].line {
-    color: #38a5ff;
-}
-
-.task-runtime .task-item .task-log-table [data-level="S"].line {
-    color: #32f388;
-}
-
-.task-runtime .task-item .task-log-table [data-level="W"].line {
-    color: #ffc761;
-}
-
-.task-runtime .task-item .task-log-table [data-level="E"].line {
-    color: #ff4545;
-}
-
-.task-runtime .task-item .task-log-table .line > .tag {
-    margin-right: 7px;
 }

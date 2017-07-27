@@ -55,7 +55,7 @@ namespace Nacollector
         private void InitBrowser()
         {
             // 初始化内置浏览器
-            string htmlPath = Utils.GetHtmlResPath("home.html");
+            string htmlPath = Utils.GetHtmlResPath("app.html");
             if (string.IsNullOrEmpty(htmlPath))
             {
                 Application.Exit(); // 退出程序
@@ -99,8 +99,22 @@ namespace Nacollector
                 // 加入 Threads Dictionary
                 taskThreads.Add(taskId, thread);
             }
+
+            // 终止任务
+            public bool abortTask(string taskId)
+            {
+                if (!taskThreads.ContainsKey(taskId))
+                    return false;
+
+                taskThreads[taskId].Abort();
+                return true;
+            }
         }
 
+        /// <summary>
+        /// 开始执行任务
+        /// </summary>
+        /// <param name="obj"></param>
         public void StartTask(object obj)
         {
             SpiderSettings settings = (SpiderSettings)obj;
@@ -123,15 +137,17 @@ namespace Nacollector
                 return;
             }
 
-            // 开始工作
+            // 开始任务工作
             try
             {
                 spider.BeginWork();
             }
             catch (Exception e) { spider.LogError(e.Message); return; }
 
-            // 工作结束
+            // 任务执行完毕
             spider.LogInfo("任务执行完毕");
+            // 报告JS任务结束
+            crBrowser.RunJS($"Task.get('{settings.TaskId}').taskIsEnd();");
         }
 
         /// <summary>
