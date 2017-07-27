@@ -146,11 +146,11 @@ button, input, select, textarea {
     color: #FFF;
     font-size: 14px;
     padding: 0 10px;
-    transition: transform .3s cubic-bezier(0.22, 0.61, 0.36, 1);
+    transition: opacity .2s;
 }
 
 .top-nav-bar .left-items .nav-title.changing {
-    transform: translateY(-100%);
+    opacity: 0;
 }
 
 .top-nav-bar .right-items {
@@ -805,7 +805,7 @@ button, input, select, textarea {
     position: absolute;
     top: 0;
     left: 0;
-    background: #2b2b2b;
+    background: rgba(21, 29, 41, 0.88);
     height: 100%;
     width: 100%;
     overflow: hidden;
@@ -821,7 +821,7 @@ button, input, select, textarea {
     color: #cacaca;
     word-break: break-all;
     margin-bottom: 8px;
-    font-size: 14px;
+    font-size: 16px;
 }
 
 .task-runtime .task-item .task-log-table [data-level="I"].line {

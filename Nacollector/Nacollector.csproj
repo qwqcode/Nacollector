@@ -98,15 +98,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Spiders\CollItemDescImg.cs" />
     <Compile Include="Spiders\Spider.cs" />
+    <Compile Include="Spiders\SpiderSettings.cs" />
     <Compile Include="Spiders\TaobaoSellerColl.cs" />
     <Compile Include="Spiders\TmallGxptInvite.cs" />
     <Compile Include="Spiders\TmallGxptInviteDelete.cs" />
-    <Compile Include="TaskForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="TaskForm.Designer.cs">
-      <DependentUpon>TaskForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="Util\HttpHelper.cs" />
     <Compile Include="Util\Utils.cs" />
     <EmbeddedResource Include="MainForm.resx">
@@ -134,9 +129,6 @@
     <Content Include="html_res\assets\fonts\Material-Design-Iconic-Font.woff2">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <EmbeddedResource Include="TaskForm.resx">
-      <DependentUpon>TaskForm.cs</DependentUpon>
-    </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

@@ -17,7 +17,7 @@ namespace Nacollector.Spiders
     /// <summary>
     /// 商品详情页图片解析
     /// </summary>
-    class CollItemDescImg : Spider
+    public class CollItemDescImg : Spider
     {
         // 参数名
         string PageUrl = "";

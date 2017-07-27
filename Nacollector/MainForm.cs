@@ -3,6 +3,7 @@ using CefSharp.WinForms;
 using MaterialSkin;
 using Nacollector.Browser;
 using Nacollector.Browser.Handler;
+using Nacollector.Spiders;
 using Nacollector.Util;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -85,42 +86,53 @@ namespace Nacollector
             // 创建新任务
             public void createTask(string taskId, string className, string classLabel, string parmsJsonStr)
             {
-                crBrowser.RunJS("Task.list[" + taskId + "].log('taskId="+ taskId + ", className="+className+", classLabel="+classLabel+", parmsJsonStr="+parmsJsonStr+"')");
-                crBrowser.RunJS("Task.list["+taskId+"].log('Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et"
-            + "dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip"
-            + "ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu"
-            + "fugiat nulla pariatur.')");
-                crBrowser.RunJS("Task.list[" + taskId + "].log('Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et"
-            + "dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip"
-            + "ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu"
-            + "fugiat nulla pariatur.', 'I')");
-                crBrowser.RunJS("Task.list[" + taskId + "].log('Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et"
-            + "dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip"
-            + "ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu"
-            + "fugiat nulla pariatur.', 'S')");
-                crBrowser.RunJS("Task.list[" + taskId + "].log('Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et"
-            + "dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip"
-            + "ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu"
-            + "fugiat nulla pariatur.', 'W')");
-                crBrowser.RunJS("Task.list[" + taskId + "].log('Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et"
-            + "dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip"
-            + "ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu"
-            + "fugiat nulla pariatur.', 'E')");
-                return;
+                // 配置
+                var settings = new SpiderSettings();
+                settings.TaskId = taskId;
+                settings.ClassName = className;
+                settings.ClassLabel = classLabel;
+                settings.ParmsJsonStr = parmsJsonStr;
+                // 创建任务执行线程
+                var thread = new Thread(new ParameterizedThreadStart(_mainForm.StartTask));
+                thread.IsBackground = true;
+                thread.Start(settings);
+                // 加入 Threads Dictionary
+                taskThreads.Add(taskId, thread);
             }
         }
 
-        /// <summary>
-        /// 打开一个任务终端
-        /// </summary>
-        public void NewTaskForm(string callClassName, string actionLabel, string parmsJson)
+        public void StartTask(object obj)
         {
-            if (this.InvokeRequired) { this.Invoke(new NewTaskFormDelegate(NewTaskForm), new object[] { callClassName, actionLabel, parmsJson }); return; }
+            SpiderSettings settings = (SpiderSettings)obj;
+            settings.CrBrowser = crBrowser;
 
-            var t = new TaskForm(callClassName, actionLabel, parmsJson);
-            t.Show();
+            Spider spider = null;
+
+            // 实例化 Spider 对象
+            string typeName = $"{this.GetType().Namespace}.Spiders.{settings.ClassName}";
+            try
+            {
+                spider = (Spider)Activator.CreateInstance(Type.GetType(typeName));
+                spider.importSettings(settings); // 导入配置
+            }
+            catch
+            {
+                string errorText = "任务新建失败，无法实例化对象 " + typeName;
+                Logging.Error(errorText);
+                MessageBox.Show(errorText, "Nacollector 错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            // 开始工作
+            try
+            {
+                spider.BeginWork();
+            }
+            catch (Exception e) { spider.LogError(e.Message); return; }
+
+            // 工作结束
+            spider.LogInfo("任务执行完毕");
         }
-        public delegate void NewTaskFormDelegate(string callClassName, string actionLabel, string parmsJson);
 
         /// <summary>
         /// 设置窗体透明度

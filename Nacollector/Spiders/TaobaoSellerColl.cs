@@ -9,7 +9,7 @@ namespace Nacollector.Spiders
     /// <summary>
     /// 淘宝店铺搜索卖家ID名采集
     /// </summary>
-    class TaobaoSellerColl : Spider
+    public class TaobaoSellerColl : Spider
     {
     }
 }

@@ -12,48 +12,41 @@ using CefSharp.WinForms;
 using CefSharp;
 using System.Threading;
 using Nacollector.Util;
+using Nacollector.Browser;
 
 namespace Nacollector.Spiders
 {
     public class Spider
     {
-        protected TaskForm ParentForm;
+        protected string TaskId = null; // 任务ID
+        protected Hashtable parms = new Hashtable(); // 参数哈希表
+        protected CrBrowser crBrowser;
 
         /// <summary>
-        /// 1.设置父窗体
+        /// 1.设置配置
         /// </summary>
-        /// <param name="pf"></param>
-        public void setParentForm(TaskForm pf)
+        /// <param name="spiderSettings"></param>
+        public void importSettings(SpiderSettings spiderSettings)
         {
-            this.ParentForm = pf;
-        }
+            TaskId = spiderSettings.TaskId;
 
-        string TaskId = null; // 任务ID
-        Hashtable parms = new Hashtable(); // 参数哈希表
-
-        /// <summary>
-        /// 2.设置任务配置
-        /// </summary>
-        /// <param name="parmsJsonStr"></param>
-        public void setTaskConfig(string taskId, string parmsJsonStr)
-        {
-            TaskId = taskId;
-
-            JArray ja = (JArray)JsonConvert.DeserializeObject(parmsJsonStr);
+            JArray ja = (JArray)JsonConvert.DeserializeObject(spiderSettings.ParmsJsonStr);
             foreach (JObject item in ja)
             {
                 string parmName = item["name"].ToString();
                 string parmValue = item["value"].ToString();
                 parms[parmName] = parmValue;
             }
+
+            crBrowser = spiderSettings.CrBrowser;
         }
         
         /// <summary>
-        /// 3.开始工作
+        /// 2.开始工作
         /// </summary>
         public virtual void BeginWork()
         {
-            Thread.Sleep(200);
+            Thread.Sleep(400); // 开始得太快 感觉违和感强...
             Log(string.Format("ThreadID=\"{0}\"; SpiderObj=\"{1}\";", Thread.CurrentThread.ManagedThreadId, this.GetType().ToString()));
             LogInfo("任务执行开始");
         }
@@ -72,41 +65,39 @@ namespace Nacollector.Spiders
         
         public void Log(string content)
         {
-            _Log(content, "normal");
+            _Log(content);
         }
 
         public void LogInfo(string content)
         {
-            _Log(content, "info");
+            _Log(content, "I");
 
         }
 
         public void LogSuccess(string content)
         {
-            _Log(content, "success");
+            _Log(content, "S");
         }
 
         public void LogWarning(string content)
         {
-            _Log(content, "warning");
+            _Log(content, "W");
         }
 
         public void LogError(string content)
         {
-            _Log(content, "error");
+            _Log(content, "E");
         }
 
         /// <summary>
-        /// 终端显示一条日志
+        /// 任务日志表显示一条日志
         /// </summary>
         /// <param name="content"></param>
-        /// <param name="type"></param>
-        public void _Log(string content, string type = "normal")
+        /// <param name="level"></param>
+        public void _Log(string content, string level = "")
         {
-            string jsCode = string.Format("Te.log(\"{0}\", Te.lt['{1}'], \"{2}\");", Utils.Base64Encode(content), type, Utils.GetTimeStamp());
-            ParentForm.crBrowser.RunJS(jsCode);
-            Logging.Info($"[{TaskId}][{type}] {content}");
-            // TaskTerminal.browserRunJS(string.Format("console.log(\"{0}\");", jsCode.Replace("\\", "\\\\").Replace("\"", "\\\"")));
+            Logging.Info("[" + TaskId + "]" + (!string.IsNullOrEmpty(level)?$"[{level}]":"") + " " + content);
+            crBrowser.RunJS($"Task.log('{TaskId}', '{Utils.Base64Encode(content)}', '{level}', '{Utils.GetTimeStamp()}', true);");
         }
         
         /// <summary>

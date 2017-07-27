@@ -432,10 +432,8 @@ window.Task = {
                 innerText += '<span class="tag">['+levelsList[level]+']</span> ';
             }
             var textHandle = function (str) {
-                str.replace(/\n/g, "<br/>")
+                return str.replace(/\n/g, "<br/>")
                     .replace(/\s/g, '&nbsp;');
-
-                return str;
             };
             innerText += textHandle(text);
             line.html(innerText);
@@ -462,8 +460,10 @@ window.Task = {
         taskObj.remove = function () {
             if (taskObj.getIsInProgress()) {
                 alert('任务执行中，无法删除 但你可以中止任务');
+                return;
             }
 
+            taskObj.hide();
             // 对象删掉！
             delete Task.list[taskId];
         };
@@ -501,6 +501,7 @@ window.Task = {
 
         return this.list[taskId];
     },
+    // 显示指定任务
     show: function (taskId) {
         if (!this.get(taskId))
             throw ('未找到任务 '+taskId);
@@ -544,6 +545,16 @@ window.Task = {
         this.get(this.currentDisplayedTaskId).setOriginalTitle();
 
         this.currentDisplayedTaskId = null;
+    },
+    // 日志
+    log: function (taskId, text, level, timeStamp, textIsBase64) {
+        if (!this.get(taskId))
+            throw ('未找到任务 '+taskId);
+
+        if (typeof textIsBase64 === "boolean" && textIsBase64 === true)
+            text = Base64.decode(text);
+
+        this.get(taskId).log(text, level);
     }
 };
 
