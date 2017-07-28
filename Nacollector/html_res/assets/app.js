@@ -16,6 +16,8 @@ $(document).ready(function () {
     }, 10);
     // 任务生成器初始化
     TaskGen.init();
+    // 任务管理器层初始化
+    Task.taskManagerLayer.init();
     // 点击操作按钮列表第一个
     $(TaskGen.sel.formToggleBtns+' a:nth-child(1)').click();
     // 下载面板初始化
@@ -45,15 +47,7 @@ var AppNavbar = {
                 icon: 'assignment',
                 title: '任务列表',
                 onClick: function () {
-                    var taskManager;
-                    if (AppLayer.sidebar.get('taskManager') === null) {
-                        taskManager = AppLayer.sidebar.register('taskManager');
-                        taskManager.setTitle('任务列表', '#00a8ce');
-                        taskManager.setWidth(450);
-                    } else {
-                        taskManager = AppLayer.sidebar.get('taskManager');
-                    }
-                    taskManager.toggle();
+                    Task.taskManagerLayer.toggleLayer();
                 }
             },
             downloadManager: {
@@ -69,6 +63,7 @@ var AppNavbar = {
                         setting = AppLayer.sidebar.register("setting");
                         setting.setTitle('设置', '#0089ff');
                         setting.setWidth(360);
+                        setting.setInner('<div style="text-align: center;background: url(./assets/kunai_256px.png) 0 no-repeat;background-size: auto 100px;background-position: center;height: 200px;line-height: 360px;color: rgba(183,183,183,0.71);"> Copyright (c) 2017 Zneiat</div>');
                     } else {
                         setting = AppLayer.sidebar.get('setting');
                     }
@@ -77,9 +72,22 @@ var AppNavbar = {
             }
         });
         AppNavbar.btnGroupAdd('task-runtime', {
-            back: {
+            backToTaskGen: {
                 icon: 'chevron-left',
-                title: '返回任务生成器'
+                title: '返回任务生成器',
+                onClick: function () {
+                    Task.hide();
+                }
+            },
+            showTaskInfo: {
+                icon: 'info',
+                title: '任务详情',
+                onClick: function () {
+                    if (!Task.getCurrent())
+                        return;
+
+                    Task.getCurrent().showInfo();
+                }
             }
         }).setMostLeft().hide();
     },
@@ -486,15 +494,33 @@ window.Task = {
         var taskLogTableSel = taskItemSel + ' .task-log-table';
         // 工厂模式
         var taskObj = {};
-        taskObj.originalTitle = null;
+        // 获取任务ID
+        taskObj.getId = function () {
+            return taskId;
+        };
+        // 获取任务调用类名
+        taskObj.getClassName = function () {
+            return className;
+        };
+        // 获取任务调用类标签
+        taskObj.getClassLabel = function () {
+            return classLabel;
+        };
+        // 获取任务参数对象
+        taskObj.getParmsObj = function () {
+            return parmsObj;
+        };
         // 设置标题
         taskObj.setTitle = function () {
-            taskObj.originalTitle = AppNavbar.titleGet();
-            AppNavbar.titleSet(classLabel + ' 任务ID：' + taskId);
+            AppNavbar.titleSet(taskObj.getTitle());
+        };
+        // 获取标题
+        taskObj.getTitle = function () {
+            return classLabel + ' 任务ID：' + taskId;
         };
         // 恢复成原来的标题
         taskObj.setOriginalTitle = function () {
-            AppNavbar.titleSet(taskObj.originalTitle);
+            AppNavbar.titleSet('');
         };
         // 显示
         taskObj.show = function () {
@@ -503,6 +529,19 @@ window.Task = {
         // 隐藏
         taskObj.hide = function () {
             Task.hide();
+        };
+        // 显示任务信息
+        taskObj.showInfo = function () {
+            layer.tab({
+                area: ['600px', '300px'],
+                tab: [{
+                    title: '基本',
+                    content: '<div style="padding: 10px 25px"><p>任务ID：'+taskId+'</p><p>任务标题：'+taskObj.getTitle()+'</p><p>任务调用类标签：'+taskObj.getClassLabel()+'</p><p>任务调用类名：'+taskObj.getClassName()+'</p><p>任务开始执行时间：'+new Date(parseInt(taskId))+'</p></div>'
+                }, {
+                    title: '参数',
+                    content: '<div style="padding: 10px 25px"><p style="word-break: break-all">'+JSON.stringify(parmsObj)+'</p></div>'
+                }]
+            });
         };
         // 日志
         taskObj.log = function (text, level) {
@@ -531,25 +570,37 @@ window.Task = {
 
             $(runtimeSel).scrollTop($(runtimeSel)[0].scrollHeight);
         };
-        // 中止
-        taskObj.abort = function () {
-            // C# 调用中止
-            TaskController.abortTask(taskId).then(function (isSuccess) {
-                if (isSuccess) {
-                    taskObj.taskIsEnd();
-                }
-            });
-        };
         // 删除
         taskObj.remove = function () {
             if (taskObj.getIsInProgress()) {
-                alert('任务执行中，无法删除 但你可以中止任务');
-                return;
+                layer.confirm('任务 “'+taskObj.getTitle()+'” 正在执行中...', {
+                    btn: ['中止并删除任务','取消'] //按钮
+                }, function(){
+                    layer.msg('正在下达中止命令...');
+                    TaskController.abortTask(taskId).then(function (isSuccess) {
+                        if (isSuccess) {
+                            taskObj._remove();
+                        } else {
+                            layer.msg('任务中止失败', {icon: 2});
+                        }
+                    });
+                }, function(){
+                    taskObj._remove();
+                });
+            } else {
+                taskObj._remove();
             }
-
-            taskObj.hide();
+        };
+        taskObj._remove = function () {
+            if (!!Task.getCurrent() && Task.getCurrent().getId() === taskId) {
+                taskObj.hide();
+            }
             // 对象删掉！
             delete Task.list[taskId];
+            // 任务管理器删除项目
+            Task.taskManagerLayer.removeItem(taskId);
+            // 提示
+            layer.msg('任务删除成功', {icon: 1});
         };
         // 任务是否正在进行中
         taskObj.isInProgress = true;
@@ -575,6 +626,7 @@ window.Task = {
         // 让任务控制器 开始一个执行新任务
         TaskController.createTask(taskId, className, classLabel, JSON.stringify(parmsObj)).then(function(callback){
             taskObj.show();
+            Task.taskManagerLayer.addItem(taskId);
         });
 
         return taskObj;
@@ -598,16 +650,15 @@ window.Task = {
         if (!this.get(taskId))
             throw ('未找到任务 '+taskId);
 
-        if (this.currentDisplayedId !== null)
+        if (this.getCurrent() !== null)
             this.hide();
 
         var taskObj = this.get(taskId);
         var runtimeSel = this.sel.runtime;
         var taskItemSel = taskObj.getSel();
 
-        $(runtimeSel + ' > *').hide();
         $(taskItemSel).show();
-        $(runtimeSel).fadeIn(300);
+        $(runtimeSel).show();
 
         $(runtimeSel).on('scroll', function () {
             taskObj.allowAutoScrollToBottom = false;
@@ -622,6 +673,9 @@ window.Task = {
 
         taskObj.setTitle();
 
+        // 显示导航栏控制按钮组
+        AppNavbar.getBtnGroupDom('task-runtime').show();
+
         this.currentDisplayedId = taskId;
     },
     // 隐藏
@@ -630,11 +684,16 @@ window.Task = {
             throw ('未显示任何任务');
 
         var runtimeSel = this.sel.runtime;
+        var taskItemSel = Task.getCurrent().getSel();
 
-        $(runtimeSel).fadeOut(300);
+        $(runtimeSel).hide();
         $(runtimeSel).off('scroll');
+        $(taskItemSel).hide();
 
-        this.get(this.currentDisplayedId).setOriginalTitle();
+        this.getCurrent().setOriginalTitle();
+
+        // 隐藏导航栏控制按钮组
+        AppNavbar.getBtnGroupDom('task-runtime').hide();
 
         this.currentDisplayedId = null;
     },
@@ -647,6 +706,46 @@ window.Task = {
             text = Base64.decode(text);
 
         this.get(taskId).log(text, level);
+    },
+    // 任务管理器层
+    taskManagerLayer: {
+        init: function () {
+            var taskManager = AppLayer.sidebar.register('taskManager');
+            taskManager.setTitle('任务列表', '#4265c7');
+            taskManager.setWidth(450);
+            taskManager.setInner('<div class="task-manager"></div>');
+        },
+        getItemSel: function (taskId) {
+            return '[data-taskmanager-taskid="'+taskId+'"]';
+        },
+        addItem: function (taskId) {
+            if (!Task.get(taskId))
+                throw ('未找到此任务 '+taskId);
+
+            var task = Task.get(taskId);
+            var taskItem = $('<div class="task-item" data-taskmanager-taskid="'+taskId+'">\n<div class="left">\n<i class="zmdi zmdi-view-carousel" data-toggle="task-show"></i>\n</div>\n<div class="right">\n<h2 class="task-title" data-toggle="task-show">'+task.getClassLabel()+'</h2>\n<p class="task-desc"><span class="task-id">任务ID：'+taskId+'</span></p>\n<div class="action-bar">\n<a class="action-btn" data-toggle="task-show"><i class="zmdi zmdi-layers"></i> 显示</a>\n<a class="action-btn" data-toggle="task-remove"><i class="zmdi zmdi-close"></i> 删除</a>\n</div>\n</div>\n</div>');
+            taskItem.find('[data-toggle="task-show"]').click(function () {
+                Task.show(taskId);
+            });
+            taskItem.find('[data-toggle="task-remove"]').click(function () {
+                Task.get(taskId).remove();
+            });
+            taskItem.prependTo(this.getLayer().getSel() + ' .task-manager');
+        },
+        removeItem: function (taskId) {
+            if ($(this.getItemSel(taskId)).length === 0)
+                throw ('未找到此任务 '+taskId);
+
+            setTimeout(function () {
+                $(Task.taskManagerLayer.getItemSel(taskId)).remove();
+            }, 20);
+        },
+        toggleLayer: function () {
+            this.getLayer().toggle();
+        },
+        getLayer: function () {
+            return AppLayer.sidebar.get('taskManager');
+        }
     }
 };
 
