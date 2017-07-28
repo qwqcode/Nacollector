@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Nacollector.Util;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,5 +13,9 @@ namespace Nacollector.Spiders
     /// </summary>
     class TmallGxptInvite : Spider
     {
+        public override void BeginWork()
+        {
+            base.BeginWork();
+        }
     }
 }

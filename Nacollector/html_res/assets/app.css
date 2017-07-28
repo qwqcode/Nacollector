@@ -77,20 +77,47 @@ button, input, select, textarea {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: rgba(86, 86, 86, 0.25);
+    background: rgba(86, 86, 86, 0.3);
 }
 
 ::-webkit-scrollbar-thumb:window-inactive {
-    background: rgba(86, 86, 86, 0.25);
+    background: rgba(86, 86, 86, 0.3);
 }
 
 ::-webkit-scrollbar-thumb:vertical:hover {
-    background: rgba(74, 121, 167, 0.77);
+    background: rgba(65, 74, 82, 0.77);
 }
 
 ::-webkit-scrollbar-thumb:vertical:active {
-    background: rgba(52, 127, 197, 0.77);
+    background: rgba(41, 47, 53, 0.77);
 }
+
+.wrap::-webkit-scrollbar，
+.task-runtime::-webkit-scrollbar {
+    width: 4px;
+    background: transparent;
+}
+
+.wrap::-webkit-scrollbar-thumb,
+.task-runtime::-webkit-scrollbar-thumb {
+    background: rgba(191, 191, 191, 0.57);
+}
+
+.wrap::-webkit-scrollbar-thumb:window-inactive,
+.task-runtime::-webkit-scrollbar-thumb:window-inactive {
+    background: rgba(191, 191, 191, 0.57);
+}
+
+.wrap::-webkit-scrollbar-thumb:vertical:hover,
+.task-runtime::-webkit-scrollbar-thumb:vertical:hover {
+    background: rgba(220, 220, 220, 0.77);
+}
+
+.wrap::-webkit-scrollbar-thumb:vertical:active,
+.task-runtime::-webkit-scrollbar-thumb:vertical:active {
+    background: rgba(255, 255, 255, 0.77);
+}
+
 
 ::-webkit-input-placeholder {
     color: #97a4ab;
@@ -176,7 +203,7 @@ button, input, select, textarea {
     border: none;
 }
 
-.top-nav-bar .right-items .nav-btns .btn-group a {
+.top-nav-bar .right-items .nav-btns .btn-group > a {
     font-size: 15px;
     color: #FFF;
     cursor: pointer;
@@ -187,16 +214,16 @@ button, input, select, textarea {
     margin-left: 5px;
 }
 
-.top-nav-bar .right-items .nav-btns .btn-group a:first-child {
+.top-nav-bar .right-items .nav-btns .btn-group > a:first-child {
     margin-left: 0;
 }
 
-.top-nav-bar .right-items .nav-btns .btn-group a > i {
+.top-nav-bar .right-items .nav-btns .btn-group > a > i {
     width: 20px;
     text-align: center;
 }
 
-.top-nav-bar .right-items .nav-btns .btn-group a:hover {
+.top-nav-bar .right-items .nav-btns .btn-group > a:hover {
     background: rgba(255,255,255,.2);;
 }
 
@@ -378,6 +405,17 @@ button, input, select, textarea {
     word-break: break-all;
     margin-bottom: 8px;
     font-size: 16px;
+    white-space: pre-wrap;
+}
+
+.task-runtime .task-item .task-log-table .line a {
+    color: inherit;
+    text-decoration: none;
+    filter: brightness(1.1);
+}
+
+.task-runtime .task-item .task-log-table .line a:hover {
+    filter: brightness(1.5);
 }
 
 .task-runtime .task-item .task-log-table [data-level="I"].line {
@@ -910,4 +948,30 @@ button, input, select, textarea {
 
 .sidebar-layer .sidebar-block .task-manager .task-item .right .action-bar .action-btn:last-child {
     margin-right: 0;
+}
+
+/* Widgets */
+.widget-float-img {
+    position: absolute;
+    z-index: 1000;
+    width: 250px;
+    height: 250px;
+    overflow: hidden;
+    border-radius: 1px;
+    background: #efefef;
+    padding: 10px;
+    box-shadow: 0 3px 4px rgba(0, 0, 0, 0.49);
+    display: flex;
+    align-items: center;
+    justify-items: center;
+}
+
+.widget-float-img > img {
+    height: auto;
+    width: auto;
+    margin: 0 auto;
+    max-height: 100%;
+    max-width: 100%;
+    border-radius: 2px;
+    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
 }

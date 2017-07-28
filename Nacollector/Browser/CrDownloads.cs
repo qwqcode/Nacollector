@@ -40,8 +40,16 @@ namespace Nacollector
         private void BrowserFrameLoadEnd(object sender, FrameLoadEndEventArgs e)
         {
             // 下载管理器下载记录导入
-            string downloadsListJson = File.ReadAllText(dlHistoryPath);
-            crBrowser.RunJS($"downloads.appLoadEvent({downloadsListJson});");
+            if (!File.Exists(dlHistoryPath))
+            {
+                FileStream fs = File.Create(dlHistoryPath);  // 创建新文件
+                fs.Close();
+            }
+            else
+            {
+                string downloadsListJson = File.ReadAllText(dlHistoryPath);
+                crBrowser.RunJS($"downloads.appLoadEvent({downloadsListJson});");
+            }
         }
 
         public class CrDownloadsCallBack

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -42,7 +43,7 @@ namespace Nacollector.Util
             return Path.Combine(GetTempPath(), filename);
         }
 
-        public static HttpResult ReqGetHtml(string reqUrl)
+        public static HttpResult GetPageByUrl(string reqUrl)
         {
             HttpHelper http = new HttpHelper();
             HttpItem item = new HttpItem()
@@ -56,7 +57,7 @@ namespace Nacollector.Util
                 UserAgent = GlobalConstant.ReqUserAgent,
                 Accept = "text/html, application/xhtml+xml, */*",
                 ContentType = "text/html", //返回类型
-                Referer = "http://www.sufeinet.com", // 来源URL
+                Referer = "", // 来源URL
                 Allowautoredirect = true, // 是否根据301跳转
                 //ProxyIp = "192.168.1.105", // 代理服务器ID
                 //ProxyPwd = "123456", // 代理服务器密码
@@ -65,6 +66,34 @@ namespace Nacollector.Util
             };
             HttpResult result = http.GetHtml(item);
             return result;
+        }
+
+        /// <summary>
+        /// 下载图片
+        /// </summary>
+        /// <param name="url">图片URL</param>
+        /// <param name="dirPath">文件夹路径</param>
+        /// <param name="fileName">文件名</param>
+        public static void DownloadImgByUrl(string url, string dirPath, string fileName)
+        {
+            Dictionary<string, string> extLookup = new Dictionary<string, string>()
+            {
+                {"image/jpeg", "jpg"}, {"image/webp", "webp"}, {"image/gif", "gif"},
+                {"image/png", "png"}, {"image/bmp", "bmp"}, {"image/x-icon", "ico"},
+                {"image/tiff", "tif"}, {"image/svg+xml", "svg"}, {"image/x-xbitmap", "xbm"}
+            };
+
+            using (WebClient wc = new WebClient())
+            {
+                byte[] fileBytes = wc.DownloadData(url);
+                string fileType = wc.ResponseHeaders[HttpResponseHeader.ContentType];
+
+                if (fileType != null && extLookup.ContainsKey(fileType))
+                {
+                    string ext = extLookup[fileType];
+                    File.WriteAllBytes(Path.Combine(dirPath, $"{fileName}.{ext}"), fileBytes);
+                }
+            }
         }
 
         /// <summary>  

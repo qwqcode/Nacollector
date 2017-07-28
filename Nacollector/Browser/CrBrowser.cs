@@ -31,6 +31,7 @@ namespace Nacollector.Browser
             browser.BrowserSettings = browserSettings;
             
             browser.MenuHandler = new MenuHandler();
+            browser.LifeSpanHandler = new LifeSpanHandler();
             browser.LoadHandler = new LoadHandler();
 
             browser.FrameLoadEnd += new EventHandler<FrameLoadEndEventArgs>(Browser_onFrameLoadEnd);

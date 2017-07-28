@@ -11,5 +11,9 @@ namespace Nacollector.Spiders
     /// </summary>
     public class TaobaoSellerColl : Spider
     {
+        public override void BeginWork()
+        {
+            base.BeginWork();
+        }
     }
 }

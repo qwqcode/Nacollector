@@ -68,6 +68,10 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.IO.Compression.FileSystem" />
+    <Reference Include="System.IO.Compression.ZipFile, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.IO.Compression.ZipFile.4.3.0\lib\net46\System.IO.Compression.ZipFile.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -84,6 +88,7 @@
     <Compile Include="Browser\Handler\BeforeDownloadUpdatedEventArgs.cs" />
     <Compile Include="Browser\Handler\DownloadHandler.cs" />
     <Compile Include="Browser\Handler\DownloadUpdatedEventArgs.cs" />
+    <Compile Include="Browser\Handler\LifeSpanHandler.cs" />
     <Compile Include="Browser\Handler\LoadHandler.cs" />
     <Compile Include="Browser\Handler\MenuHandler.cs" />
     <Compile Include="GlobalConstant.cs" />
@@ -100,6 +105,7 @@
     <Compile Include="Spiders\Spider.cs" />
     <Compile Include="Spiders\SpiderSettings.cs" />
     <Compile Include="Spiders\TaobaoSellerColl.cs" />
+    <Compile Include="Spiders\Test.cs" />
     <Compile Include="Spiders\TmallGxptInvite.cs" />
     <Compile Include="Spiders\TmallGxptInviteDelete.cs" />
     <Compile Include="Util\HttpHelper.cs" />

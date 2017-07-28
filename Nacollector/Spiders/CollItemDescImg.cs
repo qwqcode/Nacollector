@@ -4,6 +4,8 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -34,7 +36,6 @@ namespace Nacollector.Spiders
         public override void BeginWork()
         {
             base.BeginWork();
-            Thread.Sleep(500);
             // 参数设定
             PageUrl = GetParm("PageUrl");
             PageType = GetParm("PageType");
@@ -42,7 +43,7 @@ namespace Nacollector.Spiders
             CollType = GetParm("CollType");
             // 下载页面
             LogInfo("开始下载：" + PageUrl);
-            var downloadPage = Utils.ReqGetHtml(PageUrl);
+            var downloadPage = Utils.GetPageByUrl(PageUrl);
             if (downloadPage.StatusCode != System.Net.HttpStatusCode.OK) { LogError("下载失败 [" + downloadPage.StatusCode + "] " + downloadPage.StatusDescription); return; }
             pageContent = downloadPage.Html;
             LogSuccess("下载完毕");
@@ -85,7 +86,7 @@ namespace Nacollector.Spiders
             string descContent;
             try
             {
-                descContent = Utils.ReqGetHtml(descReqUrl).Html; // 下载详情内容
+                descContent = Utils.GetPageByUrl(descReqUrl).Html; // 下载详情内容
                 descContent = new Regex("(?s)(?i)var desc='(.*?)';").Match(descContent).Groups[1].Value.Trim();
             }
             catch (Exception e) { throw new Exception("详情内容下载失败：" + e.Message); }
@@ -133,7 +134,7 @@ namespace Nacollector.Spiders
             string descContent;
             try
             {
-                descContent = Utils.ReqGetHtml(descReqUrl).Html;
+                descContent = Utils.GetPageByUrl(descReqUrl).Html;
                 descContent = new Regex("(?s)(?i)var desc='(.*?)';").Match(descContent).Groups[1].Value.Trim();
             }
             catch (Exception e) { throw new Exception("详情内容下载失败：" + e.Message); }
@@ -177,7 +178,7 @@ namespace Nacollector.Spiders
             string descContent;
             try
             {
-                descContent = Utils.ReqGetHtml(descReqUrl).Html;
+                descContent = Utils.GetPageByUrl(descReqUrl).Html;
                 descContent = new Regex("(?s)(?i)var offer_details={(.*?)};").Match(descContent).Groups[1].Value.Trim();
                 JObject descContentJson = JObject.Parse("{" + descContent + "}");
                 descContent = descContentJson["content"].ToString();
@@ -253,7 +254,7 @@ namespace Nacollector.Spiders
             string descContent;
             try
             {
-                descContent = Utils.ReqGetHtml(descReqUrl).Html;
+                descContent = Utils.GetPageByUrl(descReqUrl).Html;
                 descContent = new Regex("(?s)(?i)\\(\"(.*?)\"\\)").Match(descContent).Groups[1].Value.Trim();
             }
             catch (Exception e) { throw new Exception("详情内容下载失败：" + e.Message); }
@@ -284,12 +285,74 @@ namespace Nacollector.Spiders
             {
                 if (imgType != typeTmp)
                     Log(imgType + ": ");
-                
-                for (int i=0; i< imgUrlPool[imgType].Count; i++)
+
+                var imgIndex = 0;
+                foreach (string imgSrc in imgUrlPool[imgType])
                 {
-                    Log("[" + (i+1) + "] " + imgUrlPool[imgType][i]);
+                    var number = imgIndex + 1;
+                    var imgSrcUrl = imgUrlPool[imgType][imgIndex];
+                    Log($"[{number}]  <a href=\"{imgSrcUrl}\" target=\"_blank\" onclick=\"downloadFile($(this).text());return false;\" onmouseover=\"AppWidget.floatImg(this, $(this).text())\" >{imgSrcUrl}</a>");
+                    imgIndex++;
                 }
             }
+
+            if (CollType == "collDownloadImgSrc")
+            {
+                DownloadAllImgAndPack();
+            }
+        }
+
+        /// <summary>
+        /// 下载所有图片并打包
+        /// </summary>
+        private void DownloadAllImgAndPack()
+        {
+            Log("\n");
+            LogInfo("准备一口气下载所有图片并打包");
+
+            string workPath = Path.Combine(Utils.GetTempPath(), $"CollItemDescImg_DownloadsTmp_{DateTime.Now.ToString("yyyyMMddhhmmss")}");
+            
+            Directory.CreateDirectory(workPath);
+
+            int imgTotal = 0;
+            int doneTotal = 0;
+            foreach (string imgType in imgUrlPool.Keys)
+            {
+                var imgIndex = 0;
+                foreach (string imgSrc in imgUrlPool[imgType])
+                {
+                    var number = imgIndex + 1;
+                    var imgSrcUrl = imgUrlPool[imgType][imgIndex];
+                    imgTotal++;
+                    Thread bgThread = new Thread(() =>
+                    {
+                        Utils.DownloadImgByUrl(imgSrc, workPath, imgType+"_"+number.ToString());
+                        LogSuccess($"下载完毕 {imgSrcUrl}");
+                        doneTotal++;
+                    });
+                    bgThread.Start();
+                    imgIndex++;
+                }
+            }
+
+            do {} while (imgTotal != doneTotal);
+
+            string zipFilePath = Utils.GetTempPath($"CollItemDescImg_{DateTime.Now.ToString("yyyyMMddhhmmss")}.zip"); // 以后将ZIP统一放到一个文件夹内
+
+            Thread.Sleep(1000);
+
+            Log("\n");
+            LogInfo("开始打包所有图片");
+            ZipFile.CreateFromDirectory(workPath, zipFilePath);
+            LogSuccess("图片打包完毕");
+            if (Directory.Exists(workPath))
+            {
+                Log("\n");
+                Directory.Delete(workPath, true);
+                LogSuccess("临时文件清理完毕");
+            }
+            Log("\n");
+            LogInfo($"<a href=\"{zipFilePath}\" onclick=\"downloadFile($(this).attr('href'));return false;\">点击保存图片打包文件</a>");
         }
 
         /// <summary>

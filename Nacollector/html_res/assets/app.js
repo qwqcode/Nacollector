@@ -79,6 +79,13 @@ var AppNavbar = {
                     Task.hide();
                 }
             },
+            removeTask: {
+                icon: 'close',
+                title: '删除任务',
+                onClick: function () {
+                    Task.getCurrent().remove();
+                }
+            },
             showTaskInfo: {
                 icon: 'info',
                 title: '任务详情',
@@ -303,7 +310,7 @@ var SpiderList = {
             });
             TaskGen.formHelper.selectInput('CollType', '采集模式', {
                 "collImgSrcUrl": "显示图片链接",
-                "collDownloadImgSrc": "显示图片链接 并 下载打包保存",
+                "collDownloadImgSrc": "显示图片链接 并 下载打包保存"
             });
         }
     },
@@ -327,6 +334,12 @@ var SpiderList = {
             TaskGen.formHelper.numberInput('DeleteBeginPage', '撤回开始页码', 1, 1);
             TaskGen.formHelper.numberInput('DeleteEndPage', '撤回结束页码', undefined, 1);
         }
+    },
+
+
+    Test: {
+        label: "开发测试 DEBUG...",
+        genForm: function () {}
     }
 };
 
@@ -553,8 +566,8 @@ window.Task = {
                 innerText += '<span class="tag">['+levelsList[level]+']</span> ';
             }
             var textHandle = function (str) {
-                return str.replace(/\n/g, "<br/>")
-                    .replace(/\s/g, '&nbsp;');
+                var text = str.replace(/\n/g, '<br/>');
+                return text;
             };
             innerText += textHandle(text);
             line.html(innerText);
@@ -565,8 +578,9 @@ window.Task = {
         // 自动滚动到底部
         taskObj.allowAutoScrollToBottom = true;
         taskObj.scrollToBottom = function () {
-            if (!taskObj.allowAutoScrollToBottom)
-                throw ('不允许自动滚动到底部啦');
+            // 功能有待优化，当终端快速显示日志时有问题
+            /*if (!taskObj.allowAutoScrollToBottom)
+                return; // throw ('不允许自动滚动到底部啦');*/
 
             $(runtimeSel).scrollTop($(runtimeSel)[0].scrollHeight);
         };
@@ -575,7 +589,7 @@ window.Task = {
             if (taskObj.getIsInProgress()) {
                 layer.confirm('任务 “'+taskObj.getTitle()+'” 正在执行中...', {
                     btn: ['中止并删除任务','取消'] //按钮
-                }, function(){
+                }, function() {
                     layer.msg('正在下达中止命令...');
                     TaskController.abortTask(taskId).then(function (isSuccess) {
                         if (isSuccess) {
@@ -584,8 +598,8 @@ window.Task = {
                             layer.msg('任务中止失败', {icon: 2});
                         }
                     });
-                }, function(){
-                    taskObj._remove();
+                }, function() {
+
                 });
             } else {
                 taskObj._remove();
@@ -898,7 +912,7 @@ var AppLayer = {
 /**
  * 浏览器下载管理器
  */
-window.downloads = {
+var downloads = {
     data: {
         list: {}
     },
@@ -1208,6 +1222,39 @@ window.downloads = {
 window.downloadFile = function (srcUrl) {
     var $a = $("<a></a>").attr("href", srcUrl).attr("download", "");
     $a[0].click();
+};
+
+// 小部件
+var AppWidget =  {
+    floatImg: function (parent, imgSrc) {
+        if ($('body .widget-float-img').length !== 0)
+            return;
+
+        var parentDom = $(parent);
+        var parentPos = $.getPosition($(parent));
+
+        setTimeout(function () {
+            if ($(":hover").filter(parentDom).length === 0)
+                return;
+
+            var left = parentPos['left'];
+            var top = parentPos['top'];
+            if (parentPos['top'] >= ($(WRAP_SEL).height() - parentPos['bottom'])) {
+                // Floater 显示在父元素之上
+                top = top-250 -10;
+            } else {
+                // Floater 显示在父元素之下
+                top = top+parentDom.height() +10;
+            }
+
+            var floater = $('<div class="widget-float-img" style="display: none;left: '+left+'px; top: '+top+'px;"><img src="'+imgSrc+'"></div>').appendTo('body');
+            floater.fadeIn(300);
+
+            parentDom.on('mouseout', function(e){
+                floater.remove();
+            });
+        }, 200);
+    }
 };
 
 /**

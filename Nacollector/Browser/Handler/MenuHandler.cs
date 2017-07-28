@@ -63,6 +63,7 @@ namespace Nacollector.Browser.Handler
             }
             else if (parameters.UnfilteredLinkUrl != "")
             {
+                // 当 LinkUrl 是 JavaScript:; 的时候，会出问题！ 以后再解决！
                 model.AddItem((CefMenuCommand)CopyLink, "复制链接");
                 model.AddItem((CefMenuCommand)SaveLink, "下载链接内容");
                 model.AddItem((CefMenuCommand)LinkOpenDefaultBrowser, "默认浏览器打开");

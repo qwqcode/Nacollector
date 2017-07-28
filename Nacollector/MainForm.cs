@@ -87,11 +87,13 @@ namespace Nacollector
             public void createTask(string taskId, string className, string classLabel, string parmsJsonStr)
             {
                 // 配置
-                var settings = new SpiderSettings();
-                settings.TaskId = taskId;
-                settings.ClassName = className;
-                settings.ClassLabel = classLabel;
-                settings.ParmsJsonStr = parmsJsonStr;
+                var settings = new SpiderSettings()
+                {
+                    TaskId = taskId,
+                    ClassName = className,
+                    ClassLabel = classLabel,
+                    ParmsJsonStr = parmsJsonStr
+                };
                 // 创建任务执行线程
                 var thread = new Thread(new ParameterizedThreadStart(_mainForm.StartTask));
                 thread.IsBackground = true;
@@ -148,6 +150,8 @@ namespace Nacollector
             spider.LogInfo("任务执行完毕");
             // 报告JS任务结束
             crBrowser.RunJS($"Task.get('{settings.TaskId}').taskIsEnd();");
+
+            Utils.ReleaseMemory(true);
         }
 
         /// <summary>
