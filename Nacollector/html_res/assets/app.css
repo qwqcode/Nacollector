@@ -145,6 +145,12 @@ button, input, select, textarea {
     animation-duration: .2s;
 }
 
+.anim-flash {
+    -webkit-animation-name: flash;
+    animation-name: flash
+}
+
+
 @keyframes fadeIn {
     0% {
         opacity: 0
@@ -161,6 +167,16 @@ button, input, select, textarea {
     }
 
     0% {
+    }
+}
+
+@keyframes flash {
+    0%,50%,to {
+        opacity: 1
+    }
+
+    25%,75% {
+        opacity: 0
     }
 }
 
@@ -304,6 +320,7 @@ button, input, select, textarea {
 }
 
 .top-nav-bar .right-items .nav-btns .btn-group > a {
+    position: relative;
     font-size: 15px;
     color: #FFF;
     cursor: pointer;
@@ -312,6 +329,27 @@ button, input, select, textarea {
     transition: background .2s ease-in-out;
     border-radius: 2px;
     margin-left: 5px;
+}
+
+.top-nav-bar .right-items .nav-btns .btn-group > a.show-top-badge:before {
+    content: '';
+    width: 7px;
+    height: 7px;
+    background-color: #ff605c;
+    color: #FFF;
+    border-radius: 50%;
+    position: absolute;
+    top: 4px;
+    right: 0;
+    left: 25px;
+    margin: auto;
+    -webkit-animation-name: flash;
+    animation-name: flash;
+    -webkit-animation-duration: 2s;
+    animation-duration: 2s;
+    -webkit-animation-fill-mode: both;
+    animation-fill-mode: both;
+    animation-iteration-count: infinite;
 }
 
 .top-nav-bar .right-items .nav-btns .btn-group > a:first-child {
@@ -1144,17 +1182,17 @@ button, input, select, textarea {
 }
 
 .dialog-layer .dialog-bottom .dialog-btn {
-    color: #575757;
+    color: #2196f3;
     font-weight: 500;
     cursor: pointer;
     border: 0;
     text-align: center;
+    border-radius: 2px;
     padding: 6px 13px;
 }
 
 .dialog-layer .dialog-bottom .dialog-btn:hover {
     background-color: #f6f6f6;
-    color: #03A9F4;
 }
 
 .dialog-layer .dialog-bottom .dialog-btn:not(first-child) {
@@ -1213,7 +1251,10 @@ button, input, select, textarea {
     margin-bottom: 15px;
 }
 
-.notify-layer .notify-item.type-s {background: #52a984;color: #FFF;}
+.notify-layer .notify-item.type-s {
+    background: #52a984;
+    color: #FFF;
+}
 
 .notify-layer .notify-item.type-e {
     color: #FFF;
@@ -1223,4 +1264,91 @@ button, input, select, textarea {
 .notify-layer .notify-item p {
     padding: 10px 15px;
     margin: 0;
+}
+
+.sidebar-layer .sidebar-block .setting {
+}
+
+.sidebar-layer .sidebar-block .setting .setting-group {
+}
+
+.sidebar-layer .sidebar-block .setting .setting-group .setting-group-title {
+    color: #2196f3;
+    font-size: 13px;
+    font-weight: 500;
+    margin: 20px 0 5px;
+    line-height: 1;
+    padding: 0 20px;
+}
+
+.sidebar-layer .sidebar-block .setting .setting-group .setting-item {
+    display: flex;
+    align-items: center;
+    min-height: 56px;
+    padding: 0;
+    border-bottom: 1px solid rgba(199, 199, 199, 0.3);
+    font-size: 15px;
+}
+
+.sidebar-layer .sidebar-block .setting .setting-group .setting-item .left-icon {
+    display: inline-block;
+    color: #2196f3;
+    height: 24px;
+    width: 24px;
+    user-select: none;
+    transition: all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms;
+    margin-right: 10px;
+    margin-left: 4px;
+    font-size: 24px;
+    line-height: 24px;
+    overflow: hidden;
+    vertical-align: middle;
+}
+
+.sidebar-layer .sidebar-block .setting .setting-group .setting-item .setting-btn-block {
+    color: #212121;
+    width: 100%;
+    height: 56px;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    transition: all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms;
+    outline: none;
+    padding: 0 20px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: left;
+}
+
+.sidebar-layer .sidebar-block .setting .setting-group .setting-item .setting-btn-block:hover {
+    background: rgba(0, 0, 0, 0.03);
+}
+
+.sidebar-layer .sidebar-block .setting .setting-group .setting-item .setting-btn-block:active {
+    background: rgba(0, 0, 0, 0.08);
+}
+
+
+.sidebar-layer .sidebar-block .setting .setting-group .setting-item .two-line {
+    overflow: hidden;
+    padding: 0 20px;
+}
+
+.sidebar-layer .sidebar-block .setting .setting-group .setting-item .two-line .label {
+    display: block;
+    color:  #212121;
+    margin-bottom: 1px;
+    font-size: 13px;
+}
+
+.sidebar-layer .sidebar-block .setting .setting-group .setting-item .two-line .value {
+    display: block;
+    color: #757575;
+    font-size: 13px;
+}
+
+.sidebar-layer .sidebar-block .setting .setting-group .setting-item .two-line .value a {
+    color: #757575;
+    text-decoration: none;
 }

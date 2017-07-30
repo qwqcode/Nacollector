@@ -22,7 +22,6 @@ namespace Nacollector
     {
         public CrBrowser crBrowser;
         public static DownloadHandler downloadHandler;
-        public static string dlHistoryPath = Utils.GetTempPath("dl_history.json");
 
         public CrDownloads(CrBrowser _crBrowser)
         {
@@ -32,24 +31,8 @@ namespace Nacollector
             downloadHandler.OnBeforeDownloadFired += Browser_OnBeforeDownloadFired;
             downloadHandler.OnDownloadUpdatedFired += Browser_OnDownloadUpdatedFired;
             crBrowser.GetBrowser().DownloadHandler = downloadHandler;
-
-            crBrowser.GetBrowser().FrameLoadEnd += new EventHandler<FrameLoadEndEventArgs>(BrowserFrameLoadEnd);
+            
             crBrowser.GetBrowser().RegisterAsyncJsObject("CrDownloadsCallBack", new CrDownloadsCallBack());
-        }
-        
-        private void BrowserFrameLoadEnd(object sender, FrameLoadEndEventArgs e)
-        {
-            // 下载管理器下载记录导入
-            if (!File.Exists(dlHistoryPath))
-            {
-                FileStream fs = File.Create(dlHistoryPath);  // 创建新文件
-                fs.Close();
-            }
-            else
-            {
-                string downloadsListJson = File.ReadAllText(dlHistoryPath);
-                crBrowser.RunJS($"downloads.appLoadEvent({downloadsListJson});");
-            }
         }
 
         public class CrDownloadsCallBack
@@ -214,13 +197,6 @@ namespace Nacollector
                 });
                 browser.ExecuteScriptAsync($"downloads.updateTask({callbackObj})");
             }
-        }
-
-        // 保存下载任务列表
-        public void SaveDownloadList()
-        {
-            string downloadsListJsonStr = crBrowser.EvaluateScript("downloads.appExitEvent();", 0, TimeSpan.FromSeconds(3)).GetAwaiter().GetResult().ToString();
-            File.WriteAllText(dlHistoryPath, downloadsListJsonStr);
         }
     }
 }

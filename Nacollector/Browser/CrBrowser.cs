@@ -34,10 +34,20 @@ namespace Nacollector.Browser
             browser.LifeSpanHandler = new LifeSpanHandler();
             browser.LoadHandler = new LoadHandler();
 
+            browser.RegisterAsyncJsObject("AppAction", new AppActionForJs());
+
             browser.FrameLoadEnd += new EventHandler<FrameLoadEndEventArgs>(Browser_onFrameLoadEnd);
             browser.IsBrowserInitializedChanged += new EventHandler<IsBrowserInitializedChangedEventArgs>(Browser_onIsBrowserInitializedChanged);
         }
-        
+
+        public class AppActionForJs
+        {
+            public string getVersion()
+            {
+                return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            }
+        }
+
         // Frame 加载完毕时执行
         private void Browser_onFrameLoadEnd(object sender, FrameLoadEndEventArgs e)
         {

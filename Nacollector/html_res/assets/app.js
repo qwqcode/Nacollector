@@ -22,7 +22,15 @@ $(document).ready(function () {
     $(TaskGen.sel.formToggleBtns+' a:nth-child(1)').click();
     // 下载面板初始化
     downloads.init();
+    // 设置侧边栏初始化
+    settingSidebar.init();
 });
+
+/**
+ * functions in .cs
+ * @type {{getVersion: function}}
+ */
+window.AppAction = AppAction || {};
 
 /**
  * Selectors
@@ -32,7 +40,7 @@ const WRAP_SEL = '.wrap';
 /**
  * 导航栏
  */
-var AppNavbar = {
+window.AppNavbar = {
     sel: {
         nav: '.top-nav-bar',
         navTitle: '.top-nav-bar .nav-title',
@@ -52,25 +60,17 @@ var AppNavbar = {
             },
             downloadManager: {
                 icon: 'download',
-                title: '下载内容'
+                title: '下载列表'
             },
             setting: {
                 icon: 'settings',
                 title: '设置',
                 onClick: function () {
-                    var setting;
-                    if (AppLayer.sidebar.get('setting') === null) {
-                        setting = AppLayer.sidebar.register("setting");
-                        setting.setTitle('设置', '#0089ff');
-                        setting.setWidth(360);
-                        setting.setInner('<div style="text-align: center;background: url(./assets/kunai_256px.png) 0 no-repeat;background-size: auto 100px;background-position: center;height: 200px;line-height: 360px;color: rgba(183,183,183,0.71);"> Copyright (c) 2017 Zneiat</div>');
-                    } else {
-                        setting = AppLayer.sidebar.get('setting');
-                    }
-                    setting.toggle();
+                    settingSidebar.get().toggle();
                 }
             }
         });
+
         AppNavbar.btnGroupAdd('task-runtime', {
             backToTaskGen: {
                 icon: 'chevron-left',
@@ -187,112 +187,20 @@ var AppNavbar = {
     getBtnGroupDom: function (groupName) {
         return $(this.getBtnGroupSel(groupName));
     },
-    // 面板
-    panel: {
-        list: {},
-        // 注册新面板
-        register: function (key, btnGroup, btnName) {
-            if (this.list.hasOwnProperty(key))
-                return '导航栏面板： ' + key + ' 已存在于list中';
-
-            var btnSel = AppNavbar.getBtnSel(btnGroup, btnName);
-            $(btnSel).after('<div class="navbar-panel anim-fade-in" data-navbar-panel="'+key+'" />');
-
-            var panelSel = '[data-navbar-panel="'+key+'"]';
-            // 工厂模式
-            var panelObj = {};
-            // 设置标题
-            panelObj.setTitle = function (val) {
-                $('<div class="panel-header"><div class="panel-title">'+val+'</div></div>').prependTo(panelSel);
-            };
-            // 设置内容
-            panelObj.setInner = function (val) {
-                $('<div class="panel-inner">'+val+'</div>').appendTo(panelSel);
-            };
-            // 设置尺寸
-            panelObj.setSize = function (width, height) {
-                $(panelSel).css('width', width + 'px');
-                $(panelSel).css('height', height + 'px');
-            };
-            // 自动调整位置
-            panelObj.setPosition = function () {
-                var position = $.getPosition($(btnSel));
-                var panelWidth = $(panelSel).outerWidth();
-                $(panelSel)
-                    .css('top', position['top'] + 'px')
-                    .css('left', position['right'] - panelWidth + 'px');
-            };
-            // 显示
-            panelObj.show = function () {
-                if (panelObj.isShow())
-                    throw ('导航栏面板：' + key + ' 已显示');
-
-                panelObj.setPosition();
-                $(panelSel).addClass('show');
-                // 若点按的元素非面板内元素
-                setTimeout(function () {
-                    $(document).bind('click.nav-panel-' + key, function (e) {
-                        if(!$(e.target).is(panelSel) && !$(e.target).closest(panelSel).length) {
-                            panelObj.hide();
-                        }
-                    });
-                }, 20);
-                // 自动调整面板位置
-                $(window).bind('resize.nav-panel-' + key, function () {
-                    panelObj.setPosition();
-                });
-            };
-            // 隐藏
-            panelObj.hide = function () {
-                if (!panelObj.isShow())
-                    throw ('导航栏面板：' + key + ' 未显示');
-
-                $(window).unbind('resize.nav-panel-' + key);
-                $(document).unbind('click.nav-panel-' + key); // 解绑事件
-
-                $(panelSel).removeClass('show');
-            };
-            // 切换
-            panelObj.toggle = function () {
-                if (!panelObj.isShow(key)) {
-                    panelObj.show(key);
-                } else {
-                    panelObj.hide(key);
-                }
-            };
-            // 是否显示
-            panelObj.isShow = function () {
-                return !!($(panelSel).hasClass('show'));
-            };
-            // 获取 Selector
-            panelObj.getSel = function () {
-                return panelSel;
-            };
-
-            // 导航栏按钮点击绑定
-            $(btnSel).bind('click', function () {
-                panelObj.toggle();
-            });
-
-            // 加入 List
-            this.list[key] = panelObj;
-
-            return panelObj;
-        },
-        // 获取面板
-        get: function (key) {
-            if (!this.list.hasOwnProperty(key))
-                return null;
-
-            return this.list[key];
-        }
+    // 显示按钮通知小红点
+    showBtnBadge: function (groupName, name) {
+        this.getBtnDom(groupName, name).addClass('show-top-badge');
+    },
+    // 隐藏按钮通知小红点
+    hideBtnBadge: function (groupName, name) {
+        this.getBtnDom(groupName, name).removeClass('show-top-badge');
     }
 };
 
 /**
  * 操作列表 (Key 为 className (C#调用类名) )
  */
-var SpiderList = {
+window.SpiderList = {
     CollItemDescImg: {
         label: "商品详情页图片解析",
         genForm: function () {
@@ -753,9 +661,61 @@ window.Task = {
 };
 
 /**
+ * 小部件
+ */
+window.AppWidget =  {
+    loadingIndicator: function (putInto) {
+        $('<div class="loading-indicator" style="opacity: .9;"><div class="inner"><svg viewBox="25 25 50 50"><circle cx="50" cy="50" r="20" fill="none" stroke-width="2" stroke-miterlimit="10"></circle></svg></div></div>').prependTo(putInto);
+
+        var indicatorObj = {};
+        indicatorObj.remove = function () {
+            $(putInto).find('.loading-indicator').remove();
+        };
+
+        return indicatorObj;
+    },
+    floatImg: function (parent, imgSrc) {
+        if ($('body .widget-float-img').length !== 0)
+            return;
+
+        var parentDom = $(parent);
+        var parentPos = $.getPosition($(parent));
+
+        setTimeout(function () {
+            if ($(":hover").filter(parentDom).length === 0)
+                return;
+
+            var left = parentPos['left'];
+            var top = parentPos['top'];
+            if (parentPos['top'] >= ($(WRAP_SEL).height() - parentPos['bottom'])) {
+                // Floater 显示在父元素之上
+                top = top-250 -10;
+            } else {
+                // Floater 显示在父元素之下
+                top = top+parentDom.height() +10;
+            }
+
+            var floaterDom = $('<div class="widget-float-img anim-fade-in" style="left: '+left+'px; top: '+top+'px;"></div>').appendTo('body');
+
+            var loadingIndicator = AppWidget.loadingIndicator(floaterDom);
+
+            var imgDom = $('<img src="'+imgSrc+'" class="anim-fade-in" style="display: none;">').appendTo(floaterDom);
+            imgDom.load(function () {
+                loadingIndicator.remove();
+                imgDom.show();
+            });
+
+            parentDom.on('mouseout', function(e){
+                floaterDom.remove();
+            });
+        }, 200);
+    }
+};
+
+/**
  * 内容层
  */
-var AppLayer = {
+window.AppLayer = {
     // 侧边栏
     sidebar: {
         list: {},
@@ -861,6 +821,20 @@ var AppLayer = {
             // 获取 Selector
             sidebarObj.getSel = function () {
                 return sidebarSel;
+            };
+            // 获取 Inner Selector
+            sidebarObj.getInnerSel = function () {
+                if ($(sidebarObj.getSel()+' .sidebar-inner').length === 0)
+                    sidebarObj.setInner('');
+
+                return sidebarObj.getSel()+' .sidebar-inner';
+            };
+            // 获取 InnerDom
+            sidebarObj.getInnerDom = function () {
+                if ($(sidebarObj.getSel()+' .sidebar-inner').length === 0)
+                    sidebarObj.setInner('');
+
+                return $(sidebarObj.getSel()+' .sidebar-inner');
             };
 
             // 加入 List
@@ -984,9 +958,118 @@ var AppLayer = {
 };
 
 /**
+ * 导航栏 面板
+ */
+AppNavbar.panel = {
+    list: {},
+    // 注册新面板
+    register: function (key, btnGroup, btnName) {
+        if (this.list.hasOwnProperty(key))
+            return '导航栏面板： ' + key + ' 已存在于list中';
+
+        var btnSel = AppNavbar.getBtnSel(btnGroup, btnName);
+        $(btnSel).after('<div class="navbar-panel anim-fade-in" data-navbar-panel="'+key+'" />');
+
+        var panelSel = '[data-navbar-panel="'+key+'"]';
+        // 工厂模式
+        var panelObj = {};
+        // 设置标题
+        panelObj.setTitle = function (val) {
+            $('<div class="panel-header"><div class="panel-title">'+val+'</div></div>').prependTo(panelSel);
+        };
+        // 设置内容
+        panelObj.setInner = function (val) {
+            $('<div class="panel-inner">'+val+'</div>').appendTo(panelSel);
+        };
+        // 设置尺寸
+        panelObj.setSize = function (width, height) {
+            $(panelSel).css('width', width + 'px');
+            $(panelSel).css('height', height + 'px');
+        };
+        // 自动调整位置
+        panelObj.setPosition = function () {
+            var position = $.getPosition($(btnSel));
+            var panelWidth = $(panelSel).outerWidth();
+            $(panelSel)
+                .css('top', position['top'] + 'px')
+                .css('left', position['right'] - panelWidth + 'px');
+        };
+        // 显示
+        panelObj.show = function () {
+            if (panelObj.isShow())
+                throw ('导航栏面板：' + key + ' 已显示');
+
+            panelObj.setPosition();
+            $(panelSel).addClass('show');
+            // 若点按的元素非面板内元素
+            setTimeout(function () {
+                $(document).bind('click.nav-panel-' + key, function (e) {
+                    if(!$(e.target).is(panelSel) && !$(e.target).closest(panelSel).length) {
+                        panelObj.hide();
+                    }
+                });
+            }, 20);
+            // 自动调整面板位置
+            $(window).bind('resize.nav-panel-' + key, function () {
+                panelObj.setPosition();
+            });
+            // 导航栏按钮隐藏通知小红点
+            AppNavbar.hideBtnBadge(btnGroup, btnName);
+        };
+        // 隐藏
+        panelObj.hide = function () {
+            if (!panelObj.isShow())
+                throw ('导航栏面板：' + key + ' 未显示');
+
+            $(window).unbind('resize.nav-panel-' + key);
+            $(document).unbind('click.nav-panel-' + key); // 解绑事件
+
+            $(panelSel).removeClass('show');
+        };
+        // 切换
+        panelObj.toggle = function () {
+            if (!panelObj.isShow(key)) {
+                panelObj.show(key);
+            } else {
+                panelObj.hide(key);
+            }
+        };
+        // 是否显示
+        panelObj.isShow = function () {
+            return !!($(panelSel).hasClass('show'));
+        };
+        // 获取 Selector
+        panelObj.getSel = function () {
+            return panelSel;
+        };
+
+        // 导航栏按钮点击绑定
+        $(btnSel).bind('click', function () {
+            panelObj.toggle();
+        });
+
+        // 加入 List
+        this.list[key] = panelObj;
+
+        return panelObj;
+    },
+    // 获取面板
+    get: function (key) {
+        if (!this.list.hasOwnProperty(key))
+            return null;
+
+        return this.list[key];
+    }
+};
+
+/**
  * 浏览器下载管理器
  */
-var downloads = {
+window.downloads = {
+    navbar: {
+        btnGroup: 'main-btns',
+        btnName: 'downloadManager'
+    },
     data: {
         list: {}
     },
@@ -1006,13 +1089,18 @@ var downloads = {
         downloadsList: null
     },
     panelKey: 'downloads',
+    localStorageConf: {
+        key: 'downloads'
+    },
     // 初始化
     init: function () {
-        var panelObj = AppNavbar.panel.register(this.panelKey, 'main-btns', 'downloadManager');
-        panelObj.setTitle('<i class="zmdi zmdi-download"></i> 下载内容');
+        var panelObj = AppNavbar.panel.register(this.panelKey, this.navbar.btnGroup, this.navbar.btnName);
+        panelObj.setTitle('<i class="zmdi zmdi-download"></i> 下载列表');
         panelObj.setInner('<div class="downloads-list"></div>');
         panelObj.setSize(400, 430);
         this.sel.downloadsList = panelObj.getSel() + ' .downloads-list';
+        // 读取 localStorage 恢复下载列表
+        this.restoreDataList();
     },
     // 新增任务
     addTask: function (json) {
@@ -1031,6 +1119,9 @@ var downloads = {
             currentSpeed: 0,
             status: 0
         };
+
+        // 导航栏按钮显示通知小红点
+        AppNavbar.showBtnBadge(this.navbar.btnGroup, this.navbar.btnName);
     },
     // 更新任务
     updateTask: function (json) {
@@ -1052,6 +1143,7 @@ var downloads = {
             this.data.list[key].downloadUrl = downloadUrl;
 
         this.updateItemUi(key); // 刷新界面
+        this.storeDataList(); // 存储下载列表
     },
     // 列表项目获取 Selector
     getItemSelector: function (key) {
@@ -1183,31 +1275,44 @@ var downloads = {
         }
         return num;
     },
-    // 程序启动事件
-    appLoadEvent: function (downloadsListJson) {
-        if (typeof(downloadsListJson) !== "object" || Object.prototype.toString.call(downloadsListJson).toLowerCase() !== "[object object]" || !!downloadsListJson.length)
-            throw ("[downloads.appLoadEvent] 参数非JSON对象");
+    // localStorage 恢复下载列表
+    restoreDataList: function () {
+        var data = localStorage.getItem(this.localStorageConf.key);
+        if (data === null) return;
+
+        var downloadsListObj = JSON.parse(data);
+        this.data.list = {};
 
         // console.log(JSON.stringify(downloadsListJson));
-        for (var key in downloadsListJson) {
-            if (!downloadsListJson.hasOwnProperty(key))
+        for (var key in downloadsListObj) {
+            if (!downloadsListObj.hasOwnProperty(key))
                 continue;
 
-            this.data.list[key] = downloadsListJson[key];
+            this.data.list[key] = downloadsListObj[key];
             if (this.isTaskInProgress(key))
                 this.data.list[key].status = this.statusList.cancelled;
 
             this.updateItemUi(key);
         }
     },
-    // 程序退出事件
-    appExitEvent: function () {
+    // localStorage 储存下载列表
+    storeDataList: function () {
+        localStorage.setItem(this.localStorageConf.key, JSON.stringify(this.data.list));
+    },
+    // 清空下载列表
+    removeDataList: function () {
+        // 将正在执行的下载任务取消
         for (var key in this.data.list) {
             if (this.isTaskInProgress(key))
                 this.taskAction(key, this.actionList.cancel);
         }
 
-        return JSON.stringify(this.data.list);
+        this.data.list = {};
+        $(this.sel.downloadsList).find('.download-item').remove();
+        localStorage.setItem(this.localStorageConf.key, null);
+
+        // 导航栏按钮隐藏通知小红点
+        AppNavbar.hideBtnBadge(this.navbar.btnGroup, this.navbar.btnName);
     },
     // 启动文件
     fileLaunch: function (key) {
@@ -1298,53 +1403,54 @@ window.downloadFile = function (srcUrl) {
     $a[0].click();
 };
 
-// 小部件
-var AppWidget =  {
-    loadingIndicator: function (putInto) {
-        $('<div class="loading-indicator" style="opacity: .9;"><div class="inner"><svg viewBox="25 25 50 50"><circle cx="50" cy="50" r="20" fill="none" stroke-width="2" stroke-miterlimit="10"></circle></svg></div></div>').prependTo(putInto);
+// 设置侧边栏
+window.settingSidebar = {
+    sidebarKey: 'setting',
+    get: function () {
+        return AppLayer.sidebar.get(this.sidebarKey);
+    },
+    init: function () {
+        var settingSidebar = AppLayer.sidebar.register(this.sidebarKey);
+        settingSidebar.setTitle('设置', '#0089ff');
+        settingSidebar.setWidth(360);
+        this.setSidebarInner(settingSidebar.getInnerDom());
+    },
+    // 设置侧边栏内容
+    setSidebarInner: function (innerDom) {
+        var settingDom = $('<div class="setting"></div>').appendTo(innerDom);
 
-        var indicatorObj = {};
-        indicatorObj.remove = function () {
-            $(putInto).find('.loading-indicator').remove();
+        var group = function (name, title) {
+            return $('<div class="setting-group" data-setting-sidebar-group="'+name+'"><h2 class="setting-group-title">'+title+'</h2></div>').appendTo(settingDom);
+        };
+        var itemAt = function (groupDom) {
+            var boxDom = $('<div class="setting-item"></div>').appendTo(groupDom);
+
+            var innerElement = {};
+            innerElement.btnBlock = function (text, icon, onClick) {
+                return $('<button type="button" class="setting-btn-block"><i class="zmdi zmdi-'+icon+' left-icon"></i> '+text+'</button>').click(onClick).appendTo(boxDom);
+            };
+            innerElement.infoShow = function (label, value) {
+                return $('<div class="two-line"><span class="label">'+label+'</span><span class="value">'+value+'</span></div>').appendTo(boxDom);
+            };
+
+            return innerElement;
         };
 
-        return indicatorObj;
-    },
-    floatImg: function (parent, imgSrc) {
-        if ($('body .widget-float-img').length !== 0)
-            return;
+        var groupDownloads = group('downloads', '下载内容');
+        itemAt(groupDownloads).btnBlock('下载列表清空', 'format-clear-all', function () {
+            downloads.removeDataList();
+            AppLayer.notify.success('下载列表已清空');
+        });
 
-        var parentDom = $(parent);
-        var parentPos = $.getPosition($(parent));
-
-        setTimeout(function () {
-            if ($(":hover").filter(parentDom).length === 0)
-                return;
-
-            var left = parentPos['left'];
-            var top = parentPos['top'];
-            if (parentPos['top'] >= ($(WRAP_SEL).height() - parentPos['bottom'])) {
-                // Floater 显示在父元素之上
-                top = top-250 -10;
-            } else {
-                // Floater 显示在父元素之下
-                top = top+parentDom.height() +10;
-            }
-
-            var floaterDom = $('<div class="widget-float-img anim-fade-in" style="left: '+left+'px; top: '+top+'px;"></div>').appendTo('body');
-
-            var loadingIndicator = AppWidget.loadingIndicator(floaterDom);
-
-            var imgDom = $('<img src="'+imgSrc+'" class="anim-fade-in" style="display: none;">').appendTo(floaterDom);
-            imgDom.load(function () {
-                loadingIndicator.remove();
-                imgDom.show();
-            });
-
-            parentDom.on('mouseout', function(e){
-                floaterDom.remove();
-            });
-        }, 200);
+        var groupAbout = group('about', '关于');
+        var appVersion = itemAt(groupAbout).infoShow('版本号', '').find('.value');
+        AppAction.getVersion().then(function (version) {
+            appVersion.text(version);
+        });
+        itemAt(groupAbout).infoShow('作者', 'ZNEIAT');
+        itemAt(groupAbout).infoShow('Email', '1149527164@qq.com');
+        itemAt(groupAbout).infoShow('Blog', '<a href="http://www.qwqaq.com" target="_blank">http://www.qwqaq.com</a>');
+        itemAt(groupAbout).infoShow('GitHub', '<a href="https://github.com/Zneiat" target="_blank">https://github.com/Zneiat</a>');
     }
 };
 

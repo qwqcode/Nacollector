@@ -167,9 +167,6 @@ namespace Nacollector
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            // 保存下载任务列表
-            crDownloads.SaveDownloadList();
-
             // 是否退出弹窗
             string dialogTxt = "确定退出 Nacollector？";
 
