@@ -16,6 +16,10 @@ html,body {
     box-sizing: border-box
 }
 
+a {
+    transition: all .2s ease-in-out;
+}
+
 :after,:before {
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
@@ -92,32 +96,26 @@ button, input, select, textarea {
     background: rgba(41, 47, 53, 0.77);
 }
 
-.wrap::-webkit-scrollbar，
-.task-runtime::-webkit-scrollbar {
+.wrap::-webkit-scrollbar-thumb, .task-runtime::-webkit-scrollbar {
     width: 4px;
     background: transparent;
 }
 
-.wrap::-webkit-scrollbar-thumb,
-.task-runtime::-webkit-scrollbar-thumb {
+.wrap::-webkit-scrollbar-thumb, .task-runtime::-webkit-scrollbar-thumb {
     background: rgba(191, 191, 191, 0.57);
 }
 
-.wrap::-webkit-scrollbar-thumb:window-inactive,
-.task-runtime::-webkit-scrollbar-thumb:window-inactive {
+.wrap::-webkit-scrollbar-thumb:window-inactive, .task-runtime::-webkit-scrollbar-thumb:window-inactive {
     background: rgba(191, 191, 191, 0.57);
 }
 
-.wrap::-webkit-scrollbar-thumb:vertical:hover,
-.task-runtime::-webkit-scrollbar-thumb:vertical:hover {
+.wrap::-webkit-scrollbar-thumb:vertical:hover, .task-runtime::-webkit-scrollbar-thumb:vertical:hover {
     background: rgba(220, 220, 220, 0.77);
 }
 
-.wrap::-webkit-scrollbar-thumb:vertical:active,
-.task-runtime::-webkit-scrollbar-thumb:vertical:active {
+.wrap::-webkit-scrollbar-thumb:vertical:active, .task-runtime::-webkit-scrollbar-thumb:vertical:active {
     background: rgba(255, 255, 255, 0.77);
 }
-
 
 ::-webkit-input-placeholder {
     color: #97a4ab;
@@ -128,12 +126,41 @@ button, input, select, textarea {
     margin-right: -15px;
 }
 
+.layui-layer-in {
+}
+
+.anim-fade-in {
+    -webkit-animation-name: fadeIn;
+    animation-name: fadeIn;
+    -webkit-animation-fill-mode: both;
+    animation-fill-mode: both;
+    -webkit-animation-duration: .3s;
+    animation-duration: .3s;
+}
+
+.anim-fade-out {
+    -webkit-animation-name: fadeOut;
+    animation-name: fadeOut;
+    -webkit-animation-duration: .2s;
+    animation-duration: .2s;
+}
+
 @keyframes fadeIn {
     0% {
         opacity: 0
     }
+
     to {
         opacity: 1
+    }
+}
+
+@keyframes fadeOut {
+    100% {
+        opacity: 0;
+    }
+
+    0% {
     }
 }
 
@@ -144,6 +171,79 @@ button, input, select, textarea {
     -ms-user-select: none;
     user-select: none;
     cursor: default;
+}
+
+/* Loading Indicator */
+.loading-indicator {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+}
+
+.loading-indicator .inner {
+    position: relative;
+    width: 50px;
+    height: 50px
+}
+
+.loading-indicator svg {
+    animation: loading-indicator-rotate 2s linear infinite;
+    transform-origin: center center;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0
+}
+
+.loading-indicator svg circle {
+    stroke-dasharray: 1,200;
+    stroke-dashoffset: 0;
+    animation: loading-indicator-dash 1.5s ease-in-out infinite,loading-indicator-color 6s ease-in-out infinite;
+    stroke-linecap: round
+}
+
+@keyframes loading-indicator-rotate {
+    100% {
+        transform: rotate(360deg)
+    }
+}
+
+@keyframes loading-indicator-dash {
+    0% {
+        stroke-dasharray: 1,200;
+        stroke-dashoffset: 0
+    }
+
+    50% {
+        stroke-dasharray: 89,200;
+        stroke-dashoffset: -35px
+    }
+
+    100% {
+        stroke-dasharray: 89,200;
+        stroke-dashoffset: -124px
+    }
+}
+
+@keyframes loading-indicator-color {
+    0%,100% {
+        stroke: #ff5652
+    }
+
+    40% {
+        stroke: #2196F3
+    }
+
+    66% {
+        stroke: #32c787
+    }
+
+    80%,90% {
+        stroke: #ffc107
+    }
 }
 
 /* Nav Bar */
@@ -224,8 +324,8 @@ button, input, select, textarea {
 }
 
 .top-nav-bar .right-items .nav-btns .btn-group > a:hover {
-    background: rgba(255,255,255,.2);;
-}
+    background: rgba(255,255,255,.2);
+; }
 
 /* Taskgen */
 .taskgen-header {
@@ -395,9 +495,11 @@ button, input, select, textarea {
     overflow-y: auto;
 }
 
-.task-runtime .task-item {}
+.task-runtime .task-item {
+}
 
-.task-runtime .task-item .task-log-table {}
+.task-runtime .task-item .task-log-table {
+}
 
 .task-runtime .task-item .task-log-table .line {
     animation: fadeIn .3s;
@@ -452,14 +554,14 @@ button, input, select, textarea {
     border-radius: 2px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
     display: none;
-    animation: fadeIn .3s;
 }
 
 .navbar-panel.show {
     display: block;
 }
 
-.navbar-panel .panel-header {}
+.navbar-panel .panel-header {
+}
 
 .navbar-panel .panel-header .panel-title {
     padding: 20px 25px;
@@ -474,7 +576,8 @@ button, input, select, textarea {
     vertical-align: middle;
 }
 
-.navbar-panel .downloads-list {}
+.navbar-panel .downloads-list {
+}
 
 .navbar-panel .downloads-list .download-item {
     position: relative;
@@ -500,7 +603,8 @@ button, input, select, textarea {
     margin-bottom: 6px;
 }
 
-.navbar-panel .downloads-list .download-item .details .header .file-name:hover {}
+.navbar-panel .downloads-list .download-item .details .header .file-name:hover {
+}
 
 .navbar-panel .downloads-list .download-item .details .header .download-url {
     display: block;
@@ -511,7 +615,8 @@ button, input, select, textarea {
     color: rgba(27, 27, 27, 0.6);
 }
 
-.navbar-panel .downloads-list .download-item .details .header .download-url:hover {}
+.navbar-panel .downloads-list .download-item .details .header .download-url:hover {
+}
 
 .navbar-panel .downloads-list .download-item .details .description {
     margin-top: 5px;
@@ -612,11 +717,14 @@ button, input, select, textarea {
     color: #93adb9;
 }
 
-.navbar-panel .downloads-list .download-item[dl-status="downloading"] {}
+.navbar-panel .downloads-list .download-item[dl-status="downloading"] {
+}
 
-.navbar-panel .downloads-list .download-item[dl-status="pause"] {}
+.navbar-panel .downloads-list .download-item[dl-status="pause"] {
+}
 
-.navbar-panel .downloads-list .download-item[dl-status="pause"] .details .progress {}
+.navbar-panel .downloads-list .download-item[dl-status="pause"] .details .progress {
+}
 
 .navbar-panel .downloads-list .download-item[dl-status="pause"] .details .progress .progress-bar {
     background-color: #b7b7b7;
@@ -629,7 +737,8 @@ button, input, select, textarea {
     display: none;
 }
 
-.navbar-panel .downloads-list .download-item[dl-status="done"] .details .progress .progress-bar {}
+.navbar-panel .downloads-list .download-item[dl-status="done"] .details .progress .progress-bar {
+}
 
 .navbar-panel .downloads-list .download-item[dl-status="fail"] .details .progress .progress-bar {
     background: #f95c57;
@@ -640,7 +749,8 @@ button, input, select, textarea {
     animation: none;
 }
 
-.navbar-panel .downloads-list .download-item[dl-status="cancelled"] {}
+.navbar-panel .downloads-list .download-item[dl-status="cancelled"] {
+}
 
 .navbar-panel .downloads-list .download-item[dl-status="cancelled"] .details .header .file-name {
     color: rgba(19, 19, 19, 0.6);
@@ -817,7 +927,8 @@ button, input, select, textarea {
     box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 10px, rgba(0, 0, 0, 0.23) 0px 3px 10px;
     border-radius: 0px;
     padding: 40px 0 0 0;
-    transform: translate(370px, 0px); /* 360px + 10px */
+    transform: translate(370px, 0px);
+    /* 360px + 10px */
 }
 
 .sidebar-layer .sidebar-block.show {
@@ -840,11 +951,14 @@ button, input, select, textarea {
     color: #FFF;
 }
 
-.sidebar-layer .sidebar-block .sidebar-header .header-left {}
+.sidebar-layer .sidebar-block .sidebar-header .header-left {
+}
 
-.sidebar-layer .sidebar-block .sidebar-header .header-right {}
+.sidebar-layer .sidebar-block .sidebar-header .header-right {
+}
 
-.sidebar-layer .sidebar-block .sidebar-header .header-right i {}
+.sidebar-layer .sidebar-block .sidebar-header .header-right i {
+}
 
 .sidebar-layer .sidebar-block .sidebar-header .header-right button {
     background: transparent;
@@ -921,9 +1035,15 @@ button, input, select, textarea {
     cursor: pointer;
 }
 
-.sidebar-layer .sidebar-block .task-manager .task-item .right .task-desc {margin-bottom: 10px;margin-top: 0;font-size: 13px;color: #737373;}
+.sidebar-layer .sidebar-block .task-manager .task-item .right .task-desc {
+    margin-bottom: 10px;
+    margin-top: 0;
+    font-size: 13px;
+    color: #737373;
+}
 
-.sidebar-layer .sidebar-block .task-manager .task-item .right .action-bar {}
+.sidebar-layer .sidebar-block .task-manager .task-item .right .action-bar {
+}
 
 .sidebar-layer .sidebar-block .task-manager .task-item .right .action-bar .action-btn {
     margin-right: 10px;
@@ -950,6 +1070,97 @@ button, input, select, textarea {
     margin-right: 0;
 }
 
+/* Dialog Layer */
+.dialog-layer {
+    position: absolute;
+    display: flex;
+    z-index: 1000;
+    background-color: rgba(21, 101, 192, 0.11);
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-items: center;
+}
+
+.dialog-layer .dialog-inner {
+    display: flex;
+    flex-direction: column;
+    width: 430px;
+    padding: 15px 0;
+    border-radius: 2px;
+    background-color: #fff;
+    box-shadow: 1px 1px 50px rgba(0,0,0,.3);
+    margin: 0 auto;
+}
+
+.dialog-layer .dialog-title {
+    display: flex;
+    position: relative;
+    justify-content: space-between;
+    padding: 10px 30px 15px 30px;
+    border-bottom: 0 solid #f6f6f6;
+    font-size: 16px;
+    color: #333;
+}
+
+.dialog-layer .dialog-title .right-btn {
+    width: 25px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.dialog-layer .dialog-title .right-btn:hover {
+    color: #03A9F4;
+}
+
+.dialog-layer .dialog-title .right-btn > i {
+    line-height: 25px;
+}
+
+.dialog-layer .dialog-content {
+    position: relative;
+    flex: 1 1 auto;
+    padding: 10px 30px 10px 30px;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #707070;
+    overflow-x: hidden;
+    overflow-y: auto;
+    max-height: 150px;
+    word-break: break-all;
+}
+
+.dialog-layer .dialog-bottom {
+    display: flex;
+    padding: 15px 25px 0 25px;
+    -webkit-box-pack: end;
+    justify-content: flex-end;
+    -webkit-box-align: center;
+    align-items: center;
+    color: #575757;
+}
+
+.dialog-layer .dialog-bottom .dialog-btn {
+    color: #575757;
+    font-weight: 500;
+    cursor: pointer;
+    border: 0;
+    text-align: center;
+    padding: 6px 13px;
+}
+
+.dialog-layer .dialog-bottom .dialog-btn:hover {
+    background-color: #f6f6f6;
+    color: #03A9F4;
+}
+
+.dialog-layer .dialog-bottom .dialog-btn:not(first-child) {
+    margin-left: 5px;
+}
+
 /* Widgets */
 .widget-float-img {
     position: absolute;
@@ -974,4 +1185,42 @@ button, input, select, textarea {
     max-width: 100%;
     border-radius: 2px;
     box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
+}
+
+.notify-layer {
+    position: absolute;
+    top: 20px;
+    left: 0px;
+    right: 0px;
+    margin: 0px auto;
+    max-width: 600px;
+    width: 100%;
+    padding-right: 60px;
+    z-index: 1001;
+}
+
+.notify-layer .notify-item {
+    display: block;
+    overflow: hidden;
+    background-color: #2c2c2c;
+    border-color: #2c2c2c;
+    color: #FFF;
+    box-shadow: 0 0 5px rgba(0,0,0,.4);
+    border-radius: 2px;
+}
+
+.notify-layer .notify-item:not(:last-child) {
+    margin-bottom: 15px;
+}
+
+.notify-layer .notify-item.type-s {background: #52a984;color: #FFF;}
+
+.notify-layer .notify-item.type-e {
+    color: #FFF;
+    background: #b14a45;
+}
+
+.notify-layer .notify-item p {
+    padding: 10px 15px;
+    margin: 0;
 }

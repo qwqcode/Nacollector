@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -63,10 +64,14 @@ namespace Nacollector.Browser.Handler
             }
             else if (parameters.UnfilteredLinkUrl != "")
             {
-                // 当 LinkUrl 是 JavaScript:; 的时候，会出问题！ 以后再解决！
+                
                 model.AddItem((CefMenuCommand)CopyLink, "复制链接");
-                model.AddItem((CefMenuCommand)SaveLink, "下载链接内容");
-                model.AddItem((CefMenuCommand)LinkOpenDefaultBrowser, "默认浏览器打开");
+                // 当 LinkUrl 是 JavaScript:; 的时候，下载会出问题
+                if (!Regex.IsMatch(parameters.UnfilteredLinkUrl, @"(?s)(?i)^(javascript:)"))
+                {
+                    model.AddItem((CefMenuCommand)SaveLink, "下载链接内容");
+                    model.AddItem((CefMenuCommand)LinkOpenDefaultBrowser, "默认浏览器打开");
+                }
             }
             else
             {

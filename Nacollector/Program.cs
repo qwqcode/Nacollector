@@ -84,6 +84,7 @@ namespace Nacollector
             var setting = new CefSettings();
             setting.Locale = "zh-CN";
             setting.AcceptLanguageList = "zh-CN,zh";
+            setting.CachePath = Utils.GetTempPath("cef_cache");
             Cef.Initialize(setting);
             // Cef.AddCrossOriginWhitelistEntry("https://", "http", "", true);
         }

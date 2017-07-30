@@ -196,7 +196,7 @@ var AppNavbar = {
                 return '导航栏面板： ' + key + ' 已存在于list中';
 
             var btnSel = AppNavbar.getBtnSel(btnGroup, btnName);
-            $(btnSel).after('<div class="navbar-panel" data-navbar-panel="'+key+'" />');
+            $(btnSel).after('<div class="navbar-panel anim-fade-in" data-navbar-panel="'+key+'" />');
 
             var panelSel = '[data-navbar-panel="'+key+'"]';
             // 工厂模式
@@ -247,9 +247,10 @@ var AppNavbar = {
                 if (!panelObj.isShow())
                     throw ('导航栏面板：' + key + ' 未显示');
 
-                $(panelSel).removeClass('show');
                 $(window).unbind('resize.nav-panel-' + key);
                 $(document).unbind('click.nav-panel-' + key); // 解绑事件
+
+                $(panelSel).removeClass('show');
             };
             // 切换
             panelObj.toggle = function () {
@@ -545,16 +546,7 @@ window.Task = {
         };
         // 显示任务信息
         taskObj.showInfo = function () {
-            layer.tab({
-                area: ['600px', '300px'],
-                tab: [{
-                    title: '基本',
-                    content: '<div style="padding: 10px 25px"><p>任务ID：'+taskId+'</p><p>任务标题：'+taskObj.getTitle()+'</p><p>任务调用类标签：'+taskObj.getClassLabel()+'</p><p>任务调用类名：'+taskObj.getClassName()+'</p><p>任务开始执行时间：'+new Date(parseInt(taskId))+'</p></div>'
-                }, {
-                    title: '参数',
-                    content: '<div style="padding: 10px 25px"><p style="word-break: break-all">'+JSON.stringify(parmsObj)+'</p></div>'
-                }]
-            });
+            AppLayer.dialog.open('任务信息', 'ID：'+taskId+'<br>标题：'+taskObj.getTitle()+'<br><br>调用类标签：'+taskObj.getClassLabel()+'<br>调用类名：'+taskObj.getClassName()+'<br><br>执行开始时间：'+new Date(parseInt(taskId))+'<br><br>参数：'+JSON.stringify(parmsObj)+'');
         };
         // 日志
         taskObj.log = function (text, level) {
@@ -587,20 +579,17 @@ window.Task = {
         // 删除
         taskObj.remove = function () {
             if (taskObj.getIsInProgress()) {
-                layer.confirm('任务 “'+taskObj.getTitle()+'” 正在执行中...', {
-                    btn: ['中止并删除任务','取消'] //按钮
-                }, function() {
-                    layer.msg('正在下达中止命令...');
-                    TaskController.abortTask(taskId).then(function (isSuccess) {
-                        if (isSuccess) {
-                            taskObj._remove();
-                        } else {
-                            layer.msg('任务中止失败', {icon: 2});
-                        }
-                    });
-                }, function() {
-
-                });
+                AppLayer.dialog.open('删除任务', '任务 “'+taskObj.getTitle()+'” 正在执行中...',
+                    ['中止并删除任务', function () {
+                        TaskController.abortTask(taskId).then(function (isSuccess) {
+                            if (isSuccess) {
+                                taskObj._remove();
+                            } else {
+                                AppLayer.notify.error('任务中止失败');
+                            }
+                        });
+                    }],
+                    ['取消', function () {}]);
             } else {
                 taskObj._remove();
             }
@@ -614,7 +603,7 @@ window.Task = {
             // 任务管理器删除项目
             Task.taskManagerLayer.removeItem(taskId);
             // 提示
-            layer.msg('任务删除成功', {icon: 1});
+            AppLayer.notify.success('任务删除成功');
         };
         // 任务是否正在进行中
         taskObj.isInProgress = true;
@@ -896,15 +885,100 @@ var AppLayer = {
             return layerSel;
         }
     },
-    card: {
-        layerList: {
-
+    // 对话框
+    dialog: {
+        sel: {
+            dialogLayer: '.dialog-layer'
         },
-        newLayer: function (key) {
+        open: function (title, content, yesBtn, cancelBtn) {
+            var layerSel = this.sel.dialogLayer;
 
+            if ($(layerSel).length !== 0)
+                $(layerSel).remove();
+
+            var dialogLayerDom = $('<div class="dialog-layer anim-fade-in" />').appendTo('body');
+            var dialogLayerHide = function () {
+                dialogLayerDom.addClass('anim-fade-out');
+                setTimeout(function () {
+                    dialogLayerDom.hide();
+                }, 200);
+            };
+
+            var dialogDom = $('<div class="dialog-inner"><div class="dialog-title">'+title+'</div>\n<div class="dialog-content">'+content+'</div></div>').appendTo(dialogLayerDom);
+
+            // 底部按钮
+            if (!!yesBtn || !!cancelBtn) {
+                var dialogBottomDom = $('<div class="dialog-bottom"></div>')
+                    .appendTo(dialogDom);
+
+                // 确定按钮
+                if (!!yesBtn) {
+                    var yesOnClick = yesBtn[1] || function () {};
+                    var yesBtnText = yesBtn[0] || '确定';
+
+                    $('<a class="dialog-btn yes-btn">' + yesBtnText + '</a>').click(function () {
+                        dialogLayerHide();
+                        yesOnClick();
+                    }).appendTo(dialogBottomDom);
+                }
+
+                // 取消按钮
+                if (!!cancelBtn) {
+                    var cancelBtnText = cancelBtn[0] || '取消';
+                    var cancelOnClick = cancelBtn[1] || function () {};
+
+                    $('<a class="dialog-btn cancel-btn">' + cancelBtnText + '</a>').click(function () {
+                        dialogLayerHide();
+                        cancelOnClick();
+                    }).appendTo(dialogBottomDom);
+                }
+            } else {
+                $('<a class="right-btn"><i class="zmdi zmdi-close"></i></a>').appendTo($(dialogDom).find('.dialog-title')).click(function () {
+                    dialogLayerHide();
+                });
+            }
+        }
+    },
+    // 通知
+    notify: {
+        sel: {
+            notifyLayer: '.notify-layer'
         },
-        removeLayer: function (key) {
+        success: function (message) {
+            this.show(message, 's');
+        },
+        error: function (message) {
+            this.show(message, 'e');
+        },
+        // level: s, e
+        show: function (message, level, timeout) {
+            timeout = (timeout !== undefined && typeof timeout === 'number') ? timeout : 2000;
 
+            var layerDom = $(this.sel.notifyLayer);
+            if (layerDom.length === 0)
+                layerDom = $('<div class="notify-layer" />').appendTo('body');
+
+            var notifyDom = $('<div class="notify-item anim-fade-in '+(!!level ? 'type-'+level : '')+'"><p class="notify-content">'+message+'</p></div>').prependTo(layerDom);
+
+            var notifyRemove = function () {
+                notifyDom.addClass('anim-fade-out');
+                setTimeout(function () {
+                    notifyDom.remove();
+                }, 200);
+            };
+
+            var autoOut = true;
+            notifyDom.click(function () {
+                notifyRemove();
+                autoOut = false;
+            });
+
+            if (timeout > 0) {
+                setTimeout(function () {
+                    if (!autoOut) return;
+                    notifyRemove();
+                }, timeout);
+            }
         }
     }
 };
@@ -1226,6 +1300,16 @@ window.downloadFile = function (srcUrl) {
 
 // 小部件
 var AppWidget =  {
+    loadingIndicator: function (putInto) {
+        $('<div class="loading-indicator" style="opacity: .9;"><div class="inner"><svg viewBox="25 25 50 50"><circle cx="50" cy="50" r="20" fill="none" stroke-width="2" stroke-miterlimit="10"></circle></svg></div></div>').prependTo(putInto);
+
+        var indicatorObj = {};
+        indicatorObj.remove = function () {
+            $(putInto).find('.loading-indicator').remove();
+        };
+
+        return indicatorObj;
+    },
     floatImg: function (parent, imgSrc) {
         if ($('body .widget-float-img').length !== 0)
             return;
@@ -1247,11 +1331,18 @@ var AppWidget =  {
                 top = top+parentDom.height() +10;
             }
 
-            var floater = $('<div class="widget-float-img" style="display: none;left: '+left+'px; top: '+top+'px;"><img src="'+imgSrc+'"></div>').appendTo('body');
-            floater.fadeIn(300);
+            var floaterDom = $('<div class="widget-float-img anim-fade-in" style="left: '+left+'px; top: '+top+'px;"></div>').appendTo('body');
+
+            var loadingIndicator = AppWidget.loadingIndicator(floaterDom);
+
+            var imgDom = $('<img src="'+imgSrc+'" class="anim-fade-in" style="display: none;">').appendTo(floaterDom);
+            imgDom.load(function () {
+                loadingIndicator.remove();
+                imgDom.show();
+            });
 
             parentDom.on('mouseout', function(e){
-                floater.remove();
+                floaterDom.remove();
             });
         }, 200);
     }

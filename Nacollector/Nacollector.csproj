@@ -177,27 +177,6 @@
     <Content Include="html_res\assets\kunai_256px.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="html_res\assets\layer\layer.js">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="html_res\assets\layer\skin\default\icon-ext.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="html_res\assets\layer\skin\default\icon.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="html_res\assets\layer\skin\default\layer.css">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="html_res\assets\layer\skin\default\loading-0.gif">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="html_res\assets\layer\skin\default\loading-1.gif">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="html_res\assets\layer\skin\default\loading-2.gif">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="html_res\assets\logo.svg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
