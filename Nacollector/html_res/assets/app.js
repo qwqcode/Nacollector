@@ -43,14 +43,13 @@ const WRAP_SEL = '.wrap';
 window.AppNavbar = {
     sel: {
         nav: '.top-nav-bar',
-        navTitle: '.top-nav-bar .nav-title',
-        navBtns: '.top-nav-bar .nav-btns'
+        navTitle: '.top-nav-bar .nav-title'
     },
     // 初始化 Navbar
     init: function () {
         $('<div class="left-items"><div class="nav-title"></div></div><div class="right-items"><div class="nav-btns"></div></div>').appendTo(this.sel.nav);
         // 导航栏操作按钮
-        AppNavbar.btnGroupAdd('main-btns', {
+        AppNavbar.btn.groupAdd('main-btns', {
             taskManager: {
                 icon: 'assignment',
                 title: '任务列表',
@@ -71,7 +70,7 @@ window.AppNavbar = {
             }
         });
 
-        AppNavbar.btnGroupAdd('task-runtime', {
+        AppNavbar.btn.groupAdd('task-runtime', {
             backToTaskGen: {
                 icon: 'chevron-left',
                 title: '返回任务生成器',
@@ -99,7 +98,7 @@ window.AppNavbar = {
         }).setMostLeft().hide();
     },
     // 标题设置
-    titleSet: function (value, base64) {
+    setTitle: function (value, base64) {
         if (typeof base64 === "boolean" && base64 === true)
             value = Base64.decode(value);
 
@@ -112,88 +111,108 @@ window.AppNavbar = {
         }, 100);
     },
     // 标题获取
-    titleGet: function () {
+    getTitle: function () {
         return $(this.sel.navTitle).text();
+    }
+};
+
+
+/**
+ * 导航栏按钮
+ */
+window.AppNavbar.btn = {
+    sel: {
+        navBtns: '.top-nav-bar .nav-btns'
     },
-    // 图标组列表
-    listBtnGroup: {},
-    // 添加按钮
-    btnAdd: function (groupName, name, icon, title, onClickEvent) {
-        if (this.getBtnGroupDom(groupName).length === 0)
-            throw ('找不到按钮组，需使用 this.btnGroupAdd 创建组并添加多个图标');
-
-        var dom = $('<a data-nav-btn="'+groupName+'.'+name+'" data-placement="bottom" title="'+title+'"><i class="zmdi zmdi-'+icon+'"></i></a>');
-
-        if (!!onClickEvent)
-            dom.click(onClickEvent);
-
-        dom.appendTo(this.getBtnGroupSel(groupName));
-        dom.tooltip();
-    },
+    groupList: {},
     // 按钮批量添加
-    btnGroupAdd: function (groupName, navbarBtnList) {
-        var btnGroup;
-        if (this.getBtnGroupDom(groupName).length === 0)
-            btnGroup = $('<div class="btn-group" data-nav-btn-group="'+groupName+'"></div>').appendTo(this.sel.navBtns);
-        else
-            btnGroup = this.getBtnGroupDom(groupName);
+    groupAdd: function (groupName, btnList) {
+        var btnGroup, btnGroupDom;
+        if (!this.getGroup(groupName)) {
+            // 创建新的按钮组对象
+            btnGroup = {};
+            btnGroupDom = $('<div class="btn-group" data-nav-btn-group="' + groupName + '"></div>').appendTo(this.sel.navBtns);
+            // 设置按钮组显示在最左
+            btnGroup.setMostLeft = function () {
+                btnGroupDom.insertBefore($(AppNavbar.btn.sel.navBtns+' .btn-group:first-child'));
+                return btnGroup;
+            };
+            // 设置按钮组显示在最右
+            btnGroup.setMostRight = function () {
+                btnGroupDom.insertAfter($(AppNavbar.btn.sel.navBtns+' .btn-group:last-child'));
+                return btnGroup;
+            };
+            // 隐藏按钮组
+            btnGroup.hide = function () {
+                btnGroupDom.hide();
+                return btnGroup;
+            };
+            // 获取 Dom
+            btnGroup.getDom = function () {
+                return btnGroupDom;
+            };
+            // 显示
+            btnGroup.show = function () {
+                btnGroup.getDom().show();
+                return btnGroup;
+            };
+            // 隐藏
+            btnGroup.hide = function () {
+                btnGroup.getDom().hide();
+                return btnGroup;
+            };
+            // 添加图标
+            btnGroup.btnList = {};
+            btnGroup.addBtn = function (btnName, btnObj) {
+                btnGroup.btnList[btnName] = btnObj;
+                return btnObj;
+            };
+            btnGroup.getBtn = function (btnName) {
+                if (!btnGroup.btnList[btnName]) return null;
+                return btnGroup.btnList[btnName];
+            };
+            this.groupList[groupName] = btnGroup;
+        } else {
+            btnGroup = this.getGroup(groupName);
+            btnGroupDom = btnGroup.getDom();
+        }
 
-        // 遍历对象添加图标到 btnGroup 中
-        $.each(navbarBtnList, function (name, value) {
-            AppNavbar.btnAdd(groupName, name, value['icon'], value['title'], value['onClick']);
+        // 遍历在按钮组中添加每一个按钮
+        $.each(btnList, function (btnName, value) {
+            var dom = $('<a data-nav-btn="'+groupName+'.'+btnName+'" data-placement="bottom" title="'+value['title']+'"><i class="zmdi zmdi-'+value['icon']+'"></i></a>');
+            if (!!value['onClick']) dom.click(value['onClick']);
+            dom.appendTo(btnGroupDom);
+            dom.tooltip();
+            var btnObj = {};
+            btnObj.showBadge = function () {
+                dom.addClass('show-top-badge');
+                return btnObj;
+            };
+            btnObj.hideBadge = function () {
+                dom.removeClass('show-top-badge');
+                return btnObj;
+            };
+            btnObj.getDom = function () {
+                return dom;
+            };
+            btnGroup.addBtn(btnName, btnObj);
         });
 
-        var btnGroupSetting = {};
-        // 设置按钮组显示在最左
-        btnGroupSetting.setMostLeft = function () {
-            btnGroup.insertBefore($(AppNavbar.sel.navBtns+' .btn-group:first-child'));
-            return btnGroupSetting;
-        };
-        // 设置按钮组显示在最右
-        btnGroupSetting.setMostRight = function () {
-            btnGroup.insertAfter($(AppNavbar.sel.navBtns+' .btn-group:last-child'));
-            return btnGroupSetting;
-        };
-        // 隐藏按钮组
-        btnGroupSetting.hide = function () {
-            btnGroup.hide();
-            return btnGroupSetting;
-        };
-
-        this.listBtnGroup[groupName] = btnGroupSetting;
-
-        return btnGroupSetting;
+        return btnGroup;
     },
-    // 获取按钮 Selector
-    getBtnSel: function (groupName, name) {
-        return this.sel.navBtns+' [data-nav-btn="'+groupName+'.'+name+'"]';
+    // 获取按钮组
+    getGroup: function (groupName) {
+        if (!this.groupList.hasOwnProperty(groupName)) return null;
+        return this.groupList[groupName];
     },
-    // 获取按钮 Dom
-    getBtnDom: function (groupName, name) {
-        return $(this.getBtnSel(groupName, name));
-    },
-    // 获取按钮组对象
-    getBtnGroup: function (groupName) {
-        if (!this.listBtnGroup.hasOwnProperty(groupName))
-            return null;
-
-        return this.listBtnGroup[groupName];
-    },
-    // 获取按钮组 Selector
-    getBtnGroupSel: function (groupName) {
-        return this.sel.navBtns+' [data-nav-btn-group='+groupName+'].btn-group';
-    },
-    // 获取按钮组 Dom
-    getBtnGroupDom: function (groupName) {
-        return $(this.getBtnGroupSel(groupName));
-    },
-    // 显示按钮通知小红点
-    showBtnBadge: function (groupName, name) {
-        this.getBtnDom(groupName, name).addClass('show-top-badge');
-    },
-    // 隐藏按钮通知小红点
-    hideBtnBadge: function (groupName, name) {
-        this.getBtnDom(groupName, name).removeClass('show-top-badge');
+    // 获取 按钮组 / 按钮 对象
+    get: function (name) {
+        name = name.split('.');
+        if (!!name[0] && !!name[1])
+            return this.getGroup(name[0]).getBtn(name[1]);
+        if (!!name[0] && !name[1])
+            return this.getGroup(name[0]);
+        return null;
     }
 };
 
@@ -434,7 +453,7 @@ window.Task = {
         };
         // 设置标题
         taskObj.setTitle = function () {
-            AppNavbar.titleSet(taskObj.getTitle());
+            AppNavbar.setTitle(taskObj.getTitle());
         };
         // 获取标题
         taskObj.getTitle = function () {
@@ -442,7 +461,7 @@ window.Task = {
         };
         // 恢复成原来的标题
         taskObj.setOriginalTitle = function () {
-            AppNavbar.titleSet('');
+            AppNavbar.setTitle('');
         };
         // 显示
         taskObj.show = function () {
@@ -466,8 +485,7 @@ window.Task = {
                 innerText += '<span class="tag">['+levelsList[level]+']</span> ';
             }
             var textHandle = function (str) {
-                var text = str.replace(/\n/g, '<br/>');
-                return text;
+                return str.replace(/\n/g, '<br/>');
             };
             innerText += textHandle(text);
             line.html(innerText);
@@ -585,7 +603,7 @@ window.Task = {
         taskObj.setTitle();
 
         // 显示导航栏控制按钮组
-        AppNavbar.getBtnGroupDom('task-runtime').show();
+        AppNavbar.btn.get('task-runtime').show();
 
         this.currentDisplayedId = taskId;
     },
@@ -604,7 +622,7 @@ window.Task = {
         this.getCurrent().setOriginalTitle();
 
         // 隐藏导航栏控制按钮组
-        AppNavbar.getBtnGroupDom('task-runtime').hide();
+        AppNavbar.btn.get('task-runtime').hide();
 
         this.currentDisplayedId = null;
     },
@@ -716,243 +734,253 @@ window.AppWidget =  {
  * 内容层
  */
 window.AppLayer = {
-    // 侧边栏
-    sidebar: {
-        list: {},
-        // 当前显示
-        currentDisplayedKey: null,
+
+};
+
+/**
+ * 内容层 侧边栏
+ */
+window.AppLayer.sidebar = {
+    list: {},
+    // 当前显示
+    currentDisplayedKey: null,
         // 注册新的 Sidebar
         register: function (key) {
-            if (this.list.hasOwnProperty(key))
-                return '侧边栏层： ' + key + ' 已存在于list中';
+        if (this.list.hasOwnProperty(key))
+            return '侧边栏层： ' + key + ' 已存在于list中';
 
-            var layerSel = this.getLayerSel();
-            $('<div class="sidebar-block" data-sidebar-layer-key="'+key+'" />')
-                .appendTo($(layerSel));
-            var sidebarSel = '[data-sidebar-layer-key="' + key + '"]';
-            var sidebarObj = {};
-            // 设置标题
-            sidebarObj.setTitle = function (val, titleBg) {
-                var header = $('<div class="sidebar-header"><div class="header-left">'+val+'</div><div class="header-right"><button type="button" data-toggle="sidebar-layer-hide"><i class="zmdi zmdi-close"></i></button></div></div>');
-                if (!!titleBg) header.css('background', titleBg);
-                header.prependTo(sidebarSel);
-                $(sidebarSel + ' [data-toggle="sidebar-layer-hide"]').click(function () {
-                    sidebarObj.hide();
-                });
-            };
-            // 设置内容
-            sidebarObj.setInner = function (val) {
-                $('<div class="sidebar-inner">'+val+'</div>').appendTo(sidebarSel);
-            };
-            sidebarObj.width = 360;
-            // 设置宽度
-            sidebarObj.setWidth = function (width) {
-                if (!!width && !isNaN(parseInt(width)))
-                    sidebarObj.width = parseInt(width);
-
-                $(sidebarSel).css('width', sidebarObj.width + 'px');
-            };
-            // 显示
-            sidebarObj.show = function () {
-                if (AppLayer.sidebar.currentDisplayedKey !== null && AppLayer.sidebar.currentDisplayedKey !== key) {
-                    AppLayer.sidebar.get(AppLayer.sidebar.currentDisplayedKey).hide();
-                }
-
-                if (AppLayer.sidebar.currentDisplayedKey === key)
-                    throw ('侧边栏层：' + key + ' 已显示');
-
-                if (!$(layerSel).hasClass('show'))
-                    $(layerSel).addClass('show');
-
-                // 设置宽度
-                sidebarObj.setWidth();
-
-                $(sidebarSel)
-                    .css('transform', 'translate(' + ($(sidebarSel).width() + 10) + 'px, 0px)')
-                    .addClass('show');
-
-                $('body').css('overflow', 'hidden');
-
-                if ($('.sidebar-layer > .sidebar-block.show').length !== 0) {
-                    // 变为标签内最后一个元素，显示置顶
-                    $(sidebarSel).insertAfter($('.sidebar-layer > .sidebar-block.show:last-child'));
-                }
-
-                // 若点按的元素非 block 内元素
-                setTimeout(function () {
-                    $(document).bind('click.sidebar-layer-' + key, function (e) {
-                        if(!$(e.target).is(sidebarSel) && !$(e.target).closest(sidebarSel).length) {
-                            sidebarObj.hide();
-                        }
-                    });
-                }, 20);
-
-                AppLayer.sidebar.currentDisplayedKey = key;
-            };
-            // 隐藏
-            sidebarObj.hide = function () {
-                if (AppLayer.sidebar.currentDisplayedKey === null || AppLayer.sidebar.currentDisplayedKey !== key)
-                    throw ('侧边栏层：' + key + ' 未显示');
-
-                $(sidebarSel).removeClass('show');
-
-                if ($('.sidebar-layer > .sidebar-block.show').length === 0) {
-                    // 若已经没有显示层
-                    $(layerSel).removeClass('show');
-                    $('body').css('overflow', '');
-                }
-
-                $(document).unbind('click.sidebar-layer-' + key); // 解绑事件
-
-                AppLayer.sidebar.currentDisplayedKey = null;
-            };
-            // 显隐切换
-            sidebarObj.toggle = function () {
-                if (!sidebarObj.isShow()) {
-                    sidebarObj.show();
-                } else {
-                    sidebarObj.hide();
-                }
-            };
-            // 是否显示
-            sidebarObj.isShow = function () {
-                return $(layerSel).hasClass('show') && $(sidebarSel).hasClass('show');
-            };
-            // 获取 Selector
-            sidebarObj.getSel = function () {
-                return sidebarSel;
-            };
-            // 获取 Inner Selector
-            sidebarObj.getInnerSel = function () {
-                if ($(sidebarObj.getSel()+' .sidebar-inner').length === 0)
-                    sidebarObj.setInner('');
-
-                return sidebarObj.getSel()+' .sidebar-inner';
-            };
-            // 获取 InnerDom
-            sidebarObj.getInnerDom = function () {
-                if ($(sidebarObj.getSel()+' .sidebar-inner').length === 0)
-                    sidebarObj.setInner('');
-
-                return $(sidebarObj.getSel()+' .sidebar-inner');
-            };
-
-            // 加入 List
-            this.list[key] = sidebarObj;
-
-            return sidebarObj;
-        },
-        // 获取 sidebarObj
-        get: function (key) {
-            if (!this.list.hasOwnProperty(key))
-                return null;
-
-            return this.list[key];
-        },
-        // 获取层 Selector
-        getLayerSel: function () {
-            var layerSel = '.sidebar-layer';
-
-            if ($(layerSel).length === 0)
-                $('<div class="sidebar-layer" />').appendTo('body');
-
-            return layerSel;
-        }
-    },
-    // 对话框
-    dialog: {
-        sel: {
-            dialogLayer: '.dialog-layer'
-        },
-        open: function (title, content, yesBtn, cancelBtn) {
-            var layerSel = this.sel.dialogLayer;
-
-            if ($(layerSel).length !== 0)
-                $(layerSel).remove();
-
-            var dialogLayerDom = $('<div class="dialog-layer anim-fade-in" />').appendTo('body');
-            var dialogLayerHide = function () {
-                dialogLayerDom.addClass('anim-fade-out');
-                setTimeout(function () {
-                    dialogLayerDom.hide();
-                }, 200);
-            };
-
-            var dialogDom = $('<div class="dialog-inner"><div class="dialog-title">'+title+'</div>\n<div class="dialog-content">'+content+'</div></div>').appendTo(dialogLayerDom);
-
-            // 底部按钮
-            if (!!yesBtn || !!cancelBtn) {
-                var dialogBottomDom = $('<div class="dialog-bottom"></div>')
-                    .appendTo(dialogDom);
-
-                // 确定按钮
-                if (!!yesBtn) {
-                    var yesOnClick = yesBtn[1] || function () {};
-                    var yesBtnText = yesBtn[0] || '确定';
-
-                    $('<a class="dialog-btn yes-btn">' + yesBtnText + '</a>').click(function () {
-                        dialogLayerHide();
-                        yesOnClick();
-                    }).appendTo(dialogBottomDom);
-                }
-
-                // 取消按钮
-                if (!!cancelBtn) {
-                    var cancelBtnText = cancelBtn[0] || '取消';
-                    var cancelOnClick = cancelBtn[1] || function () {};
-
-                    $('<a class="dialog-btn cancel-btn">' + cancelBtnText + '</a>').click(function () {
-                        dialogLayerHide();
-                        cancelOnClick();
-                    }).appendTo(dialogBottomDom);
-                }
-            } else {
-                $('<a class="right-btn"><i class="zmdi zmdi-close"></i></a>').appendTo($(dialogDom).find('.dialog-title')).click(function () {
-                    dialogLayerHide();
-                });
-            }
-        }
-    },
-    // 通知
-    notify: {
-        sel: {
-            notifyLayer: '.notify-layer'
-        },
-        success: function (message) {
-            this.show(message, 's');
-        },
-        error: function (message) {
-            this.show(message, 'e');
-        },
-        // level: s, e
-        show: function (message, level, timeout) {
-            timeout = (timeout !== undefined && typeof timeout === 'number') ? timeout : 2000;
-
-            var layerDom = $(this.sel.notifyLayer);
-            if (layerDom.length === 0)
-                layerDom = $('<div class="notify-layer" />').appendTo('body');
-
-            var notifyDom = $('<div class="notify-item anim-fade-in '+(!!level ? 'type-'+level : '')+'"><p class="notify-content">'+message+'</p></div>').prependTo(layerDom);
-
-            var notifyRemove = function () {
-                notifyDom.addClass('anim-fade-out');
-                setTimeout(function () {
-                    notifyDom.remove();
-                }, 200);
-            };
-
-            var autoOut = true;
-            notifyDom.click(function () {
-                notifyRemove();
-                autoOut = false;
+        var layerSel = this.getLayerSel();
+        $('<div class="sidebar-block" data-sidebar-layer-key="'+key+'" />')
+            .appendTo($(layerSel));
+        var sidebarSel = '[data-sidebar-layer-key="' + key + '"]';
+        var sidebarObj = {};
+        // 设置标题
+        sidebarObj.setTitle = function (val, titleBg) {
+            var header = $('<div class="sidebar-header"><div class="header-left">'+val+'</div><div class="header-right"><button type="button" data-toggle="sidebar-layer-hide"><i class="zmdi zmdi-close"></i></button></div></div>');
+            if (!!titleBg) header.css('background', titleBg);
+            header.prependTo(sidebarSel);
+            $(sidebarSel + ' [data-toggle="sidebar-layer-hide"]').click(function () {
+                sidebarObj.hide();
             });
+        };
+        // 设置内容
+        sidebarObj.setInner = function (val) {
+            $('<div class="sidebar-inner">'+val+'</div>').appendTo(sidebarSel);
+        };
+        sidebarObj.width = 360;
+        // 设置宽度
+        sidebarObj.setWidth = function (width) {
+            if (!!width && !isNaN(parseInt(width)))
+                sidebarObj.width = parseInt(width);
 
-            if (timeout > 0) {
-                setTimeout(function () {
-                    if (!autoOut) return;
-                    notifyRemove();
-                }, timeout);
+            $(sidebarSel).css('width', sidebarObj.width + 'px');
+        };
+        // 显示
+        sidebarObj.show = function () {
+            if (AppLayer.sidebar.currentDisplayedKey !== null && AppLayer.sidebar.currentDisplayedKey !== key) {
+                AppLayer.sidebar.get(AppLayer.sidebar.currentDisplayedKey).hide();
             }
+
+            if (AppLayer.sidebar.currentDisplayedKey === key)
+                throw ('侧边栏层：' + key + ' 已显示');
+
+            if (!$(layerSel).hasClass('show'))
+                $(layerSel).addClass('show');
+
+            // 设置宽度
+            sidebarObj.setWidth();
+
+            $(sidebarSel)
+                .css('transform', 'translate(' + ($(sidebarSel).width() + 10) + 'px, 0px)')
+                .addClass('show');
+
+            $('body').css('overflow', 'hidden');
+
+            if ($('.sidebar-layer > .sidebar-block.show').length !== 0) {
+                // 变为标签内最后一个元素，显示置顶
+                $(sidebarSel).insertAfter($('.sidebar-layer > .sidebar-block.show:last-child'));
+            }
+
+            // 若点按的元素非 block 内元素
+            setTimeout(function () {
+                $(document).bind('click.sidebar-layer-' + key, function (e) {
+                    if(!$(e.target).is(sidebarSel) && !$(e.target).closest(sidebarSel).length) {
+                        sidebarObj.hide();
+                    }
+                });
+            }, 20);
+
+            AppLayer.sidebar.currentDisplayedKey = key;
+        };
+        // 隐藏
+        sidebarObj.hide = function () {
+            if (AppLayer.sidebar.currentDisplayedKey === null || AppLayer.sidebar.currentDisplayedKey !== key)
+                throw ('侧边栏层：' + key + ' 未显示');
+
+            $(sidebarSel).removeClass('show');
+
+            if ($('.sidebar-layer > .sidebar-block.show').length === 0) {
+                // 若已经没有显示层
+                $(layerSel).removeClass('show');
+                $('body').css('overflow', '');
+            }
+
+            $(document).unbind('click.sidebar-layer-' + key); // 解绑事件
+
+            AppLayer.sidebar.currentDisplayedKey = null;
+        };
+        // 显隐切换
+        sidebarObj.toggle = function () {
+            if (!sidebarObj.isShow()) {
+                sidebarObj.show();
+            } else {
+                sidebarObj.hide();
+            }
+        };
+        // 是否显示
+        sidebarObj.isShow = function () {
+            return $(layerSel).hasClass('show') && $(sidebarSel).hasClass('show');
+        };
+        // 获取 Selector
+        sidebarObj.getSel = function () {
+            return sidebarSel;
+        };
+        // 获取 Inner Selector
+        sidebarObj.getInnerSel = function () {
+            if ($(sidebarObj.getSel()+' .sidebar-inner').length === 0)
+                sidebarObj.setInner('');
+
+            return sidebarObj.getSel()+' .sidebar-inner';
+        };
+        // 获取 InnerDom
+        sidebarObj.getInnerDom = function () {
+            if ($(sidebarObj.getSel()+' .sidebar-inner').length === 0)
+                sidebarObj.setInner('');
+
+            return $(sidebarObj.getSel()+' .sidebar-inner');
+        };
+
+        // 加入 List
+        this.list[key] = sidebarObj;
+
+        return sidebarObj;
+    },
+    // 获取 sidebarObj
+    get: function (key) {
+        if (!this.list.hasOwnProperty(key))
+            return null;
+
+        return this.list[key];
+    },
+    // 获取层 Selector
+    getLayerSel: function () {
+        var layerSel = '.sidebar-layer';
+
+        if ($(layerSel).length === 0)
+            $('<div class="sidebar-layer" />').appendTo('body');
+
+        return layerSel;
+    }
+};
+
+/**
+ * 内容层 对话框
+ */
+window.AppLayer.dialog = {
+    sel: {
+        dialogLayer: '.dialog-layer'
+    },
+    open: function (title, content, yesBtn, cancelBtn) {
+        var layerSel = this.sel.dialogLayer;
+
+        if ($(layerSel).length !== 0)
+            $(layerSel).remove();
+
+        var dialogLayerDom = $('<div class="dialog-layer anim-fade-in" />').appendTo('body');
+        var dialogLayerHide = function () {
+            dialogLayerDom.addClass('anim-fade-out');
+            setTimeout(function () {
+                dialogLayerDom.hide();
+            }, 200);
+        };
+
+        var dialogDom = $('<div class="dialog-inner"><div class="dialog-title">'+title+'</div>\n<div class="dialog-content">'+content+'</div></div>').appendTo(dialogLayerDom);
+
+        // 底部按钮
+        if (!!yesBtn || !!cancelBtn) {
+            var dialogBottomDom = $('<div class="dialog-bottom"></div>')
+                .appendTo(dialogDom);
+
+            // 确定按钮
+            if (!!yesBtn) {
+                var yesOnClick = yesBtn[1] || function () {};
+                var yesBtnText = yesBtn[0] || '确定';
+
+                $('<a class="dialog-btn yes-btn">' + yesBtnText + '</a>').click(function () {
+                    dialogLayerHide();
+                    yesOnClick();
+                }).appendTo(dialogBottomDom);
+            }
+
+            // 取消按钮
+            if (!!cancelBtn) {
+                var cancelBtnText = cancelBtn[0] || '取消';
+                var cancelOnClick = cancelBtn[1] || function () {};
+
+                $('<a class="dialog-btn cancel-btn">' + cancelBtnText + '</a>').click(function () {
+                    dialogLayerHide();
+                    cancelOnClick();
+                }).appendTo(dialogBottomDom);
+            }
+        } else {
+            $('<a class="right-btn"><i class="zmdi zmdi-close"></i></a>').appendTo($(dialogDom).find('.dialog-title')).click(function () {
+                dialogLayerHide();
+            });
+        }
+    }
+};
+
+/**
+ * 内容层 通知
+ */
+window.AppLayer.notify = {
+    sel: {
+        notifyLayer: '.notify-layer'
+    },
+    success: function (message) {
+        this.show(message, 's');
+    },
+    error: function (message) {
+        this.show(message, 'e');
+    },
+    // level: s, e
+    show: function (message, level, timeout) {
+        timeout = (timeout !== undefined && typeof timeout === 'number') ? timeout : 2000;
+
+        var layerDom = $(this.sel.notifyLayer);
+        if (layerDom.length === 0)
+            layerDom = $('<div class="notify-layer" />').appendTo('body');
+
+        var notifyDom = $('<div class="notify-item anim-fade-in '+(!!level ? 'type-'+level : '')+'"><p class="notify-content">'+message+'</p></div>').prependTo(layerDom);
+
+        var notifyRemove = function () {
+            notifyDom.addClass('anim-fade-out');
+            setTimeout(function () {
+                notifyDom.remove();
+            }, 200);
+        };
+
+        var autoOut = true;
+        notifyDom.click(function () {
+            notifyRemove();
+            autoOut = false;
+        });
+
+        if (timeout > 0) {
+            setTimeout(function () {
+                if (!autoOut) return;
+                notifyRemove();
+            }, timeout);
         }
     }
 };
@@ -963,12 +991,12 @@ window.AppLayer = {
 AppNavbar.panel = {
     list: {},
     // 注册新面板
-    register: function (key, btnGroup, btnName) {
+    register: function (key, btnName) {
         if (this.list.hasOwnProperty(key))
             return '导航栏面板： ' + key + ' 已存在于list中';
 
-        var btnSel = AppNavbar.getBtnSel(btnGroup, btnName);
-        $(btnSel).after('<div class="navbar-panel anim-fade-in" data-navbar-panel="'+key+'" />');
+        var btnDom = AppNavbar.btn.get(btnName).getDom();
+        btnDom.after('<div class="navbar-panel anim-fade-in" data-navbar-panel="'+key+'" />');
 
         var panelSel = '[data-navbar-panel="'+key+'"]';
         // 工厂模式
@@ -988,7 +1016,7 @@ AppNavbar.panel = {
         };
         // 自动调整位置
         panelObj.setPosition = function () {
-            var position = $.getPosition($(btnSel));
+            var position = $.getPosition(btnDom);
             var panelWidth = $(panelSel).outerWidth();
             $(panelSel)
                 .css('top', position['top'] + 'px')
@@ -1014,7 +1042,7 @@ AppNavbar.panel = {
                 panelObj.setPosition();
             });
             // 导航栏按钮隐藏通知小红点
-            AppNavbar.hideBtnBadge(btnGroup, btnName);
+            AppNavbar.btn.get(btnName).hideBadge();
         };
         // 隐藏
         panelObj.hide = function () {
@@ -1044,7 +1072,7 @@ AppNavbar.panel = {
         };
 
         // 导航栏按钮点击绑定
-        $(btnSel).bind('click', function () {
+        btnDom.bind('click', function () {
             panelObj.toggle();
         });
 
@@ -1066,10 +1094,7 @@ AppNavbar.panel = {
  * 浏览器下载管理器
  */
 window.downloads = {
-    navbar: {
-        btnGroup: 'main-btns',
-        btnName: 'downloadManager'
-    },
+    navbarBtnName: 'main-btns.downloadManager',
     data: {
         list: {}
     },
@@ -1094,7 +1119,7 @@ window.downloads = {
     },
     // 初始化
     init: function () {
-        var panelObj = AppNavbar.panel.register(this.panelKey, this.navbar.btnGroup, this.navbar.btnName);
+        var panelObj = AppNavbar.panel.register(this.panelKey, this.navbarBtnName);
         panelObj.setTitle('<i class="zmdi zmdi-download"></i> 下载列表');
         panelObj.setInner('<div class="downloads-list"></div>');
         panelObj.setSize(400, 430);
@@ -1121,7 +1146,7 @@ window.downloads = {
         };
 
         // 导航栏按钮显示通知小红点
-        AppNavbar.showBtnBadge(this.navbar.btnGroup, this.navbar.btnName);
+        AppNavbar.btn.get(this.navbarBtnName).showBadge();
     },
     // 更新任务
     updateTask: function (json) {
@@ -1312,7 +1337,7 @@ window.downloads = {
         localStorage.setItem(this.localStorageConf.key, null);
 
         // 导航栏按钮隐藏通知小红点
-        AppNavbar.hideBtnBadge(this.navbar.btnGroup, this.navbar.btnName);
+        AppNavbar.btn.get(this.navbarBtnName).hideBadge();
     },
     // 启动文件
     fileLaunch: function (key) {
