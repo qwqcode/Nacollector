@@ -28,10 +28,16 @@ namespace Nacollector
             crBrowser = _crBrowser;
 
             downloadHandler = new DownloadHandler();
-            downloadHandler.OnBeforeDownloadFired += Browser_OnBeforeDownloadFired;
-            downloadHandler.OnDownloadUpdatedFired += Browser_OnDownloadUpdatedFired;
+            downloadHandler.OnBeforeDownloadFired += (s, e) =>
+            {
+                DownloadDo("add", crBrowser.GetBrowser(), e);
+            };
+            downloadHandler.OnDownloadUpdatedFired += (s, e) =>
+            {
+                DownloadDo("update", crBrowser.GetBrowser(), e);
+            };
+
             crBrowser.GetBrowser().DownloadHandler = downloadHandler;
-            
             crBrowser.GetBrowser().RegisterAsyncJsObject("CrDownloadsCallBack", new CrDownloadsCallBack());
         }
 
@@ -75,16 +81,6 @@ namespace Nacollector
             {
                 dlTaskAction[key] = action;
             }
-        }
-        
-        private void Browser_OnBeforeDownloadFired(object sender, BeforeDownloadUpdatedEventArgs e)
-        {
-            DownloadDo("add", crBrowser.GetBrowser(), e);
-        }
-
-        private void Browser_OnDownloadUpdatedFired(object sender, DownloadUpdatedEventArgs e)
-        {
-            DownloadDo("update", crBrowser.GetBrowser(), e);
         }
 
         private static Dictionary<int, string> dlTaskIndex = new Dictionary<int, string>();

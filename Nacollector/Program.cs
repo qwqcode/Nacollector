@@ -81,11 +81,16 @@ namespace Nacollector
         private static void InitCef()
         {
             Cef.EnableHighDPISupport();
+            var cefBasePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Resources\cef_sharp");
             var setting = new CefSettings();
             setting.Locale = "zh-CN";
             setting.AcceptLanguageList = "zh-CN,zh";
+            setting.LogFile = Utils.GetTempPath("cef.log");
             setting.CachePath = Utils.GetTempPath("cef_cache");
-            Cef.Initialize(setting);
+            setting.BrowserSubprocessPath = cefBasePath + @"\CefSharp.BrowserSubprocess.exe";
+            setting.LocalesDirPath = cefBasePath + @"\locales\";
+            setting.ResourcesDirPath = cefBasePath + @"\";
+            Cef.Initialize(setting, true, null);
             // Cef.AddCrossOriginWhitelistEntry("https://", "http", "", true);
         }
 

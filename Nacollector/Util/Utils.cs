@@ -13,7 +13,7 @@ using System.Windows.Forms;
 
 namespace Nacollector.Util
 {
-    class Utils
+    public class Utils
     {
         private static string _tempPath = null;
 
@@ -24,9 +24,9 @@ namespace Nacollector.Util
             {
                 try
                 {
-                    Directory.CreateDirectory(Path.Combine(Application.StartupPath, "nc_temp"));
+                    Directory.CreateDirectory(Path.Combine(Application.StartupPath, "NacollectorTemp"));
                     // don't use "/", it will fail when we call explorer /select xxx/nc_temp\xxx.log
-                    _tempPath = Path.Combine(Application.StartupPath, "nc_temp");
+                    _tempPath = Path.Combine(Application.StartupPath, "NacollectorTemp");
                 }
                 catch (Exception e)
                 {
@@ -43,7 +43,9 @@ namespace Nacollector.Util
             return Path.Combine(GetTempPath(), filename);
         }
 
-        public static HttpResult GetPageByUrl(string reqUrl)
+        public static bool ReqIeProxy { get; set; }
+
+        public static HttpResult GetPageByUrl(string reqUrl, Dictionary<string, string> headers=null)
         {
             HttpHelper http = new HttpHelper();
             HttpItem item = new HttpItem()
@@ -54,16 +56,31 @@ namespace Nacollector.Util
                 ReadWriteTimeout = 30000, // 写入Post数据超时时间
                 IsToLower = false, // 得到的HTML代码是否转成小写,可选项默认转小写
                 Cookie = "", // 字符串
-                UserAgent = GlobalConstant.ReqUserAgent,
+                UserAgent = GlobalConstant.HttpReqUserAgent,
                 Accept = "text/html, application/xhtml+xml, */*",
                 ContentType = "text/html", //返回类型
                 Referer = "", // 来源URL
                 Allowautoredirect = true, // 是否根据301跳转
+                MaximumAutomaticRedirections = 10,
                 //ProxyIp = "192.168.1.105", // 代理服务器ID
                 //ProxyPwd = "123456", // 代理服务器密码
                 //ProxyUserName = "administrator", // 代理服务器账户名
                 //ResultType = ResultType.String, // 返回数据类型，是Byte还是String
             };
+            
+            // 请求头
+            if (headers != null && headers.Count > 0)
+            {
+                foreach (var key in headers.Keys)
+                {
+                    item.Header.Add(key, headers[key]);
+                }
+            }
+
+            // 是否使用IE代理
+            if (ReqIeProxy)
+                item.ProxyIp = "ieproxy";
+
             HttpResult result = http.GetHtml(item);
             return result;
         }
@@ -85,6 +102,10 @@ namespace Nacollector.Util
 
             using (WebClient wc = new WebClient())
             {
+                // 是否使用IE代理
+                if (!ReqIeProxy)
+                    wc.Proxy = null;
+
                 byte[] fileBytes = wc.DownloadData(url);
                 string fileType = wc.ResponseHeaders[HttpResponseHeader.ContentType];
 
@@ -113,7 +134,7 @@ namespace Nacollector.Util
         /// <returns></returns>
         public static string GetHtmlResPath(string filename)
         {
-            string path = Path.Combine(Application.StartupPath, "html_res", filename);
+            string path = Path.Combine(Application.StartupPath, "Resources/html_res", filename);
 
             if (!File.Exists(path))
             {

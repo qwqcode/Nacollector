@@ -32,7 +32,7 @@ namespace Nacollector
         public MainForm()
         {
             _mainForm = this;
-
+            
             InitSkin(); // 初始化窗体皮肤
             InitializeComponent(); // 初始化控件
             InitBrowser(); // 初始化浏览器
@@ -62,6 +62,7 @@ namespace Nacollector
             }
             
             crBrowser = new CrBrowser(htmlPath);
+            crBrowser.GetBrowser().RegisterAsyncJsObject("AppAction", new AppActionForJs());
             crBrowser.GetBrowser().RegisterAsyncJsObject("TaskController", new TaskControllerForJs());
             crBrowser.GetBrowser().FrameLoadEnd += new EventHandler<FrameLoadEndEventArgs>(Browser_FrameLoadEnd); // 浏览器初始化完毕时执行
 
@@ -74,6 +75,30 @@ namespace Nacollector
         {
             // 取消设置窗体透明
             SetOpacity(1);
+        }
+
+        /// <summary>
+        /// 程序JS操作
+        /// </summary>
+        public class AppActionForJs
+        {
+            // 获取程序版本
+            public string getVersion()
+            {
+                return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            }
+
+            // 采集是否使用IE代理请求
+            public void _utilsReqIeProxy(bool isEnable)
+            {
+                Utils.ReqIeProxy = isEnable;
+            }
+
+            // 日志文件清理
+            public void logFileClear()
+            {
+                Logging.Clear();
+            }
         }
 
         /// <summary>
