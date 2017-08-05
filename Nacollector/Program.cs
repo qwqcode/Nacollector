@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -42,6 +43,8 @@ namespace Nacollector
             Utils.ReleaseMemory(true);
             using (Mutex mutex = new Mutex(false, $"Global\\Nacollector_{Application.StartupPath.GetHashCode()}"))
             {
+                AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
+
                 Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
                 Application.ThreadException += Application_ThreadException;
                 AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
@@ -75,25 +78,47 @@ namespace Nacollector
             }
         }
 
+        // The subfolder, where the cefsharp files will be moved to
+        private static string cefSubFolder = @"Resources\cef_sharp";
+        // If the assembly resolver loads cefsharp from another folder, set this to true
+        private static bool resolved = false;
+
+        /// <summary>
+        /// Will attempt to load missing assemblys from subfolder
+        /// </summary>
+        private static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
+        {
+            if (args.Name.StartsWith("CefSharp"))
+            {
+                resolved = true; // Set to true, so BrowserSubprocessPath will be set
+
+                string assemblyName = args.Name.Split(new[] { ',' }, 2)[0] + ".dll";
+                string subfolderPath = Path.Combine(Application.StartupPath, cefSubFolder, assemblyName);
+                return File.Exists(subfolderPath) ? Assembly.LoadFile(subfolderPath) : null;
+            }
+
+            return null;
+        }
+
         /// <summary>
         /// 初始化 CEF
         /// </summary>
         private static void InitCef()
         {
             Cef.EnableHighDPISupport();
-            var cefBasePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Resources\cef_sharp");
             var setting = new CefSettings();
             setting.Locale = "zh-CN";
             setting.AcceptLanguageList = "zh-CN,zh";
             setting.LogFile = Utils.GetTempPath("cef.log");
             setting.CachePath = Utils.GetTempPath("cef_cache");
-            setting.BrowserSubprocessPath = cefBasePath + @"\CefSharp.BrowserSubprocess.exe";
-            setting.LocalesDirPath = cefBasePath + @"\locales\";
-            setting.ResourcesDirPath = cefBasePath + @"\";
+            setting.BrowserSubprocessPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Resources\cef_sharp\CefSharp.BrowserSubprocess.exe");
+            setting.LocalesDirPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Resources\cef_sharp\locales\");
+            setting.ResourcesDirPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Resources\cef_sharp\");
+            setting.RemoteDebuggingPort = 51228;
             Cef.Initialize(setting, true, null);
             // Cef.AddCrossOriginWhitelistEntry("https://", "http", "", true);
         }
-
+        
         private static int exited = 0;
         
         private static void Application_ThreadException(object sender, ThreadExceptionEventArgs e)

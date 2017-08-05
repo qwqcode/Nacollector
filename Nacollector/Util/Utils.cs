@@ -2,6 +2,7 @@
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -25,7 +26,7 @@ namespace Nacollector.Util
                 try
                 {
                     Directory.CreateDirectory(Path.Combine(Application.StartupPath, "NacollectorTemp"));
-                    // don't use "/", it will fail when we call explorer /select xxx/nc_temp\xxx.log
+                    // don't use "/", it will fail when we call explorer /select xxx/NacollectorTemp\xxx.log
                     _tempPath = Path.Combine(Application.StartupPath, "NacollectorTemp");
                 }
                 catch (Exception e)
@@ -59,7 +60,6 @@ namespace Nacollector.Util
                 UserAgent = GlobalConstant.HttpReqUserAgent,
                 Accept = "text/html, application/xhtml+xml, */*",
                 ContentType = "text/html", //返回类型
-                Referer = "", // 来源URL
                 Allowautoredirect = true, // 是否根据301跳转
                 MaximumAutomaticRedirections = 10,
                 //ProxyIp = "192.168.1.105", // 代理服务器ID
@@ -73,7 +73,18 @@ namespace Nacollector.Util
             {
                 foreach (var key in headers.Keys)
                 {
-                    item.Header.Add(key, headers[key]);
+                    if (key.ToLower() == "referer")
+                    {
+                        item.Referer = headers[key];
+                    }
+                    else if (key.ToLower() == "cookie")
+                    {
+                        item.Cookie = headers[key];
+                    }
+                    else
+                    {
+                        item.Header.Add(key, headers[key]);
+                    }
                 }
             }
 

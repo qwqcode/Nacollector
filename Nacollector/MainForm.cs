@@ -165,6 +165,7 @@ namespace Nacollector
             }
 
             // 开始任务工作
+
             try
             {
                 spider.BeginWork();

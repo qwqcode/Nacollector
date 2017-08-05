@@ -14,14 +14,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace Nacollector.Spiders
+namespace Nacollector.Spiders.Business
 {
     /// <summary>
     /// 商品详情页图片解析
     /// </summary>
     public class CollItemDescImg : Spider
     {
-        // 参数名
+        // 参数
         string PageUrl = "";
         string PageType = "";
         string ImgType = "";
@@ -37,7 +37,7 @@ namespace Nacollector.Spiders
         {
             base.BeginWork();
             // 参数设定
-            PageUrl = GetParm("PageUrl");
+            PageUrl = GetParm("PageUrl"); // 若使用 new Uri() 会把 urlencode 的参数自动 decode
             PageType = GetParm("PageType");
             ImgType = GetParm("ImgType");
             CollType = GetParm("CollType");
@@ -310,10 +310,8 @@ namespace Nacollector.Spiders
             Log("\n");
             LogInfo("准备一口气下载所有图片并打包");
 
-            string workPath = Path.Combine(Utils.GetTempPath(), $"CollItemDescImg_DownloadsTmp_{DateTime.Now.ToString("yyyyMMddhhmmss")}");
-            
-            Directory.CreateDirectory(workPath);
-
+            string donwloadTempDirTag = "Download";
+            var downloadTempPath = GetTempDirPath(donwloadTempDirTag);
             int imgTotal = 0;
             int doneTotal = 0;
             foreach (string imgType in imgUrlPool.Keys)
@@ -326,7 +324,7 @@ namespace Nacollector.Spiders
                     imgTotal++;
                     Thread bgThread = new Thread(() =>
                     {
-                        Utils.DownloadImgByUrl(imgSrc, workPath, imgType+"_"+number.ToString());
+                        Utils.DownloadImgByUrl(imgSrc, downloadTempPath, imgType+"_"+number.ToString());
                         LogSuccess($"下载完毕 {imgSrcUrl}");
                         doneTotal++;
                     });
@@ -337,20 +335,14 @@ namespace Nacollector.Spiders
 
             do {} while (imgTotal != doneTotal);
 
-            string zipFilePath = Utils.GetTempPath($"CollItemDescImg_{DateTime.Now.ToString("yyyyMMddhhmmss")}.zip"); // 以后将ZIP统一放到一个文件夹内
-
-            Thread.Sleep(1000);
-
+            string zipFilePath = Path.Combine(GetTempDirPath("ForUserSave"), $"CollItemDescImg_{DateTime.Now.ToString("yyyyMMddhhmmss")}.zip"); // 以后将ZIP统一放到一个文件夹内
             Log("\n");
             LogInfo("开始打包所有图片");
-            ZipFile.CreateFromDirectory(workPath, zipFilePath);
+            ZipFile.CreateFromDirectory(downloadTempPath, zipFilePath);
             LogSuccess("图片打包完毕");
-            if (Directory.Exists(workPath))
-            {
-                Log("\n");
-                Directory.Delete(workPath, true);
-                LogSuccess("临时文件清理完毕");
-            }
+            Log("\n");
+            DeleteTempDirPath(donwloadTempDirTag);
+            LogSuccess("临时文件清理完毕");
             Log("\n");
             LogInfo($"<a href=\"{zipFilePath}\" onclick=\"downloadFile($(this).attr('href'));return false;\">点击保存图片打包文件</a>");
         }

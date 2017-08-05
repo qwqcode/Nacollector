@@ -13,6 +13,7 @@ using CefSharp;
 using System.Threading;
 using Nacollector.Util;
 using Nacollector.Browser;
+using System.IO;
 
 namespace Nacollector.Spiders
 {
@@ -109,6 +110,31 @@ namespace Nacollector.Spiders
         protected string UrlSchemeFull(string url, bool schemeIsHttps = false)
         {
             return url.Substring(0, 2).ToLower() == "//" ? (schemeIsHttps ? "https:" : "http:") + url : url;
+        }
+
+        /// <summary>
+        /// 获取临时存放文件夹
+        /// </summary>
+        protected string GetTempDirPath(string tag = null)
+        {
+            string path = Utils.GetTempPath("Spider_Temp" + (!string.IsNullOrEmpty(tag) ? $"_{tag}" : ""));
+            if (Directory.Exists(path))
+                Directory.Delete(path, true);
+
+            Directory.CreateDirectory(path);
+
+            return path;
+        }
+
+        /// <summary>
+        /// 删除临时文件夹
+        /// </summary>
+        /// <param name="tag"></param>
+        protected void DeleteTempDirPath(string tag = null)
+        {
+            string path = Utils.GetTempPath("Spider_Temp" + (!string.IsNullOrEmpty(tag) ? $"_{tag}" : ""));
+            if (Directory.Exists(path))
+                Directory.Delete(path, true);
         }
     }
 }

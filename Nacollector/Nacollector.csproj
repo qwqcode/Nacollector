@@ -89,6 +89,7 @@
     <Reference Include="System.IO.Compression.ZipFile, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\System.IO.Compression.ZipFile.4.3.0\lib\net46\System.IO.Compression.ZipFile.dll</HintPath>
     </Reference>
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -98,6 +99,9 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
+    <Reference Include="WebDriver, Version=3.4.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Selenium.WebDriver.3.4.0\lib\net40\WebDriver.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Browser\CrDownloads.cs" />
@@ -123,16 +127,20 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Spiders\CollItemDescImg.cs" />
+    <Compile Include="Spiders\Business\CollItemDescImg.cs" />
+    <Compile Include="Spiders\Debug\Default.cs" />
     <Compile Include="Spiders\Spider.cs" />
     <Compile Include="Spiders\SpiderSettings.cs" />
-    <Compile Include="Spiders\TaobaoSellerColl.cs" />
-    <Compile Include="Spiders\Test.cs" />
-    <Compile Include="Spiders\TmallGxptInvite.cs" />
-    <Compile Include="Spiders\TmallGxptInviteDelete.cs" />
+    <Compile Include="Spiders\Business\TaobaoSellerColl.cs" />
+    <Compile Include="Spiders\Business\TmallGxptInvite.cs" />
+    <Compile Include="Spiders\Business\TmallGxptInviteDelete.cs" />
     <Compile Include="Util\HttpHelper.cs" />
     <Compile Include="Util\IniFile.cs" />
     <Compile Include="Util\Utils.cs" />
+    <Content Include="..\packages\Chromium.ChromeDriver.2.30\content\chromedriver.exe">
+      <Link>chromedriver.exe</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Resources\cef_sharp\cef.pak">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -447,7 +455,9 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Spiders\Picture\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

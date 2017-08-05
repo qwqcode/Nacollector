@@ -224,152 +224,11 @@ window.AppNavbar.btn = {
 };
 
 /**
- * 操作列表 (Key 为 className (C#调用类名) )
+ * 任务选择列表
  */
-window.SpiderList = {
-    CollItemDescImg: {
-        label: "商品详情页图片解析",
-        genForm: function () {
-            TaskGen.formHelper.textInput('PageUrl', '详情页链接', '', inputValidators.isUrl);
-            TaskGen.formHelper.selectInput('PageType', '链接类型', {
-                "Tmall": "天猫",
-                "Taobao": "淘宝",
-                "Alibaba": "阿里巴巴",
-                "Suning": "苏宁易购",
-                "Gome": "国美在线"
-            });
-            TaskGen.formHelper.selectInput('ImgType', '图片类型', {
-                "Thumb": "主图",
-                "Category": "分类图",
-                "Desc": "详情图"
-            });
-            TaskGen.formHelper.selectInput('CollType', '采集模式', {
-                "collImgSrcUrl": "显示图片链接",
-                "collDownloadImgSrc": "显示图片链接 并 下载打包保存"
-            });
-        }
-    },
-    TaobaoSellerColl: {
-        label: "淘宝店铺搜索卖家ID名采集",
-        genForm: function () {
-            TaskGen.formHelper.textInput('PageUrl', '店铺搜索页链接', '', inputValidators.isUrl);
-            TaskGen.formHelper.numberInput('CollBeginPage', '采集开始页码', 1, 1);
-            TaskGen.formHelper.numberInput('CollEndPage', '采集结束页码', undefined, 1);
-        }
-    },
-    TmallGxptInvite: {
-        label: "天猫供销平台分销商一键邀请",
-        genForm: function () {
-            TaskGen.formHelper.textareaInput('PageUrl', '分销商ID名（一行一个）', undefined, 250);
-        }
-    },
-    TmallGxptInviteDelete: {
-        label: "天猫供销平台分销商一键撤回",
-        genForm: function () {
-            TaskGen.formHelper.numberInput('DeleteBeginPage', '撤回开始页码', 1, 1);
-            TaskGen.formHelper.numberInput('DeleteEndPage', '撤回结束页码', undefined, 1);
-        }
-    },
-
-
-    Test: {
-        label: "开发测试 DEBUG...",
-        genForm: function () {}
-    }
-};
-
-/**
- * Task Generator (任务生成器)
- */
-window.TaskGen = {
-    sel: {
-        form: '.taskgen-form',
-        formToggleBtns: '.taskgen-form-toggle .btn-list'
-    },
-    // 当前
-    current: {
-        className: null,
-        inputs: {}
-    },
-    // 初始化
-    init: function () {
-        // 遍历列表 生成按钮
-        $.each(SpiderList, function (key, val) {
-            var btn = $('<a data-action-class-name="' + key + '">' + val['label'] + '</a>');
-            // 按钮点击事件
-            btn.click(function () {
-                // 表单生成
-                TaskGen.formLoad($(this).attr('data-action-class-name'));
-                // 按钮选中
-                $(TaskGen.sel.formToggleBtns + ' a').removeClass('active');
-                $(this).addClass('active');
-            });
-            btn.appendTo(TaskGen.sel.formToggleBtns);
-        });
-    },
-    // 表单装载
-    formLoad: function (className) {
-        // 点击操作按钮事件
-        if (!SpiderList[className])
-            throw ('SpiderList 中没有 ' + className + '，无法创建表单！');
-
-        // 清除当前表单
-        $(this.sel.form).html('');
-        // 清除当前数据
-        this.current.className = null;
-        this.current.inputs = {};
-
-        // 装入新数据
-        this.current.className = className;
-        // 执行表单创建
-        SpiderList[className].genForm();
-
-        // 提交按钮
-        var submitBtn = $('<div class="form-btns">\n<button class="submit-btn" type="submit">执行任务</button>\n</div>').appendTo(this.sel.form);
-        submitBtn.click(function () {
-            TaskGen.taskCreate();
-            return false;
-        });
-    },
-    // 表单提交检验
-    formCheck: function () {
-        var isInputAllRight = true;
-        $.each(TaskGen.current.inputs, function (i, obj) {
-            if (!obj.inputSel || $(obj.inputSel).length === 0)
-                throw ('表单输入元素 '+i+' 的 Selector 无效');
-
-            var inputSel = obj.inputSel,
-                inputDom = $(inputSel),
-                inputVal = inputDom.val().trim();
-
-            if (inputVal === '') {
-                inputDom.focus();
-                isInputAllRight = false;
-                return false;
-            }
-
-            // 验证器
-            if (!!obj.validator && !obj.validator(inputVal)) {
-                inputDom.addClass('has-error').focus();
-                inputDom.bind('input propertychange', function() {
-                    if (obj.validator($(this).val().trim())) $(this).unbind('input propertychange').removeClass('has-error');
-                });
-                isInputAllRight = false;
-                return false;
-            }
-        });
-
-        return isInputAllRight;
-    },
-    // 新建任务
-    taskCreate: function () {
-        if (!this.formCheck())
-            return false;
-
-        Task.createTask(this.current.className, SpiderList[this.current.className].label, $(this.sel.form).serializeArray());
-    },
+(function () {
     // 表单控件
-    formHelper: {
+    var Form = {
         // 当前表单数据添加
         _currentInfoAdd: function (fieldName, label, inputTagId, validator) {
             TaskGen.current.inputs[fieldName] = {
@@ -421,6 +280,220 @@ window.TaskGen = {
             var formInput = $(inputHtml).appendTo(formGroup);
             this._currentInfoAdd(fieldName, label, tagId);
         }
+    };
+    // 操作列表
+    window.SpiderList = {};
+    window.SpiderList.Business = { _NamespaceLabel: "电商" };
+    window.SpiderList.Business.CollItemDescImg = {
+        label: "商品详情页图片解析",
+        genForm: function () {
+            Form.textInput('PageUrl', '详情页链接', '', inputValidators.isUrl);
+            Form.selectInput('PageType', '链接类型', {
+                "Tmall": "天猫",
+                "Taobao": "淘宝",
+                "Alibaba": "阿里巴巴",
+                "Suning": "苏宁易购",
+                "Gome": "国美在线"
+            });
+            Form.selectInput('ImgType', '图片类型', {
+                "Thumb": "主图",
+                "Category": "分类图",
+                "Desc": "详情图"
+            });
+            Form.selectInput('CollType', '采集模式', {
+                "collImgSrcUrl": "显示图片链接",
+                "collDownloadImgSrc": "显示图片链接 并 下载打包保存"
+            });
+        }
+    };
+    window.SpiderList.Business.TaobaoSellerColl = {
+        label: "淘宝店铺搜索卖家ID名采集",
+        genForm: function () {
+            Form.textInput('PageUrl', '店铺搜索页链接', '', inputValidators.isUrl);
+            Form.numberInput('CollBeginPage', '采集开始页码', 1, 1);
+            Form.numberInput('CollEndPage', '采集结束页码', undefined, 1);
+        }
+    };
+    window.SpiderList.Business.TmallGxptInvite = {
+        label: "天猫供销平台分销商一键邀请",
+        genForm: function () {
+            Form.textareaInput('PageUrl', '分销商ID名（一行一个）', undefined, 250);
+        }
+    };
+    window.SpiderList.Business.TmallGxptInviteDelete = {
+        label: "天猫供销平台分销商一键撤回",
+        genForm: function () {
+            Form.numberInput('DeleteBeginPage', '撤回开始页码', 1, 1);
+            Form.numberInput('DeleteEndPage', '撤回结束页码', undefined, 1);
+        }
+    };
+    window.SpiderList.Picture = { _NamespaceLabel: "图片" };
+    window.SpiderList.Picture.Test = {
+        label: "开发测试 DEBUG...",
+        genForm: function () {}
+    };
+    window.SpiderList.Debug = { _NamespaceLabel: "调试" };
+    window.SpiderList.Debug.Default = {
+        label: "Default",
+        genForm: function () {}
+    };
+})();
+
+/**
+ * Task Generator (任务生成器)
+ */
+window.TaskGen = {
+    sel: {
+        form: '.taskgen-form',
+        formToggle: '.taskgen-form-toggle',
+        formToggleDropdown: '.taskgen-form-toggle .namespace-dropdown',
+        formToggleBtns: '.taskgen-form-toggle .classname-btns'
+    },
+    // 当前
+    current: {
+        typeName: null,
+        inputs: {}
+    },
+    // 初始化
+    init: function () {
+        // 遍历列表 生成按钮
+        var dropdownDom = $('<div class="namespace-dropdown"><div class="dropdown-selected"></div><ul class="dropdown-option anim-fade-in"></ul></div>'),
+            dropdownSelectedDom = dropdownDom.find('.dropdown-selected'),
+            dropdownOptionDom = dropdownDom.find('.dropdown-option');
+        var btnsDom = $('<div class="classname-btns"></div>');
+
+        dropdownDom.appendTo(this.sel.formToggle);
+        btnsDom.appendTo(this.sel.formToggle);
+
+        var dropdownOptionShow = function () {
+            dropdownOptionDom.addClass('show');
+            // 若点击其他地方
+            setTimeout(function () {
+                $(document).bind('click.dropdown-option', function (e) {
+                    if(!$(e.target).is('.dropdown-option') && !$(e.target).closest('.dropdown-option').length) {
+                        dropdownOptionHide();
+                    }
+                });
+            }, 20);
+        };
+        var dropdownOptionHide = function () {
+            $(document).unbind('click.dropdown-option');
+            dropdownOptionDom.removeClass('show');
+        };
+        dropdownSelectedDom.click(function () {
+            dropdownOptionShow();
+        });
+
+        $.each(SpiderList, function (namespace, eachClass) {
+            var li = $('<li data-namespace="'+namespace+'">'+eachClass._NamespaceLabel+'</li>');
+            // 点击 li
+            li.click(function () {
+                // 按钮显示
+                btnsDom.html(''); // 删除原有的所有按钮
+                $.each(eachClass, function (classname, classInfo) {
+                    if (classname.substr(0, 1) === '_') return;
+                    var typeName = namespace + '.' + classname;
+                    var btn = $('<a>' + classInfo['label'] + '</a>').appendTo(btnsDom);
+                    // 选中之前点击过的按钮
+                    if (!!TaskGen.current.typeName && TaskGen.current.typeName === typeName) {
+                        btnsDom.find('a').removeClass('active');
+                        $(btn).addClass('active');
+                    }
+                    btn.click(function () {
+                        // 表单生成
+                        TaskGen.formLoad(typeName);
+                        // 按钮选中
+                        btnsDom.find('a').removeClass('active');
+                        $(this).addClass('active');
+                    });
+                });
+                dropdownSelectedDom.text($(this).text());
+                dropdownSelectedDom.attr('data-namespace', namespace);
+                // 选中当前 li
+                dropdownOptionDom.find('li').removeClass('selected');
+                $(this).addClass('selected');
+                // 取消显示 dropdown-option
+                dropdownOptionHide();
+                // 当前 li 置顶
+                $(this).insertBefore(dropdownOptionDom.find('li:first-child'));
+            });
+            li.appendTo(dropdownOptionDom);
+        });
+
+        // 打开第一个任务生成器
+        dropdownOptionDom.find('li:first-child').click();
+        btnsDom.find('a:first-child').click();
+    },
+    // 分析 TypeName
+    spiderListGet: function (typeNameStr) {
+        var typeName = typeNameStr.split('.') || null;
+        if (!typeName || !typeName[0] || !typeName[1]) return null;
+        var namespace = typeName[0],
+            classname = typeName[1];
+        if (!SpiderList.hasOwnProperty(namespace) || !SpiderList[namespace].hasOwnProperty(classname)) return null;
+        return SpiderList[namespace][classname];
+    },
+    // 表单装载
+    formLoad: function (typeName) {
+        // 点击操作按钮事件
+        if (!this.spiderListGet(typeName))
+            throw ('SpiderList 中没有 ' + typeName + '，无法创建表单！');
+
+        var spider = this.spiderListGet(typeName);
+        var formDom = $(this.sel.form);
+
+        // 清除当前表单
+        formDom.html('');
+        // 清除当前数据
+        this.current.typeName = null;
+        this.current.inputs = {};
+
+        // 装入新数据
+        this.current.typeName = typeName;
+        // 执行表单创建
+        spider.genForm();
+        // 提交按钮
+        var submitBtn = $('<div class="form-btns">\n<button class="submit-btn" type="submit">执行任务</button>\n</div>')
+            .appendTo(formDom);
+
+        submitBtn.click(function () {
+            if (!TaskGen.formCheck())
+                return false;
+
+            Task.createTask(typeName, spider.label, formDom.serializeArray());
+
+            return false;
+        });
+    },
+    // 表单提交检验
+    formCheck: function () {
+        var isInputAllRight = true;
+        $.each(TaskGen.current.inputs, function (i, obj) {
+            if (!obj.inputSel || $(obj.inputSel).length === 0)
+                throw ('表单输入元素 '+i+' 的 Selector 无效');
+
+            var inputSel = obj.inputSel,
+                inputDom = $(inputSel),
+                inputVal = inputDom.val().trim();
+
+            if (inputVal === '') {
+                inputDom.focus();
+                isInputAllRight = false;
+                return false;
+            }
+
+            // 验证器
+            if (!!obj.validator && !obj.validator(inputVal)) {
+                inputDom.addClass('has-error').focus();
+                inputDom.bind('input propertychange', function() {
+                    if (obj.validator($(this).val().trim())) $(this).unbind('input propertychange').removeClass('has-error');
+                });
+                isInputAllRight = false;
+                return false;
+            }
+        });
+
+        return isInputAllRight;
     }
 };
 
@@ -433,7 +506,7 @@ window.Task = {
     // 当前显示的任务ID
     currentDisplayedId: null,
     // 创建任务
-    createTask: function (className, classLabel, parmsObj) {
+    createTask: function (typeName, classLabel, parmsObj) {
         var taskId = new Date().getTime().toString();
         var runtimeSel = this.sel.runtime;
         // 创建元素
@@ -447,8 +520,8 @@ window.Task = {
             return taskId;
         };
         // 获取任务调用类名
-        taskObj.getClassName = function () {
-            return className;
+        taskObj.getTypeName = function () {
+            return typeName;
         };
         // 获取任务调用类标签
         taskObj.getClassLabel = function () {
@@ -480,7 +553,7 @@ window.Task = {
         };
         // 显示任务信息
         taskObj.showInfo = function () {
-            AppLayer.dialog.open('任务信息', 'ID：'+taskId+'<br>标题：'+taskObj.getTitle()+'<br><br>调用类标签：'+taskObj.getClassLabel()+'<br>调用类名：'+taskObj.getClassName()+'<br><br>执行开始时间：'+new Date(parseInt(taskId))+'<br><br>参数：'+JSON.stringify(parmsObj)+'');
+            AppLayer.dialog.open('任务信息', 'ID：'+taskId+'<br>标题：'+taskObj.getTitle()+'<br><br>调用类标签：'+taskObj.getClassLabel()+'<br>调用类名：'+taskObj.getTypeName()+'<br><br>执行开始时间：'+new Date(parseInt(taskId))+'<br><br>参数：'+JSON.stringify(parmsObj)+'');
         };
         // 日志
         taskObj.log = function (text, level) {
@@ -560,7 +633,7 @@ window.Task = {
         this.list[taskId] = taskObj;
 
         // 让任务控制器 开始一个执行新任务
-        TaskController.createTask(taskId, className, classLabel, JSON.stringify(parmsObj)).then(function(callback){
+        TaskController.createTask(taskId, typeName, classLabel, JSON.stringify(parmsObj)).then(function(callback){
             taskObj.show();
             Task.taskManagerLayer.addItem(taskId);
         });
@@ -780,7 +853,7 @@ window.AppLayer.sidebar = {
             if (!!width && !isNaN(parseInt(width)))
                 sidebarObj.width = parseInt(width);
 
-            $(sidebarSel).css('width', sidebarObj.width + 'px');
+            $(sidebarSel).css('width', sidebarObj.width + 'px').css('transform', 'translate('+sidebarObj.width+'px, 0px)');
         };
         // 显示
         sidebarObj.show = function () {
@@ -1297,6 +1370,8 @@ window.downloads = {
         delete this.data.list[key];
 
         $(this.getItemSelector(key)).hide();
+
+        this.storeDataList(); // 存储下载列表
     },
     // 获取正在下载的任务数
     countDownloadingTask: function () {

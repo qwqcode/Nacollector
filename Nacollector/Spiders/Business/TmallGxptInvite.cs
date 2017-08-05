@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Nacollector.Spiders
+namespace Nacollector.Spiders.Business
 {
     /// <summary>
     /// 天猫供销平台分销商一键邀请
