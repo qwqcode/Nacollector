@@ -165,15 +165,23 @@ namespace Nacollector
             }
 
             // 开始任务工作
-
+            DateTime beforWorkDt = DateTime.Now;
             try
             {
                 spider.BeginWork();
             }
-            catch (Exception e) { spider.LogError(e.Message); return; }
+            catch (Exception e)
+            {
+                // 任务执行中抛出的错误被接住了...
+                spider.LogError(e.Message);
+            }
 
             // 任务执行完毕
-            spider.LogInfo("任务执行完毕");
+            DateTime afterWorkDt = DateTime.Now;
+            double timeSpent = afterWorkDt.Subtract(beforWorkDt).TotalSeconds;
+            spider.Log("\n");
+            spider.Log($"&gt;&gt; 任务执行完毕 （执行耗时：{timeSpent.ToString()}s）");
+
             // 报告JS任务结束
             crBrowser.RunJS($"Task.get('{settings.TaskId}').taskIsEnd();");
 

@@ -44,7 +44,7 @@ namespace Nacollector.Spiders.Business
             // 下载页面
             LogInfo("开始下载：" + PageUrl);
             var downloadPage = Utils.GetPageByUrl(PageUrl);
-            if (downloadPage.StatusCode != System.Net.HttpStatusCode.OK) { LogError("下载失败 [" + downloadPage.StatusCode + "] " + downloadPage.StatusDescription); return; }
+            if (downloadPage.StatusCode != System.Net.HttpStatusCode.OK) { throw new Exception("下载失败 [" + downloadPage.StatusCode + "] " + downloadPage.StatusDescription); }
             pageContent = downloadPage.Html;
             LogSuccess("下载完毕");
             pageDom = CQ.CreateDocument(pageContent);
@@ -66,7 +66,7 @@ namespace Nacollector.Spiders.Business
             pageDom[".J_TSaleProp > li > a"].Each((i, e) => {
                 string cssVal = e.Cq().Css("background");
                 if (cssVal == null) return;
-                string picSrcUrl = new Regex("(?s)(?i)url\\((.*)\\)").Match(cssVal).Groups[1].Value;
+                string picSrcUrl = new Regex("(?smi)url\\((.*)\\)").Match(cssVal).Groups[1].Value;
                 AddImgUrl("分类图", picSrcUrl.Replace("_40x40q90.jpg", ""));
             });
         }
@@ -75,7 +75,7 @@ namespace Nacollector.Spiders.Business
             JObject jsonConf;
             try
             {
-                string jsonStr = new Regex("(?s)(?i)TShop.Setup\\((.*?)\\);").Match(pageContent).Groups[1].Value.Trim();
+                string jsonStr = new Regex("(?smi)TShop.Setup\\((.*?)\\);").Match(pageContent).Groups[1].Value.Trim();
                 jsonConf = JObject.Parse(jsonStr);
             }
             catch { throw new Exception("解析 JSON 失败"); }
@@ -87,7 +87,7 @@ namespace Nacollector.Spiders.Business
             try
             {
                 descContent = Utils.GetPageByUrl(descReqUrl).Html; // 下载详情内容
-                descContent = new Regex("(?s)(?i)var desc='(.*?)';").Match(descContent).Groups[1].Value.Trim();
+                descContent = new Regex("(?smi)var desc='(.*?)';").Match(descContent).Groups[1].Value.Trim();
             }
             catch (Exception e) { throw new Exception("详情内容下载失败：" + e.Message); }
             LogSuccess("详情内容下载完毕");
@@ -106,7 +106,7 @@ namespace Nacollector.Spiders.Business
             JArray json;
             try
             {
-                string jsonStr = new Regex("(?s)(?i)auctionImages    : \\[(.*?)\\]").Match(pageContent).Groups[1].Value.Trim();
+                string jsonStr = new Regex("(?smi)auctionImages    : \\[(.*?)\\]").Match(pageContent).Groups[1].Value.Trim();
                 json = JArray.Parse("[" + jsonStr + "]");
             }
             catch { throw new Exception("解析 JSON 失败"); }
@@ -119,14 +119,14 @@ namespace Nacollector.Spiders.Business
             pageDom[".J_TSaleProp > li > a"].Each((i, e) => {
                 string cssVal = e.Cq().Css("background");
                 if (cssVal == null) return;
-                string picSrcUrl = new Regex("(?s)(?i)url\\((.*)\\)").Match(cssVal).Groups[1].Value;
+                string picSrcUrl = new Regex("(?smi)url\\((.*)\\)").Match(cssVal).Groups[1].Value;
                 AddImgUrl("分类图", picSrcUrl.Replace("_30x30.jpg", ""));
             });
         }
 
         private void TaobaoDesc()
         {
-            string descReqUrl = new Regex("(?s)(?i)descUrl          : location.protocol===\\'http:\\' \\? \\'.*?\\' : \'(.*?)\'").Match(pageContent).Groups[1].Value.Trim();
+            string descReqUrl = new Regex("(?smi)descUrl          : location.protocol===\\'http:\\' \\? \\'.*?\\' : \'(.*?)\'").Match(pageContent).Groups[1].Value.Trim();
             if (descReqUrl == null) { Log("详情内容请求URL无法正常获取"); return; }
             descReqUrl = UrlSchemeFull(descReqUrl);
             Log("\n");
@@ -135,7 +135,7 @@ namespace Nacollector.Spiders.Business
             try
             {
                 descContent = Utils.GetPageByUrl(descReqUrl).Html;
-                descContent = new Regex("(?s)(?i)var desc='(.*?)';").Match(descContent).Groups[1].Value.Trim();
+                descContent = new Regex("(?smi)var desc='(.*?)';").Match(descContent).Groups[1].Value.Trim();
             }
             catch (Exception e) { throw new Exception("详情内容下载失败：" + e.Message); }
             LogSuccess("详情内容下载完毕");
@@ -154,7 +154,7 @@ namespace Nacollector.Spiders.Business
         {
             pageDom["#dt-tab li.tab-trigger"].Each((i, e) => {
                 string picSrcUrl = e.GetAttribute("data-imgs");
-                picSrcUrl = new Regex("(?s)(?i)\"original\":\"(.*?)\"").Match(picSrcUrl).Groups[1].Value.Trim();
+                picSrcUrl = new Regex("(?smi)\"original\":\"(.*?)\"").Match(picSrcUrl).Groups[1].Value.Trim();
                 AddImgUrl("主图", picSrcUrl);
             });
         }
@@ -163,7 +163,7 @@ namespace Nacollector.Spiders.Business
         {
             pageDom[".list-leading .unit-detail-spec-operator"].Each((i, e) => {
                 string picSrcUrl = e.GetAttribute("data-imgs");
-                picSrcUrl = new Regex("(?s)(?i)\"original\":\"(.*?)\"").Match(picSrcUrl).Groups[1].Value.Trim();
+                picSrcUrl = new Regex("(?smi)\"original\":\"(.*?)\"").Match(picSrcUrl).Groups[1].Value.Trim();
                 AddImgUrl("分类图", picSrcUrl);
             });
         }
@@ -179,7 +179,7 @@ namespace Nacollector.Spiders.Business
             try
             {
                 descContent = Utils.GetPageByUrl(descReqUrl).Html;
-                descContent = new Regex("(?s)(?i)var offer_details={(.*?)};").Match(descContent).Groups[1].Value.Trim();
+                descContent = new Regex("(?smi)var offer_details={(.*?)};").Match(descContent).Groups[1].Value.Trim();
                 JObject descContentJson = JObject.Parse("{" + descContent + "}");
                 descContent = descContentJson["content"].ToString();
             }
@@ -243,7 +243,7 @@ namespace Nacollector.Spiders.Business
             JObject jsonConf;
             try
             {
-                string jsonConfStr = new Regex("(?s)(?i)var prdInfo = {(.*?)};").Match(pageContent).Groups[1].Value.Trim();
+                string jsonConfStr = new Regex("(?smi)var prdInfo = {(.*?)};").Match(pageContent).Groups[1].Value.Trim();
                 jsonConf = JObject.Parse("{" + jsonConfStr + "}");
             }
             catch { throw new Exception("解析 JSON 失败"); }
@@ -255,7 +255,7 @@ namespace Nacollector.Spiders.Business
             try
             {
                 descContent = Utils.GetPageByUrl(descReqUrl).Html;
-                descContent = new Regex("(?s)(?i)\\(\"(.*?)\"\\)").Match(descContent).Groups[1].Value.Trim();
+                descContent = new Regex("(?smi)\\(\"(.*?)\"\\)").Match(descContent).Groups[1].Value.Trim();
             }
             catch (Exception e) { throw new Exception("详情内容下载失败：" + e.Message); }
             LogSuccess("详情内容下载完毕");
@@ -275,10 +275,10 @@ namespace Nacollector.Spiders.Business
             Log("\n");
             if (imgUrlPool.Count == 0)
             {
-                LogError("喔豁！没有采集到任何的图片URL...\n" +
+                throw new Exception(
+                    "喔豁！没有采集到任何的图片URL...\n" +
                     "╮(╯▽╰)╭   怕是 " + PageTypeTranslation(PageType) + " 页面结构更新了？！\n" +
                     "如果你觉得是，请 +Q: 1149527164 告诉我");
-                return;
             }
             string typeTmp = "";
             foreach (string imgType in imgUrlPool.Keys)
@@ -322,13 +322,13 @@ namespace Nacollector.Spiders.Business
                     var number = imgIndex + 1;
                     var imgSrcUrl = imgUrlPool[imgType][imgIndex];
                     imgTotal++;
-                    Thread bgThread = new Thread(() =>
+                    // http://www.cnblogs.com/doforfuture/p/6293926.html
+                    ThreadPool.QueueUserWorkItem(m =>
                     {
-                        Utils.DownloadImgByUrl(imgSrc, downloadTempPath, imgType+"_"+number.ToString());
+                        Utils.DownloadImgByUrl(imgSrc, downloadTempPath, imgType + "_" + number.ToString());
                         LogSuccess($"下载完毕 {imgSrcUrl}");
                         doneTotal++;
                     });
-                    bgThread.Start();
                     imgIndex++;
                 }
             }

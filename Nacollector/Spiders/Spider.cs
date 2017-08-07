@@ -49,7 +49,8 @@ namespace Nacollector.Spiders
         {
             Thread.Sleep(900); // 开始得太快 感觉违和感强...
             Log(string.Format("ThreadID=\"{0}\"; SpiderObj=\"{1}\";", Thread.CurrentThread.ManagedThreadId, this.GetType().ToString()));
-            LogInfo("任务执行开始");
+            Log("&gt;&gt; 任务执行开始");
+            Log("\n");
         }
 
         /// <summary>

@@ -317,7 +317,7 @@ window.AppNavbar.btn = {
     window.SpiderList.Business.TmallGxptInvite = {
         label: "天猫供销平台分销商一键邀请",
         genForm: function () {
-            Form.textareaInput('PageUrl', '分销商ID名（一行一个）', undefined, 250);
+            Form.textareaInput('SellerId', '分销商ID名（一行一个）', undefined, 250);
         }
     };
     window.SpiderList.Business.TmallGxptInviteDelete = {

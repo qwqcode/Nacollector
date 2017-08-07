@@ -59,22 +59,22 @@ namespace Nacollector.Spiders.Business
             Log("\n");
             Log($"&gt;&gt; 开始采集第 {page} 页卖家名");
             string reqUrl = GetHandledUrl(page);
-            if (string.IsNullOrEmpty(reqUrl)) { LogError("请求地址有误"); return; }
+            if (string.IsNullOrEmpty(reqUrl)) { throw new Exception("请求地址有误"); }
             string refererUrl = (page > 1) ? (GetHandledUrl(page - 1)) : "https://www.taobao.com";
             Log($"请求地址：{reqUrl}\n伪造来源：{refererUrl}");
             HttpResult downloadPage = Utils.GetPageByUrl(reqUrl, new Dictionary<string, string>{ { "referer", refererUrl } });
-            if (downloadPage.StatusCode != System.Net.HttpStatusCode.OK) { LogError("下载失败 [" + downloadPage.StatusCode + "] " + downloadPage.StatusDescription); }
+            if (downloadPage.StatusCode != System.Net.HttpStatusCode.OK) { throw new Exception("下载失败 [" + downloadPage.StatusCode + "] " + downloadPage.StatusDescription); }
             string pageContent = downloadPage.Html;
             LogSuccess("下载完毕");
             JObject jsonConf;
             try
             {
-                string jsonStr = new Regex("(?s)(?i)g_page_config = {(.*?)};").Match(pageContent).Groups[1].Value.Trim();
+                string jsonStr = new Regex("(?smi)g_page_config = {(.*?)};").Match(pageContent).Groups[1].Value.Trim();
                 jsonConf = JObject.Parse("{"+jsonStr+"}");
             }
-            catch { LogError("解析 JSON 失败"); return; }
+            catch { throw new Exception("解析 JSON 失败"); }
             string itemsJsonStr = jsonConf["mods"]["shoplist"]["data"]["shopItems"].ToString();
-            if (string.IsNullOrEmpty(itemsJsonStr)) { LogError("内容无法正常获取"); return; }
+            if (string.IsNullOrEmpty(itemsJsonStr)) { throw new Exception("内容无法正常获取"); }
             JArray items = JArray.Parse(jsonConf["mods"]["shoplist"]["data"]["shopItems"].ToString());
             int addedCount = 0;
             foreach (var item in items)
