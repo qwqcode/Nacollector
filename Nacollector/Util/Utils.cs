@@ -46,7 +46,7 @@ namespace Nacollector.Util
 
         public static bool ReqIeProxy { get; set; }
 
-        public static HttpResult GetPageByUrl(string reqUrl, Dictionary<string, string> headers=null)
+        public static HttpResult GetPageByUrl(string reqUrl, Dictionary<string, string> headers=null, Dictionary<string, string> postData=null, Encoding encoding = null)
         {
             HttpHelper http = new HttpHelper();
             HttpItem item = new HttpItem()
@@ -61,13 +61,13 @@ namespace Nacollector.Util
                 Accept = "text/html, application/xhtml+xml, */*",
                 ContentType = "text/html", //返回类型
                 Allowautoredirect = true, // 是否根据301跳转
-                MaximumAutomaticRedirections = 10,
+                MaximumAutomaticRedirections = 10
                 //ProxyIp = "192.168.1.105", // 代理服务器ID
                 //ProxyPwd = "123456", // 代理服务器密码
                 //ProxyUserName = "administrator", // 代理服务器账户名
                 //ResultType = ResultType.String, // 返回数据类型，是Byte还是String
             };
-            
+
             // 请求头
             if (headers != null && headers.Count > 0)
             {
@@ -88,6 +88,19 @@ namespace Nacollector.Util
                 }
             }
 
+            if (postData != null)
+            {
+                item.Method = "POST";
+                item.Postdata = string.Join("&", postData.Select(d => Uri.EscapeDataString(d.Key) + "=" + Uri.EscapeDataString(d.Value)));
+                item.PostDataType = PostDataType.String;
+                item.ContentType = "application/x-www-form-urlencoded";
+            }
+
+            if (encoding != null)
+                item.Encoding = encoding; // 例如 Encoding.GetEncoding("gb2312");
+            else
+                item.Encoding = Encoding.GetEncoding("UTF-8");
+            
             // 是否使用IE代理
             if (ReqIeProxy)
                 item.ProxyIp = "ieproxy";
@@ -127,7 +140,7 @@ namespace Nacollector.Util
                 }
             }
         }
-
+        
         /// <summary>  
         /// 获取时间戳  
         /// </summary>  

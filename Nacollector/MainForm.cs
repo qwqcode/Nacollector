@@ -166,6 +166,7 @@ namespace Nacollector
 
             // 开始任务工作
             DateTime beforWorkDt = DateTime.Now;
+
             try
             {
                 spider.BeginWork();
@@ -174,6 +175,10 @@ namespace Nacollector
             {
                 // 任务执行中抛出的错误被接住了...
                 spider.LogError(e.Message);
+                Logging.Error(e.ToString()); // 保存错误详情
+#if DEBUG
+                spider.Log(e.ToString());
+#endif
             }
 
             // 任务执行完毕

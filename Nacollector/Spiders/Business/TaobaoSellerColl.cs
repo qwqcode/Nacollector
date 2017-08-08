@@ -35,7 +35,8 @@ namespace Nacollector.Spiders.Business
             if (!CollBeginPageIsInt) throw new Exception("参数 CollBeginPage 不是数字");
             bool CollEndPageIsInt = Int32.TryParse(GetParm("CollEndPage"), out CollEndPage);
             if (!CollEndPageIsInt) throw new Exception("参数 CollEndPage 不是数字");
-            
+            if (CollBeginPage <= 0 || CollEndPage <= 0 || CollBeginPage > CollEndPage) throw new Exception("老铁，你输入的参数是什么鬼？");
+
             for (int i = CollBeginPage; i <= CollEndPage; i++)
             {
                 WorkOnPage(i); 
@@ -73,9 +74,13 @@ namespace Nacollector.Spiders.Business
                 jsonConf = JObject.Parse("{"+jsonStr+"}");
             }
             catch { throw new Exception("解析 JSON 失败"); }
-            string itemsJsonStr = jsonConf["mods"]["shoplist"]["data"]["shopItems"].ToString();
-            if (string.IsNullOrEmpty(itemsJsonStr)) { throw new Exception("内容无法正常获取"); }
-            JArray items = JArray.Parse(jsonConf["mods"]["shoplist"]["data"]["shopItems"].ToString());
+            string itemsJsonStr = null;
+            try
+            {
+                itemsJsonStr = jsonConf["mods"]["shoplist"]["data"]["shopItems"].ToString();
+            }
+            catch { throw new Exception("内容为空"); }
+            JArray items = JArray.Parse(itemsJsonStr);
             int addedCount = 0;
             foreach (var item in items)
             {
@@ -84,7 +89,7 @@ namespace Nacollector.Spiders.Business
                     sellerNames.Add(seller);
                 addedCount++;
             }
-            LogSuccess($"采集 {addedCount} 个卖家ID");
+            LogSuccess($"采集了 {addedCount} 个卖家ID");
         }
 
         /// <summary>

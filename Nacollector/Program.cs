@@ -45,9 +45,11 @@ namespace Nacollector
             {
                 AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
 
+# if !DEBUG
                 Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
                 Application.ThreadException += Application_ThreadException;
                 AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+# endif
 
                 Application.ApplicationExit += Application_ApplicationExit;
                 
@@ -130,7 +132,7 @@ namespace Nacollector
                 MessageBox.Show(
                     $"意外的错误，Nacollector 将退出，请上QQ告诉我 1149527164 {Environment.NewLine}{errorMsg}",
                     "Nacollector UI Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Application.Exit();
+                // Application.Exit();
             }
         }
 
@@ -143,7 +145,7 @@ namespace Nacollector
                 MessageBox.Show(
                     $"意外的错误，Nacollector 将退出，请上QQ告诉我 1149527164 \n {Environment.NewLine}{errMsg}",
                     "Nacollector non-UI Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Application.Exit();
+                // Application.Exit();
             }
         }
 

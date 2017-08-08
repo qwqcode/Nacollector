@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace Nacollector.Spiders.Business
 {
@@ -23,20 +24,19 @@ namespace Nacollector.Spiders.Business
         string cookieStr = null;
         string _tb_token_ = null;
 
+        List<string> errorSeller = new List<string>(); // 未邀请成功的卖家
+        int maxErrorThreshold = 5; // 最多错误阈值
+
         public override void BeginWork()
         {
             base.BeginWork();
             // 参数设定
             SellerId = GetParm("SellerId").Trim();
             SellerIdArr = SellerId.Split(new string[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries);
-            if (SellerIdArr.Length <= 0) { throw new Exception("卖家ID不能一个都没有啊"); }
+            if (SellerIdArr.Length <= 0) { throw new Exception("卖家ID不能一个也没有啊"); }
             // 获取 Cookie
-            var browserCookieGetter = new CrBrowserCookieGetter("登录天猫供销平台")
-            {
-                StartUrl = "https://qudao.gongxiao.tmall.com/supplier/user/invitation_list.htm",
-                EndUrlRegPattern = @"^(https|http)://qudao\.gongxiao\.tmall\.com/supplier/user/invitation_list\.htm"
-            };
-            browserCookieGetter.UseAutoCompleteInput(@"^https://login\.taobao\.com/member/login\.jhtml", new List<string>() { "#TPL_username_1", "#TPL_password_1" });
+            var browserCookieGetter = new CrBrowserCookieGetter(startUrl: "https://qudao.gongxiao.tmall.com/supplier/user/invitation_list.htm", endUrlReg: @"^(https|http)://qudao\.gongxiao\.tmall\.com/supplier/user/invitation_list\.htm", caption: "登录天猫供销平台");
+            browserCookieGetter.UseInputAutoComplete(@"^https://login\.taobao\.com/member/login\.jhtml", new List<string>() { "#TPL_username_1", "#TPL_password_1" });
             browserCookieGetter.BeginWork();
             // ... Show Dialog Working
             cookieStr = browserCookieGetter.GetCookieStr();
@@ -50,11 +50,32 @@ namespace Nacollector.Spiders.Business
             LogSuccess($"成功获取到一个 _tb_token_ = {_tb_token_}");
             Log("\n");
             // 执行邀请操作
+            var index = 0;
             foreach (var entry in SellerIdArr)
             {
-                string id = entry.ToString();
-                InviteSellerOnce(id);
+                if (maxErrorThreshold != 0 && errorSeller.Count > maxErrorThreshold)
+                {
+                    if (MessageBox.Show($"邀请失败次数已满 {maxErrorThreshold} 次" + Environment.NewLine + "是否中止任务？", this.GetType().ToString(), MessageBoxButtons.YesNo) == DialogResult.Yes)
+                        throw new Exception("邀请失败过多，任务中止执行");
+                    else
+                        maxErrorThreshold = 0;
+                }
+
+                Log($"&gt;&gt; 准备邀请第 {index+1} 个卖家，共 {SellerIdArr.Count()} 个，还剩 {SellerIdArr.Count() - (index+1)} 个");
+                string sellerId = entry.ToString();
+                try
+                {
+                    InviteSellerOnce(sellerId);
+                }
+                catch (Exception e)
+                {
+                    LogError(e.Message);
+                    errorSeller.Add(sellerId);
+                }
+                Log("\n");
+                index++;
             }
+            LogInfo($"共邀请 {SellerIdArr.Count()} 个卖家，成功邀请 {SellerIdArr.Count() - errorSeller.Count} 个，邀请失败 {errorSeller.Count} 个");
         }
 
         /// <summary>
@@ -87,10 +108,13 @@ namespace Nacollector.Spiders.Business
             string result_Result = resultJObject["result"].ToString();
             string result_Message = resultJObject["message"].ToString();
             if (result_Result == "success")
+            {
                 LogSuccess($"邀请 {sellerId} 响应 {result_Message}");
+            }
             else
-                LogError($"邀请 {sellerId} 响应 {result_Result} - {result_Message}");
-            Log("\n");
+            {
+                throw new Exception($"邀请 {sellerId} 响应 {result_Result} - {result_Message}");
+            }
         }
 
         public string ReqByUrl(string url, bool isAjax=false)

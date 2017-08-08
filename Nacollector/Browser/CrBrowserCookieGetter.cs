@@ -15,21 +15,31 @@ namespace Nacollector.Browser
 {
     public class CrBrowserCookieGetter
     {
-        public static List<string> visitedAddress = new List<string>(); // static 不管实例化多少次对象，每次值都是一样的
+        public static List<string> visitedAddress = new List<string>(); // 所有已访问过的页面地址
+        public static Dictionary<string, string> historyCookie = new Dictionary<string, string>(); // 所有 已得到的 历史Cookie 字符串
 
-        public string StartUrl { get; set; }
-        public string EndUrlRegPattern { get; set; }
+        public string StartUrl { get; } // 初始页 URL
+        public string EndUrlReg { get; } // 获取Cookie页 Url 正则表达式
 
-        private bool isUseAutoCompleteInput = false;
-        private static Dictionary<string, List<string>> AutoCompleteInput = new Dictionary<string, List<string>>();
-
-        private ChromiumWebBrowser browser = null;
         private Form form = null;
+        private ChromiumWebBrowser browser = null;
+        private InputAutoComplete inputAutoComplete = null;
 
         private string cookie = null;
 
-        public CrBrowserCookieGetter(string caption = "")
+        public CrBrowserCookieGetter(string startUrl, string endUrlReg, string caption = "")
         {
+            StartUrl = startUrl;
+            EndUrlReg = endUrlReg;
+
+            // 是否使用上一次得到的 Cookie
+            if (historyCookie.ContainsKey(EndUrlReg) && (MessageBox.Show("上一次已经获取过 Cookie，是否继续使用？" + Environment.NewLine + "如果刚刚才干过这件事 请点是", caption, MessageBoxButtons.YesNo) == DialogResult.Yes))
+            {
+                // 使用上一次的 Cookie
+                EndWork(null, historyCookie[EndUrlReg]);
+                return;
+            }
+            
             // 新建一个 form
             form = new Form()
             {
@@ -39,38 +49,8 @@ namespace Nacollector.Browser
                 StartPosition = FormStartPosition.CenterScreen,
                 Text = caption,
             };
-            // 当窗口关闭时执行
-            form.FormClosing += (s, e) =>
-            {
-                //try
-                //{
-                //    browser.CloseDevTools();
-                //    browser.GetBrowser().CloseBrowser(true);
-                //    if (browser != null)
-                //    {
-                //        browser.Dispose();
-                //    }
-                //}
-                //catch { }
-            };
-            form.FormClosed += (s, e) =>
-            {
-                // 至于有没有用，以后再试
-                form.Close();
-                form.Dispose();
-            };
-        }
 
-        /// <summary>
-        /// 初始化浏览器
-        /// </summary>
-        private void InitBrowser()
-        {
-            // 删除浏览器中所有 Cookie
-            // Cef.GetGlobalCookieManager().DeleteCookies(null, null);
-            // 删除已访问过网页的 Cookie
-            ClearCookies();
-            // 初始化浏览器
+            // 浏览器 初始化
             browser = new ChromiumWebBrowser(StartUrl)
             {
                 Dock = DockStyle.Fill,
@@ -83,9 +63,8 @@ namespace Nacollector.Browser
                 DefaultEncoding = "UTF-8",
                 BackgroundColor = (uint)ColorTranslator.FromHtml("#333333").ToArgb()
             };
-            // 右键菜单
-            browser.MenuHandler = new MenuHandler(this);
-
+            browser.MenuHandler = new MenuHandler(this); // 右键菜单
+            // 当页面加载开始
             browser.FrameLoadStart += (s, e) =>
             {
                 var address = ((ChromiumWebBrowser)s).Address;
@@ -96,34 +75,43 @@ namespace Nacollector.Browser
             var pageLoadTimes = 0;
             browser.AddressChanged += (s, e) => {
                 pageLoadTimes++;
-                if (pageLoadTimes == 1) return; // 页面第一次加载的时候怎么可能获取 Cookie ?? So... 第一次不获取
+                if (pageLoadTimes == 1) return; // 页面第一次加载的时候怎么可能获取 Cookie ?? So... 第一次加载不获取
 
                 var address = ((ChromiumWebBrowser)s).Address;
-                if (Regex.IsMatch(address, EndUrlRegPattern))
+                if (Regex.IsMatch(address, EndUrlReg))
                 {
                     EndWork(address);
                 }
             };
-            
-            form.Controls.Add(browser);
-
-            AutoCompleteInputInit();
         }
 
         /// <summary>
-        /// 开始工作（显示窗体）
+        /// 1. 使用输入自动填充
+        /// </summary>
+        /// <param name="pageUrlReg">生效页面地址正则表达式</param>
+        /// <param name="inputElemCssSelectors">输入框元素CSS选择器</param>
+        public void UseInputAutoComplete(string pageUrlReg, List<string> inputElemCssSelectors)
+        {
+            if (browser == null) return;
+            inputAutoComplete = new InputAutoComplete(browser, pageUrlReg, inputElemCssSelectors);
+        }
+
+        /// <summary>
+        /// 2. 开始工作（显示窗体）
         /// </summary>
         public void BeginWork()
         {
-            if (browser == null)
-                InitBrowser();
-
+            if (browser == null) return;
+            form.Controls.Add(browser);
             form.ShowDialog();
         }
 
         /// <summary>
-        /// 结束工作（关闭窗体）
+        /// 3. 结束工作（关闭窗体）
         /// </summary>
+        /// <param name="cookieAddress">Cookie 地址</param>
+        /// <param name="cookieStr">Cookie 字符串</param>
+        /// <param name="closeForm">是否关闭窗体</param>
         public async void EndWork(string cookieAddress, string cookieStr = null)
         {
             string cookieHeader = null;
@@ -133,7 +121,7 @@ namespace Nacollector.Browser
                 Cef.GetGlobalCookieManager().VisitUrlCookies(cookieAddress, true, visitor);
 
                 var cookiesList = await visitor.Task; // AWAIT !!!!!!!!!
-                cookieHeader = CookieCollector.GetCookieHeader(cookiesList);
+                cookieHeader = GetCookieStr(cookiesList);
             }
             else if (cookieAddress == null && cookieStr != null)
             {
@@ -142,62 +130,112 @@ namespace Nacollector.Browser
 
             // 关键的赋值
             cookie = cookieHeader;
+            historyCookie[EndUrlReg] = cookieHeader;
 
             // 关闭窗体
-            form.Invoke(new Action(() => {
-                if (form == null || form.IsDisposed)
-                    return;
-
-                form.Close();
-            }));
-        }
-
-        /// <summary>
-        /// 设置表单自动填充
-        /// </summary>
-        public void UseAutoCompleteInput(string forPageUrlRegPattern, List<string> inputCssSelector)
-        {
-            if (!AutoCompleteInput.ContainsKey(forPageUrlRegPattern))
+            if (form != null && !form.IsDisposed)
             {
-                AutoCompleteInput.Add(forPageUrlRegPattern, inputCssSelector);
+                form.Invoke(new Action(() => {
+                    form.Close();
+                }));
             }
-            isUseAutoCompleteInput = true;
+
+            // 清理 Cookie
+            if (visitedAddress.Count > 0)
+            {
+                // 删除已访问过网页的 Cookie
+                foreach (var address in visitedAddress)
+                {
+                    var visitor = new CookieCollector(deleteAllCookie: true);
+                    Cef.GetGlobalCookieManager().VisitUrlCookies(address, true, visitor);
+                }
+            }
         }
 
-        /// <summary>
-        /// 初始化表单自动填充
-        /// </summary>
-        public void AutoCompleteInputInit()
+        private class InputAutoComplete
         {
-            if (!isUseAutoCompleteInput)
-                return;
+            private ChromiumWebBrowser browser;
+            private static Dictionary<string, AutoInputConfig> pages = new Dictionary<string, AutoInputConfig>(); // 静态：所有输入框自动填充配置；静态字段 无论实例化对象多少次，字段的值不变
 
-            foreach (var pattern in AutoCompleteInput.Keys)
+            public InputAutoComplete(ChromiumWebBrowser parmBrowser, string pageUrlReg, List<string> inputElemCssSelectors)
             {
-                MessageBox.Show(pattern);
-
-                MessageBox.Show(browser.Address); /// 需要将 function 放到当页面每次加载时执行
-
-                if (!Regex.IsMatch(browser.Address, pattern))
-                    continue;
-                
-                List<string> selectors = AutoCompleteInput[pattern];
-                string jsCodeStr = "";
-                foreach (var sel in selectors)
+                if (!pages.ContainsKey(pageUrlReg))
                 {
-                    jsCodeStr += @"document.querySelector('"+ sel + "').onblur = function () {  console.log(this.value); };";
+                    var inputConfig = new AutoInputConfig() { inputElemSelectors = inputElemCssSelectors };
+                    pages.Add(pageUrlReg, inputConfig);
                 }
 
-                MessageBox.Show(jsCodeStr);
+                browser = parmBrowser;
+                browser.RegisterJsObject("_cr_browser_InputRecord", new InputRecordObjForJs() { PageUrlReg = pageUrlReg });
+                browser.FrameLoadStart += (s, e) =>
+                {
+                    var currentAddress = ((ChromiumWebBrowser)s).Address;
+                    
+                    foreach (var dic in pages)
+                    {
+                        if (!Regex.IsMatch(currentAddress, dic.Key))
+                            continue;
 
-                browser.ExecuteScriptAsync(jsCodeStr);
+                        var config = dic.Value;
+                        List<string> selectors = config.inputElemSelectors;
 
-                break;
+                        string jsCodeStr = "";
+                        foreach (var sel in selectors)
+                        {
+                            jsCodeStr += @"document.querySelector('" + sel + "').oninput = function () { _cr_browser_InputRecord.record('" + sel + "', this.value); };";
+                            string data = config.GetInputValue(sel);
+                            if (!string.IsNullOrEmpty(data))
+                                jsCodeStr += $"document.querySelector('{sel}').value = '{data.Replace(@"\", @"\\").Replace("'", @"\'")}';";
+                        }
+
+                        // MessageBox.Show(jsCodeStr);
+
+                        browser.ExecuteScriptAsync(jsCodeStr);
+
+                        break;
+                    }
+                };
+            }
+            
+            // 输入记录对象 拿给JS用的
+            private class InputRecordObjForJs
+            {
+                public string PageUrlReg { get; set; } // 存值时需要的 页面地址正则表达式
+                
+                public void record(string inputElemSel, string value)
+                {
+                    if (!pages.ContainsKey(PageUrlReg))
+                        return;
+
+                    pages[PageUrlReg].SaveInputValue(inputElemSel, value);
+                }
+            }
+
+            private class AutoInputConfig
+            {
+                public List<string> inputElemSelectors { get; set; } // 输入框元素选择器
+                public Dictionary<string, string> inputValues = new Dictionary<string, string>(); // 输入值
+
+                // 存储输入值，对应一个 输入框元素选择器
+                public void SaveInputValue(string inputSel, string val)
+                {
+                    if (inputValues.ContainsKey(inputSel))
+                        inputValues.Remove(inputSel); // 字典使用 Add 不会覆盖原有值，所以先删除原有值
+
+                    inputValues.Add(inputSel, val); // 也可以使用 inputValues[inputSel] = val; 代替这行代码，直接覆盖原有值
+                }
+
+                // 获取输入值
+                public string GetInputValue(string inputSel)
+                {
+                    if (!inputValues.ContainsKey(inputSel)) return "";
+                    return inputValues[inputSel];
+                }
             }
         }
-
+        
         /// <summary>
-        /// 获取 Cookie 字符串
+        /// 4. 获取 Cookie 字符串
         /// </summary>
         /// <returns>this.cookie 为空返回 ""</returns>
         public string GetCookieStr()
@@ -209,25 +247,29 @@ namespace Nacollector.Browser
         }
 
         /// <summary>
-        /// 清理已访问过网页的全部Cookie
+        /// List 转 Cookie 字符串
         /// </summary>
+        /// <param name="cookies"></param>
         /// <returns></returns>
-        public static void ClearCookies()
+        public string GetCookieStr(List<Cookie> cookies)
         {
-            // string test = "";
-            foreach (var address in visitedAddress)
+            StringBuilder cookieString = new StringBuilder();
+            string delimiter = string.Empty;
+
+            foreach (var cookie in cookies)
             {
-                // test += address + Environment.NewLine;
-                // Cef.GetGlobalCookieManager().DeleteCookies(address, null); // 不能用
-                var visitor = new CookieCollector(deleteAllCookie: true);
-                Cef.GetGlobalCookieManager().VisitUrlCookies(address, true, visitor);
-                visitor.Task.Wait();
+                cookieString.Append(delimiter);
+                cookieString.Append(cookie.Name);
+                cookieString.Append('=');
+                cookieString.Append(cookie.Value);
+                delimiter = "; ";
             }
-            // MessageBox.Show(test);
+
+            return cookieString.ToString();
         }
 
         /// <summary>
-        /// 用于获取 Cookie 的
+        /// Cookie 操作
         /// </summary>
         private class CookieCollector : ICookieVisitor
         {
@@ -260,24 +302,6 @@ namespace Nacollector.Browser
 
                 return true;
             }
-
-            public static string GetCookieHeader(List<Cookie> cookies)
-            {
-                StringBuilder cookieString = new StringBuilder();
-                string delimiter = string.Empty;
-
-                foreach (var cookie in cookies)
-                {
-                    cookieString.Append(delimiter);
-                    cookieString.Append(cookie.Name);
-                    cookieString.Append('=');
-                    cookieString.Append(cookie.Value);
-                    delimiter = "; ";
-                }
-
-                return cookieString.ToString();
-            }
-            
             public void Dispose() {}
         }
 
