@@ -135,9 +135,7 @@ namespace Nacollector.Browser
             // 关闭窗体
             if (form != null && !form.IsDisposed)
             {
-                form.Invoke(new Action(() => {
-                    form.Close();
-                }));
+                form.Close();
             }
 
             // 清理 Cookie
@@ -335,15 +333,18 @@ namespace Nacollector.Browser
                 switch ((int)commandId)
                 {
                     case GetCurrentCookie:
-                        _this.EndWork(browserControl.Address);
+                        _this.form.Invoke(new Action(() =>
+                        {
+                            _this.EndWork(browserControl.Address);
+                        }));
                         break;
 
                     case InputCookie:
-                        string cookieStr = "";
                         _this.form.Invoke(new Action(() => {
+                            string cookieStr = "";
                             cookieStr = Utils.InputDialog("输入 Cookie 字符串 (通过 Chrome EditThisCookie 扩展完整获取)", "手动输入 Cookie");
+                            _this.EndWork(null, cookieStr);
                         }));
-                        _this.EndWork(null, cookieStr);
                         break;
 
                     case ShowDevTools:

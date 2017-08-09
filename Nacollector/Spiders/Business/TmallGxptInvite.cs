@@ -47,13 +47,13 @@ namespace Nacollector.Spiders.Business
             LogSuccess($"{homePageUrl} 下载完毕");
             _tb_token_ = new Regex("(?smi)name=(?:\"|')_tb_token_(?:\"|') type=(?:\"|')hidden(?:\"|') value=(?:\"|')(.*?)(?:\"|')").Match(homePageHtml).Groups[1].Value;
             if (string.IsNullOrEmpty(_tb_token_)) { throw new Exception("_tb_token_ 获取失败"); }
-            LogSuccess($"成功获取到一个 _tb_token_ = {_tb_token_}");
+            LogSuccess($"已获取 _tb_token_ = {_tb_token_}");
             Log("\n");
             // 执行邀请操作
             var index = 0;
             foreach (var entry in SellerIdArr)
             {
-                if (maxErrorThreshold != 0 && errorSeller.Count > maxErrorThreshold)
+                if (maxErrorThreshold != 0 && errorSeller.Count >= maxErrorThreshold)
                 {
                     if (MessageBox.Show($"邀请失败次数已满 {maxErrorThreshold} 次" + Environment.NewLine + "是否中止任务？", this.GetType().ToString(), MessageBoxButtons.YesNo) == DialogResult.Yes)
                         throw new Exception("邀请失败过多，任务中止执行");
@@ -122,7 +122,7 @@ namespace Nacollector.Spiders.Business
             var headers = new Dictionary<string, string> { };
             headers.Add("cookie", cookieStr);
             if (isAjax) headers.Add("x-requested-with", "XMLHttpRequest");
-            HttpResult req = Utils.GetPageByUrl(url, headers);
+            HttpResult req = Utils.GetPageByUrl(url, headers, null, Encoding.GetEncoding("gb2312"));
             if (req.StatusCode != System.Net.HttpStatusCode.OK) { throw new Exception($"{req.ResponseUri.ToString()} 请求失败 [{req.StatusCode}] {req.StatusDescription}"); }
             return req.Html;
         }

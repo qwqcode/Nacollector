@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace Nacollector.Spiders.Business
 {
@@ -22,7 +23,7 @@ namespace Nacollector.Spiders.Business
 
         string cookieStr = null;
 
-        List<string> errorSeller = new List<string>(); // 未邀请成功的卖家
+        List<string> errorSeller = new List<string>(); // 未撤回成功的卖家
         int maxErrorThreshold = 5; // 最多错误阈值
 
         public override void BeginWork()
@@ -41,13 +42,26 @@ namespace Nacollector.Spiders.Business
             // ... Show Dialog Working
             cookieStr = browserCookieGetter.GetCookieStr();
             if (string.IsNullOrEmpty(cookieStr)) { throw new Exception("Cookie 获取未成功"); }
-
+            Log("\n");
+            // 执行撤回操作
+            
             int totalPage = DeleteEndPage - DeleteBeginPage + 1;
             for (int i = DeleteBeginPage; i <= DeleteEndPage; i++)
             {
                 Log($"&gt;&gt; 准备撤回第 {i} 页所有卖家，共 {totalPage} 页，还剩 {totalPage - i} 页");
-                WorkOnPage(i);
+                try
+                {
+                    WorkOnPage(i);
+                }
+                catch (Exception e)
+                {
+                    if (e.Message == "_END_TASK_")
+                        throw new Exception("撤回失败过多，任务中止执行");
+                    else
+                        LogError(e.Message);
+                }
                 Log("\n");
+                
             }
         }
 
@@ -59,12 +73,12 @@ namespace Nacollector.Spiders.Business
         {
             // 下载列表页
             var listPageUrl = "https://qudao.gongxiao.tmall.com/supplier/user/invitation_list.htm";
-            string listPageHtml = ReqByUrl(listPageUrl, false, new Dictionary<string, string> { { "pageNo", page.ToString() } }, Encoding.GetEncoding("gb2312"));
+            string listPageHtml = ReqByUrl(listPageUrl, false, new Dictionary<string, string> { { "pageNo", page.ToString() } });
             LogSuccess($"{listPageUrl} 下载完毕");
             // 获取 _tb_token_
             string _tb_token_ = new Regex("(?smi)name=(?:\"|')_tb_token_(?:\"|') type=(?:\"|')hidden(?:\"|') value=(?:\"|')(.*?)(?:\"|')").Match(listPageHtml).Groups[1].Value;
             if (string.IsNullOrEmpty(_tb_token_)) { throw new Exception("_tb_token_ 获取失败"); }
-            LogSuccess($"成功获取到 _tb_token_ = {_tb_token_}");
+            LogSuccess($"已获取 _tb_token_ = {_tb_token_}");
             // 获取列表数据
             JObject listJson;
             try
@@ -73,28 +87,76 @@ namespace Nacollector.Spiders.Business
                 listJson = JObject.Parse("{" + listJsonStr.Trim() + "}");
             }
             catch { throw new Exception("解析 列表数据 JSON 失败"); }
-            LogSuccess($"成功获取 {listJson.Count} 个 卖家 userIdNum");
+            if (listJson.Count <= 0) { throw new Exception("页面邀请记录为空"); }
+            Log($"已获取 {listJson.Count} 个 卖家 userIdNum");
             var pageDom = CQ.CreateDocument(listPageHtml);
             // 开始执行撤回
+            var index = 0;
             foreach (var item in listJson)
             {
-                if (pageDom["[data-uid=\""+ item.Key + "\"] .J_Status"].Text().Trim() != "已撤回")
+                if (maxErrorThreshold != 0 && errorSeller.Count >= maxErrorThreshold)
                 {
-                    // 明天继续
+                    if (MessageBox.Show($"撤回失败次数已满 {maxErrorThreshold} 次" + Environment.NewLine + "是否中止任务？", this.GetType().ToString(), MessageBoxButtons.YesNo) == DialogResult.Yes)
+                        throw new Exception("_END_TASK_");
+                    else
+                        maxErrorThreshold = 0;
+                }
+
+                var sellerIdNum = item.Key;
+                var sellerId = pageDom["[data-uid=\"" + sellerIdNum + "\"] > td:first-child > a"].Text().Trim(); // 卖家名
+                if (pageDom["[data-uid=\""+ sellerIdNum + "\"] .J_Status"].Text().Trim() != "已撤回")
+                {
+                    try
+                    {
+                        DeleteSellerOnce(sellerId, sellerIdNum);
+                    }
+                    catch (Exception e)
+                    {
+                        LogError(e.Message);
+                        errorSeller.Add(sellerId);
+                    }
                 }
                 else
                 {
-                    Log($"自动忽略已撤回卖家 {item.Key}");
+                    LogInfo($"撤回 {sellerId} 已自动忽略已撤回的卖家");
                 }
+                index++;
             }
         }
 
-        public string ReqByUrl(string url, bool isAjax = false, Dictionary<string, string>postData = null, Encoding encoding = null)
+        /// <summary>
+        /// 删除卖家一次
+        /// </summary>
+        /// <param name="sellerId"></param>
+        /// <param name="sellerIdNum"></param>
+        public void DeleteSellerOnce(string sellerId, string sellerIdNum)
+        {
+            string deleteResult = ReqByUrl($"https://qudao.gongxiao.tmall.com/supplier/json/cancel_invitation_json.htm?action=user/invitation_action&event_submit_do_cancel=t&invitationId={sellerIdNum}&_input_charset=utf-8", true);
+            // 解析 Json
+            JObject resultJObject;
+            try
+            {
+                resultJObject = JObject.Parse(deleteResult.Trim());
+            }
+            catch { throw new Exception("解析结果 JSON 失败 \n" + deleteResult.Trim().Replace("\n", "").Replace(" ", "").Replace("\t", "").Replace("\r", "")); }
+            string result_Result = resultJObject["result"].ToString();
+            string result_Message = resultJObject["message"].ToString();
+            if (result_Result == "success")
+            {
+                LogSuccess($"撤回 {sellerId} 响应 {result_Message}");
+            }
+            else
+            {
+                throw new Exception($"撤回 {sellerId} 响应 {result_Result} - {result_Message}");
+            }
+        }
+
+        public string ReqByUrl(string url, bool isAjax = false, Dictionary<string, string>postData = null)
         {
             var headers = new Dictionary<string, string> { };
             headers.Add("cookie", cookieStr);
             if (isAjax) headers.Add("x-requested-with", "XMLHttpRequest");
-            HttpResult req = Utils.GetPageByUrl(url, headers, postData, encoding);
+            HttpResult req = Utils.GetPageByUrl(url, headers, postData, Encoding.GetEncoding("gb2312"));
             if (req.StatusCode != System.Net.HttpStatusCode.OK) { throw new Exception($"{req.ResponseUri.ToString()} 请求失败 [{req.StatusCode}] {req.StatusDescription}"); }
             return req.Html;
         }
