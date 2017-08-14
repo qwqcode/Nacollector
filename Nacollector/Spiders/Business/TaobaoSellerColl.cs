@@ -23,6 +23,7 @@ namespace Nacollector.Spiders.Business
         string PageUrl = "";
         int CollBeginPage = 0;
         int CollEndPage = 0;
+        bool IgnoreTmall = false;
         // 卖家名池
         List<string> sellerNames = new List<string>();
 
@@ -36,6 +37,7 @@ namespace Nacollector.Spiders.Business
             bool CollEndPageIsInt = Int32.TryParse(GetParm("CollEndPage"), out CollEndPage);
             if (!CollEndPageIsInt) throw new Exception("参数 CollEndPage 不是数字");
             if (CollBeginPage <= 0 || CollEndPage <= 0 || CollBeginPage > CollEndPage) throw new Exception("老铁，你输入的参数是什么鬼？");
+            IgnoreTmall = GetParm("IgnoreTmall").Trim().ToLower() == "on" ? true : false;
 
             for (int i = CollBeginPage; i <= CollEndPage; i++)
             {
@@ -84,6 +86,9 @@ namespace Nacollector.Spiders.Business
             int addedCount = 0;
             foreach (var item in items)
             {
+                if (IgnoreTmall && item["isTmall"].ToString().Trim().ToLower() == "true")
+                    continue;
+
                 var seller = item["nick"].ToString().Trim();
                 if (!sellerNames.Contains(seller))
                     sellerNames.Add(seller);

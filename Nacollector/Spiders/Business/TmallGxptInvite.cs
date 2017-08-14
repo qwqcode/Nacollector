@@ -105,8 +105,8 @@ namespace Nacollector.Spiders.Business
                 resultJObject = JObject.Parse(inviteResult.Trim());
             }
             catch { throw new Exception("解析结果 JSON 失败 \n" + inviteResult.Trim().Replace("\n", "").Replace(" ", "").Replace("\t", "").Replace("\r", "")); }
-            string result_Result = resultJObject["result"].ToString();
-            string result_Message = resultJObject["message"].ToString();
+            string result_Result = resultJObject["result"].ToString().Trim();
+            string result_Message = resultJObject["message"].ToString().Trim();
             if (result_Result == "success")
             {
                 LogSuccess($"邀请 {sellerId} 响应 {result_Message}");

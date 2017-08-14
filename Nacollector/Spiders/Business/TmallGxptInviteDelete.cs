@@ -139,8 +139,9 @@ namespace Nacollector.Spiders.Business
                 resultJObject = JObject.Parse(deleteResult.Trim());
             }
             catch { throw new Exception("解析结果 JSON 失败 \n" + deleteResult.Trim().Replace("\n", "").Replace(" ", "").Replace("\t", "").Replace("\r", "")); }
-            string result_Result = resultJObject["result"].ToString();
-            string result_Message = resultJObject["message"].ToString();
+            string result_Result = resultJObject["result"].ToString().Trim();
+            string result_Message = resultJObject["message"].ToString().Trim();
+            result_Message = Regex.Replace(result_Message, "(?smi)<[^>]+>", "");
             if (result_Result == "success")
             {
                 LogSuccess($"撤回 {sellerId} 响应 {result_Message}");

@@ -99,6 +99,23 @@ namespace Nacollector
             {
                 Logging.Clear();
             }
+
+            // 升级操作
+            public void appUpdateAction(string srcUrl, string updateType)
+            {
+                if (!File.Exists(Path.Combine(Application.StartupPath, "Naupdater.exe")))
+                {
+                    MessageBox.Show("升级 Naupdater.exe 模块丢失，无法升级", "未找到 Naupdater.exe", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                Process process = new Process();
+                process.StartInfo.FileName = "Naupdater.exe";
+                process.StartInfo.WorkingDirectory = Application.StartupPath;
+                process.StartInfo.Arguments = $"-{updateType} \"{srcUrl}\"";
+                // MessageBox.Show($"-{updateType} \"{srcUrl}\"");
+                process.Start();
+            }
         }
 
         /// <summary>

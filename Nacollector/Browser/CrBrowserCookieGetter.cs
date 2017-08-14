@@ -43,12 +43,16 @@ namespace Nacollector.Browser
             // 新建一个 form
             form = new Form()
             {
-                ClientSize = new Size(1150, 698),
+                ClientSize = new Size(1300, 700),
                 ShowIcon = false,
                 MinimizeBox = false,
                 StartPosition = FormStartPosition.CenterScreen,
                 Text = caption,
             };
+            form.FormClosing += ((s, e) =>
+            {
+                form.DialogResult = DialogResult.OK;
+            });
 
             // 浏览器 初始化
             browser = new ChromiumWebBrowser(StartUrl)
@@ -103,7 +107,10 @@ namespace Nacollector.Browser
         {
             if (browser == null) return;
             form.Controls.Add(browser);
-            form.ShowDialog();
+            MainForm._mainForm.Invoke(new Action(() =>
+            {
+                form.ShowDialog();
+            }));
         }
 
         /// <summary>
@@ -135,7 +142,10 @@ namespace Nacollector.Browser
             // 关闭窗体
             if (form != null && !form.IsDisposed)
             {
-                form.Close();
+                MainForm._mainForm.Invoke(new Action(() =>
+                {
+                    form.Close();
+                }));
             }
 
             // 清理 Cookie
@@ -333,18 +343,19 @@ namespace Nacollector.Browser
                 switch ((int)commandId)
                 {
                     case GetCurrentCookie:
-                        _this.form.Invoke(new Action(() =>
-                        {
-                            _this.EndWork(browserControl.Address);
-                        }));
+                        _this.EndWork(browserControl.Address);
                         break;
 
                     case InputCookie:
-                        _this.form.Invoke(new Action(() => {
-                            string cookieStr = "";
+                        string cookieStr = "";
+                        _this.form.Invoke(new Action(() =>
+                        {
                             cookieStr = Utils.InputDialog("输入 Cookie 字符串 (通过 Chrome EditThisCookie 扩展完整获取)", "手动输入 Cookie");
-                            _this.EndWork(null, cookieStr);
                         }));
+                        if (!string.IsNullOrEmpty(cookieStr))
+                            _this.EndWork(null, cookieStr);
+                        else
+                            MessageBox.Show("Cookie 字符串不能为空", "手动输入 Cookie", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         break;
 
                     case ShowDevTools:

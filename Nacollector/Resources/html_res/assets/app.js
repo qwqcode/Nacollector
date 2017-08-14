@@ -24,11 +24,17 @@ $(document).ready(function () {
     downloads.init();
     // 设置初始化
     setting.init();
+    // 设置程序当前版本号
+    AppAction.getVersion().then(function (version) {
+        AppAction.version = version;
+        // 检测更新
+        AppUpdate.check(true);
+    });
 });
 
 /**
  * functions in .cs
- * @type {{getVersion, _utilsReqIeProxy, logFileClear}}
+ * @type {{getVersion, _utilsReqIeProxy, logFileClear, appUpdateAction}}
  */
 window.AppAction = AppAction || {};
 window.AppAction.utilsReqIeProxy = function (isEnable) {
@@ -312,6 +318,10 @@ window.AppNavbar.btn = {
             Form.textInput('PageUrl', '店铺搜索页链接', '', inputValidators.isUrl);
             Form.numberInput('CollBeginPage', '采集开始页码', 1, 1);
             Form.numberInput('CollEndPage', '采集结束页码', undefined, 1);
+            Form.selectInput('IgnoreTmall', '忽略天猫卖家', {
+                "on": "开启",
+                "off": "关闭"
+            });
         }
     };
     window.SpiderList.Business.TmallGxptInvite = {
@@ -1607,7 +1617,7 @@ window.setting = {
             });
         });
         itemAt(groupMaintenance).btnBlock('检查更新', function () {
-            AppLayer.notify.success('无更新');
+            AppUpdate.check(false);
         });
 
         var groupAbout = group('about', '关于');
@@ -1619,6 +1629,47 @@ window.setting = {
         itemAt(groupAbout).infoShow('Email', '1149527164@qq.com');
         itemAt(groupAbout).infoShow('Blog', '<a href="http://www.qwqaq.com" target="_blank">http://www.qwqaq.com</a>');
         itemAt(groupAbout).infoShow('GitHub', '<a href="https://github.com/Zneiat" target="_blank">https://github.com/Zneiat</a>');
+    }
+};
+
+// 升级检测
+window.AppUpdate = {
+    check: function (atDocumentReady) {
+        atDocumentReady = atDocumentReady || false;
+        var ajaxOpt = {
+            type: 'GET',
+            url: 'http://tools.qwqaq.com/nacollector-updare-query.php',
+            dataType: 'json',
+            data: {'token': 'TmFjb2xsZWN0b3JCeVpuZWlhdEluMjAxNzA4UUQ='},
+            beforeSend: function() {}
+        };
+        ajaxOpt.success = function (json) {
+            var UpdateVersion = json['latest'] || null;
+            if (!!UpdateVersion && UpdateVersion !== AppAction.version) {
+                // 有更新
+                var UpdateLog = (!!json['updateLog'] && json['updateLog'].hasOwnProperty(UpdateVersion)) ? json['updateLog'][UpdateVersion] : '无说明';
+
+                AppLayer.dialog.open('Nacollector 可更新至 ' + json['latest'] + ' 版本', UpdateLog,
+                    ['现在更新', function () {
+                        if (!json['updateRes'] || !json['updateRes'].hasOwnProperty(UpdateVersion)) {
+                            AppLayer.notify.error('更新地址获取失败');
+                            return;
+                        }
+                        var updateType = 'a';
+                        if (!!json['updateType'] && json['updateType'].hasOwnProperty(UpdateVersion)) {
+                            updateType = json['updateType'][UpdateVersion];
+                        }
+                        AppAction.appUpdateAction(json['updateRes'][UpdateVersion], updateType);
+                    }],
+                    ['以后再说', function () {}]);
+            } else {
+                if (!atDocumentReady) AppLayer.notify.success('暂无更新');
+            }
+        };
+        ajaxOpt.error = function () {
+            if (!atDocumentReady) AppLayer.notify.success('更新信息获取失败');
+        };
+        $.ajax(ajaxOpt);
     }
 };
 
