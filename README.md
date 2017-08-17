@@ -18,6 +18,8 @@ Nothing... Just C# Web App....
 
 ![20170817173505](https://raw.githubusercontent.com/Zneiat/Nacollector/master/screenshots/20170817173505.png)
 
+![20170817173516](https://raw.githubusercontent.com/Zneiat/Nacollector/master/screenshots/20170817173516.png)
+
 ![20170817173551](https://raw.githubusercontent.com/Zneiat/Nacollector/master/screenshots/20170817173551.png)
 
 ![20170817173613](https://raw.githubusercontent.com/Zneiat/Nacollector/master/screenshots/20170817173613.png)
