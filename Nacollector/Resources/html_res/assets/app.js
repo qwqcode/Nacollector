@@ -1,5 +1,5 @@
 ﻿/**
- * Created by Zneia on 2017/7/15.
+ * Created by Zneiat on 2017/7/15.
  */
 
 /**
@@ -1616,25 +1616,29 @@ window.setting = {
                 AppLayer.notify.success('日志文件已清理');
             });
         });
-        itemAt(groupMaintenance).btnBlock('检查更新', function () {
-            AppUpdate.check(false);
+        var updateBtn = itemAt(groupMaintenance).btnBlock('检查更新', function () {
+            updateBtn.text("正在检查更新...");
+            AppUpdate.check(false, function () {
+                updateBtn.text("检查更新");
+            });
         });
-
         var groupAbout = group('about', '关于');
         var infoAppVersion = itemAt(groupAbout).infoShow('版本号', '').find('.value');
         AppAction.getVersion().then(function (version) {
             infoAppVersion.text(version);
         });
-        itemAt(groupAbout).infoShow('作者', 'ZNEIAT');
-        itemAt(groupAbout).infoShow('Email', '1149527164@qq.com');
-        itemAt(groupAbout).infoShow('Blog', '<a href="http://www.qwqaq.com" target="_blank">http://www.qwqaq.com</a>');
-        itemAt(groupAbout).infoShow('GitHub', '<a href="https://github.com/Zneiat" target="_blank">https://github.com/Zneiat</a>');
+        itemAt(groupAbout).infoShow('作者', '<a href="https://github.com/Zneiat" target="_blank">ZNEIAT</a>');
+        itemAt(groupAbout).infoShow('联系', '1149527164@qq.com');
+        itemAt(groupAbout).infoShow('博客', '<a href="http://www.qwqaq.com" target="_blank">http://www.qwqaq.com</a>');
+        itemAt(groupAbout).infoShow('GitHub', '<a href="https://github.com/Zneiat/Nacollector" target="_blank">Zneiat/Nacollector</a>');
+        itemAt(groupAbout).infoShow('', '<a href="https://github.com/Zneiat/Nacollector/blob/master/LICENSE" target="_blank">未经允许程序和衍生品不得用于商业用途，侵权必究</a>');
+        itemAt(groupAbout).infoShow('', '<a href="https://github.com/Zneiat/Nacollector" target="_blank">Nacollector</a> Copyright (C) 2018 <a href="https://github.com/Zneiat" target="_blank">Zneiat</a>');
     }
 };
 
 // 升级检测
 window.AppUpdate = {
-    check: function (atDocumentReady) {
+    check: function (atDocumentReady, onFinish) {
         atDocumentReady = atDocumentReady || false;
         var ajaxOpt = {
             type: 'GET',
@@ -1644,6 +1648,7 @@ window.AppUpdate = {
             beforeSend: function() {}
         };
         ajaxOpt.success = function (json) {
+            !!onFinish ? onFinish(json) : null;
             var UpdateVersion = json['latest'] || null;
             if (!!UpdateVersion && UpdateVersion !== AppAction.version) {
                 // 有更新

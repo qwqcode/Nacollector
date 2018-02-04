@@ -325,8 +325,15 @@ namespace Nacollector.Spiders.Business
                     // http://www.cnblogs.com/doforfuture/p/6293926.html
                     ThreadPool.QueueUserWorkItem(m =>
                     {
-                        Utils.DownloadImgByUrl(imgSrc, downloadTempPath, imgType + "_" + number.ToString());
-                        LogSuccess($"下载完毕 {imgSrcUrl}");
+                        string errorMsg = null;
+                        try
+                        {
+                            Utils.DownloadImgByUrl(imgSrc, downloadTempPath, imgType + "_" + number.ToString());
+                        } catch (Exception e) { errorMsg = e.Message; }
+                        if (errorMsg == null)
+                            LogSuccess($"下载完毕 {imgSrcUrl}");
+                        else
+                            LogWarning($"下载错误 已忽略 {imgSrcUrl} {errorMsg}");
                         doneTotal++;
                     });
                     imgIndex++;
