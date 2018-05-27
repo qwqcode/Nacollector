@@ -30,7 +30,8 @@ Nacollector 是一个实用的电商工具箱，或者说是一个卖家工具�
 - And More
 
 ## Donate
-如果你觉得这个 APP 不错，欢迎捐赠，维持本项目持续地发展
+如果您觉得我的项目对您有帮助，并且您愿意给予我一点小小的支持，您可以通过以下方式向我捐赠，这样可以维持项目持续地发展，非常感谢！ヽ(•̀ω•́ )ゝ
+
 If you are enjoying this app, please consider making a donation to keep it alive.
 
 | Alipay | Wechat | 
