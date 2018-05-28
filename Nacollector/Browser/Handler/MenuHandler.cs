@@ -24,6 +24,8 @@ namespace Nacollector.Browser.Handler
         private const int SaveLink = 26504;
         private const int CopyLink = 26505;
         private const int LinkOpenDefaultBrowser = 26506;
+        private const int LinkToZneiatProject = 26507;
+        private const int FeedbackProject = 26508;
 
         void IContextMenuHandler.OnBeforeContextMenu(IWebBrowser browserControl, IBrowser browser, IFrame frame, IContextMenuParams parameters, IMenuModel model)
         {
@@ -77,7 +79,9 @@ namespace Nacollector.Browser.Handler
             {
                 if (_showReload)
                     model.AddItem(CefMenuCommand.ReloadNoCache, "刷新 (ReloadNoCache)");
-                model.AddItem((CefMenuCommand)ShowDevTools, "检查 (ShowDevTools)");
+                model.AddItem((CefMenuCommand)FeedbackProject, "反馈问题");
+                model.AddItem((CefMenuCommand)LinkToZneiatProject, "开源项目");
+                // model.AddItem((CefMenuCommand)ShowDevTools, "检查 (ShowDevTools)");
             }
         }
 
@@ -107,6 +111,12 @@ namespace Nacollector.Browser.Handler
 
                 case LinkOpenDefaultBrowser:
                     System.Diagnostics.Process.Start("explorer.exe", parameters.UnfilteredLinkUrl);
+                    break;
+                case LinkToZneiatProject:
+                    System.Diagnostics.Process.Start("https://github.com/Zneiat/Nacollector");
+                    break;
+                case FeedbackProject:
+                    System.Diagnostics.Process.Start("https://github.com/Zneiat/Nacollector/issues");
                     break;
             }
 

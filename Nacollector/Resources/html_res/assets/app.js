@@ -1,5 +1,6 @@
 ﻿/**
  * Created by Zneiat on 2017/7/15.
+ * https://github.com/Zneiat/Nacollector
  */
 
 /**
@@ -29,6 +30,12 @@ $(document).ready(function () {
         AppAction.version = version;
         // 检测更新
         AppUpdate.check(true);
+    });
+    // 开发者工具显示方式
+    $(document).keydown(function (e) {
+        if (e.altKey && event.keyCode === 123) {
+            AppAction.showDevTools();
+        }
     });
 });
 
@@ -1631,7 +1638,7 @@ window.setting = {
         itemAt(groupAbout).infoShow('联系', '1149527164@qq.com');
         itemAt(groupAbout).infoShow('博客', '<a href="http://www.qwqaq.com" target="_blank">http://www.qwqaq.com</a>');
         itemAt(groupAbout).infoShow('GitHub', '<a href="https://github.com/Zneiat/Nacollector" target="_blank">Zneiat/Nacollector</a>');
-        itemAt(groupAbout).infoShow('', '<a href="https://github.com/Zneiat/Nacollector/blob/master/LICENSE" target="_blank">未经允许程序和衍生品不得用于商业用途，侵权必究</a>');
+        itemAt(groupAbout).infoShow('', '<a href="https://github.com/Zneiat/Nacollector" target="_blank">未经允许程序和衍生品不得用于商业用途，侵权必究</a>');
         itemAt(groupAbout).infoShow('', '<a href="https://github.com/Zneiat/Nacollector" target="_blank">Nacollector</a> Copyright (C) 2018 <a href="https://github.com/Zneiat" target="_blank">Zneiat</a>');
     }
 };
@@ -1642,9 +1649,9 @@ window.AppUpdate = {
         atDocumentReady = atDocumentReady || false;
         var ajaxOpt = {
             type: 'GET',
-            url: 'http://tools.qwqaq.com/nacollector-updare-query.php',
+            url: AppConfig.updateCheckUrl,
             dataType: 'json',
-            data: {'token': 'TmFjb2xsZWN0b3JCeVpuZWlhdEluMjAxNzA4UUQ='},
+            data: {'token': AppConfig.updateCheckToken},
             beforeSend: function() {}
         };
         ajaxOpt.success = function (json) {

@@ -48,8 +48,8 @@ namespace Nacollector
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            // 设置窗体透明
-            SetOpacity(0);
+            // 程序启动画面
+            SetIsStarting(true);
         }
 
         private void InitBrowser()
@@ -67,14 +67,14 @@ namespace Nacollector
             crBrowser.GetBrowser().FrameLoadEnd += new EventHandler<FrameLoadEndEventArgs>(Browser_FrameLoadEnd); // 浏览器初始化完毕时执行
 
             crDownloads = new CrDownloads(crBrowser);
-
+            
             ContentPanel.Controls.Add(crBrowser.GetBrowser());
         }
-        
+
         private void Browser_FrameLoadEnd(object sender, FrameLoadEndEventArgs e)
         {
-            // 取消设置窗体透明
-            SetOpacity(1);
+            // 关闭程序启动画面
+            SetIsStarting(false);
         }
 
         /// <summary>
@@ -85,7 +85,13 @@ namespace Nacollector
             // 获取程序版本
             public string getVersion()
             {
+                crBrowser.RunJS($"AppConfig.updateCheckUrl=\"{GlobalConstant.UpdateCheckUrl}\";AppConfig.updateCheckToken=\"{GlobalConstant.UpdateCheckToken}\"");
                 return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            }
+
+            public void showDevTools()
+            {
+                crBrowser.GetBrowser().ShowDevTools();
             }
 
             // 采集是否使用IE代理请求
@@ -210,16 +216,40 @@ namespace Nacollector
             Utils.ReleaseMemory(true);
         }
 
-        /// <summary>
-        /// 设置窗体透明度
-        /// </summary>
-        public void SetOpacity(int value)
-        {
-            if (this.InvokeRequired) { this.Invoke(new SetOpacityDelegate(SetOpacity), new object[] { value }); return; }
 
-            this.Opacity = value;
+        private Form startingForm;
+
+        /// <summary>
+        /// 设置程序启动画面
+        /// </summary>
+        public void SetIsStarting(bool isStarting)
+        {
+            if (this.InvokeRequired) { this.Invoke(new SetIsStartingDelegate(SetIsStarting), new object[] { isStarting }); return; }
+
+            if (isStarting)
+            {
+                startingForm = new Form
+                {
+                    Size = new Size(640, 400),
+                    TopMost = true,
+                    ControlBox = false,
+                    ShowInTaskbar = false,
+                    AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                    FormBorderStyle = FormBorderStyle.None,
+                    StartPosition = FormStartPosition.CenterScreen,
+                    BackgroundImageLayout = ImageLayout.Zoom,
+                    BackgroundImage = Properties.Resources.StartingImg
+                };
+                startingForm.Show();
+                this.Opacity = 0;
+            } else
+            {
+                startingForm.Hide();
+                this.Opacity = 1;
+            }
+            
         }
-        public delegate void SetOpacityDelegate(int value);
+        public delegate void SetIsStartingDelegate(bool isStarting);
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
