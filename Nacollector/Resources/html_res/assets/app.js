@@ -1638,7 +1638,7 @@ window.setting = {
         itemAt(groupAbout).infoShow('联系', '1149527164@qq.com');
         itemAt(groupAbout).infoShow('博客', '<a href="http://www.qwqaq.com" target="_blank">http://www.qwqaq.com</a>');
         itemAt(groupAbout).infoShow('GitHub', '<a href="https://github.com/Zneiat/Nacollector" target="_blank">Zneiat/Nacollector</a>');
-        itemAt(groupAbout).infoShow('', '<a href="https://github.com/Zneiat/Nacollector" target="_blank">未经允许程序和衍生品不得用于商业用途，侵权必究</a>');
+        itemAt(groupAbout).infoShow('', '<a href="https://raw.githubusercontent.com/Zneiat/Nacollector/master/LICENSE" target="_blank">您使用 Nacollector 即视为您已阅读并同意本《Nacollector 用户使用许可协议》的约束</a>');
         itemAt(groupAbout).infoShow('', '<a href="https://github.com/Zneiat/Nacollector" target="_blank">Nacollector</a> Copyright (C) 2018 <a href="https://github.com/Zneiat" target="_blank">Zneiat</a>');
     }
 };

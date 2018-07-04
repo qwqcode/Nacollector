@@ -6,7 +6,7 @@ Nacollector 是一个实用的电商工具箱，或者说是一个卖家工具�
 
 [Nacollector 能做什么？](https://github.com/Zneiat/Nacollector/wiki/What-you-can-do-with-Nacollector)
 
-> 本项目使用 GPL3.0 开源协议，未经允许代码和衍生品不得用于商业用途，侵权必究
+> 未经允许代码和衍生品不得用于商业用途，侵权必究
 
 #### Features
 - Material Design
@@ -41,6 +41,9 @@ If you are enjoying this app, please consider making a donation to keep it alive
 捐赠者的名字将保存于 [捐赠者列表](https://github.com/Zneiat/donate-qwqaq)，非常感谢你们的支持
 
 ## License
+
+未经允许代码和衍生品不得用于商业用途，侵权必究
+
 [Nacollector](https://github.com/Zneiat/Nacollector) Copyright (C) 2018 [Zneiat](http://www.qwqaq.com "Author Blog")
 
 ## Author
