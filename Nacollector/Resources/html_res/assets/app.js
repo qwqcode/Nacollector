@@ -1,6 +1,6 @@
 ﻿/**
- * Created by Zneiat on 2017/7/15.
- * https://github.com/Zneiat/Nacollector
+ * Created by qwqcode on 2017/7/15.
+ * https://github.com/qwqcode/Nacollector
  */
 
 /**
@@ -432,7 +432,7 @@ window.TaskGen = {
                 // 取消显示 dropdown-option
                 dropdownOptionHide();
                 // 当前 li 置顶
-                $(this).insertBefore(dropdownOptionDom.find('li:first-child'));
+                // $(this).insertBefore(dropdownOptionDom.find('li:first-child'));
             });
             li.appendTo(dropdownOptionDom);
         });
@@ -1113,10 +1113,10 @@ AppNavbar.panel = {
         };
         // 自动调整位置
         panelObj.setPosition = function () {
-            var position = $.getPosition(btnDom);
+            var position = btnDom[0].getBoundingClientRect();
             var panelWidth = $(panelSel).outerWidth();
             $(panelSel)
-                .css('top', position['top'] + 'px')
+                .css('top', position['top'] - 25 + 'px')
                 .css('left', position['right'] - panelWidth + 'px');
         };
         // 显示
@@ -1634,12 +1634,12 @@ window.setting = {
         AppAction.getVersion().then(function (version) {
             infoAppVersion.text(version);
         });
-        itemAt(groupAbout).infoShow('作者', '<a href="https://github.com/Zneiat" target="_blank">ZNEIAT</a>');
+        itemAt(groupAbout).infoShow('作者', '<a href="https://github.com/qwqcode" target="_blank">qwqcode</a>');
         itemAt(groupAbout).infoShow('联系', '1149527164@qq.com');
-        itemAt(groupAbout).infoShow('博客', '<a href="http://www.qwqaq.com" target="_blank">http://www.qwqaq.com</a>');
-        itemAt(groupAbout).infoShow('GitHub', '<a href="https://github.com/Zneiat/Nacollector" target="_blank">Zneiat/Nacollector</a>');
-        itemAt(groupAbout).infoShow('', '<a href="https://raw.githubusercontent.com/Zneiat/Nacollector/master/LICENSE" target="_blank">您使用 Nacollector 即视为您已阅读并同意本《Nacollector 用户使用许可协议》的约束</a>');
-        itemAt(groupAbout).infoShow('', '<a href="https://github.com/Zneiat/Nacollector" target="_blank">Nacollector</a> Copyright (C) 2018 <a href="https://github.com/Zneiat" target="_blank">Zneiat</a>');
+        itemAt(groupAbout).infoShow('博客', '<a href="https://qwqaq.com" target="_blank">qwqaq.com</a>');
+        itemAt(groupAbout).infoShow('GitHub', '<a href="https://github.com/qwqcode/Nacollector" target="_blank">qwqcode/Nacollector</a>');
+        itemAt(groupAbout).infoShow('', '<a href="https://raw.githubusercontent.com/qwqcode/Nacollector/master/LICENSE" target="_blank">您使用 Nacollector 即视为您已阅读并同意本《Nacollector 用户使用许可协议》的约束</a>');
+        itemAt(groupAbout).infoShow('', '<a href="https://github.com/qwqcode/Nacollector" target="_blank">Nacollector</a> Copyright (C) 2018 <a href="https://qwqaq.com" target="_blank">qwqaq.com</a>');
     }
 };
 

@@ -81,7 +81,9 @@ namespace Nacollector.Browser.Handler
                     model.AddItem(CefMenuCommand.ReloadNoCache, "刷新 (ReloadNoCache)");
                 model.AddItem((CefMenuCommand)FeedbackProject, "反馈问题");
                 model.AddItem((CefMenuCommand)LinkToZneiatProject, "开源项目");
-                // model.AddItem((CefMenuCommand)ShowDevTools, "检查 (ShowDevTools)");
+# if DEBUG
+                model.AddItem((CefMenuCommand)ShowDevTools, "检查 (ShowDevTools)");
+# endif
             }
         }
 

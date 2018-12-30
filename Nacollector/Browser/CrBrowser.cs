@@ -1,6 +1,7 @@
 ﻿using CefSharp;
 using CefSharp.WinForms;
 using Nacollector.Browser.Handler;
+using Nacollector.Util;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -14,10 +15,13 @@ namespace Nacollector.Browser
 {
     public class CrBrowser
     {
+        private MainForm form;
         private ChromiumWebBrowser browser;
 
-        public CrBrowser(string address)
+        public CrBrowser(MainForm form, string address)
         {
+            this.form = form;
+
             // 初始化浏览器
             browser = new ChromiumWebBrowser(address);
 
@@ -33,6 +37,7 @@ namespace Nacollector.Browser
             browser.MenuHandler = new MenuHandler();
             browser.LifeSpanHandler = new LifeSpanHandler();
             browser.LoadHandler = new LoadHandler();
+            browser.DragHandler = new DragDropHandler();
 
             browser.FrameLoadEnd += new EventHandler<FrameLoadEndEventArgs>(Browser_onFrameLoadEnd);
             browser.IsBrowserInitializedChanged += new EventHandler<IsBrowserInitializedChangedEventArgs>(Browser_onIsBrowserInitializedChanged);
@@ -45,8 +50,39 @@ namespace Nacollector.Browser
         }
         
         // 浏览器初始化完毕时执行
-        private void Browser_onIsBrowserInitializedChanged(object sender, IsBrowserInitializedChangedEventArgs e)
+        private void Browser_onIsBrowserInitializedChanged(object sender, IsBrowserInitializedChangedEventArgs args)
         {
+            if (args.IsBrowserInitialized)
+            {
+                // 设置鼠标按下操作
+                ChromeWidgetMessageInterceptor.SetupLoop(browser, (message) =>
+                {
+                    Point point = new Point(message.LParam.ToInt32());
+                    if (((DragDropHandler)browser.DragHandler).draggableRegion.IsVisible(point))
+                    {
+                        // 若现在鼠标指针在可拖动区域内
+                        if (message.Msg == (int)WindowMessages.WM_LBUTTONDBLCLK) // 鼠标左键双击
+                        {
+                            form.Invoke((MethodInvoker)delegate
+                            {
+                                form.ToggleMaximize();
+                            });
+                        }
+                        else if (message.Msg == (int)WindowMessages.WM_LBUTTONDOWN) // 鼠标左键按下
+                        {
+                            NativeMethods.ReleaseCapture();
+                            form.SendHandleMessage(); // 执行 模拟标题栏拖动
+                        }
+                        else if (message.Msg == (int)WindowMessages.WM_RBUTTONDOWN) // 鼠标右键按下
+                        {
+                            form.Invoke((MethodInvoker)delegate
+                            {
+                                form.ShowSystemMenu(point);
+                            });
+                        }
+                    }
+                });
+            }
         }
 
         /// <summary>

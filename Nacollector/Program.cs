@@ -1,4 +1,5 @@
 ﻿using CefSharp;
+using CefSharp.WinForms;
 using Microsoft.Win32;
 using Nacollector.Util;
 using System;

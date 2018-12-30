@@ -15,7 +15,7 @@ namespace Nacollector.Browser.Handler
         public event EventHandler<DownloadUpdatedEventArgs> OnDownloadUpdatedFired;
 
         // 下载之前（单个下载任务 只会执行一次，从这里获取 downloadItem.SuggestedFileName）
-        public void OnBeforeDownload(IBrowser browser, DownloadItem downloadItem, IBeforeDownloadCallback callback)
+        public void OnBeforeDownload(IWebBrowser chromiumWebBrowser, IBrowser browser, DownloadItem downloadItem, IBeforeDownloadCallback callback)
         {
             var handler = OnBeforeDownloadFired;
             if (handler != null)
@@ -39,7 +39,7 @@ namespace Nacollector.Browser.Handler
         }
 
         // 当下载任务信息更新
-        public void OnDownloadUpdated(IBrowser browser, DownloadItem downloadItem, IDownloadItemCallback callback)
+        public void OnDownloadUpdated(IWebBrowser chromiumWebBrowser, IBrowser browser, DownloadItem downloadItem, IDownloadItemCallback callback)
         {
             var handler = OnDownloadUpdatedFired;
             if (handler != null)

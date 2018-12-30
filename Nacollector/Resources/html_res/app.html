@@ -19,7 +19,22 @@
     <script src="./assets/app.js"></script>
 </head>
 <body>
-    <div class="top-nav-bar"></div>
+    <header class="title-bar blur" oncontextmenu="return false">
+        <div class="title-bar-inner">
+            <div class="controls">
+                <div class="window-icon-bg" id="HeaderBtnMinimize">
+                    <div class="window-icon window-minimize" onclick="AppAction.appMin();"></div>
+                </div>
+                <div class="window-icon-bg" id="HeaderBtnMaximize" onclick="AppAction.appMaxMini();">
+                    <div class="window-icon window-maximize" :class="{ 'window-maximize': !this.isMaximized, 'window-unmaximize': this.isMaximized }"></div>
+                </div>
+                <div class="window-icon-bg red" id="HeaderBtnClose" onclick="AppAction.appClose();">
+                    <div class="window-icon window-close"></div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <div class="top-nav-bar" oncontextmenu="return false"></div>
     <div class="wrap">
         <div class="taskgen">
             <div class="container">

@@ -1,9 +1,10 @@
 ﻿using CefSharp;
 using CefSharp.WinForms;
-using MaterialSkin;
 using Nacollector.Browser;
 using Nacollector.Browser.Handler;
+using Nacollector.JsActions;
 using Nacollector.Spiders;
+using Nacollector.Ui;
 using Nacollector.Util;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -16,6 +17,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,7 +25,7 @@ using System.Windows.Forms;
 
 namespace Nacollector
 {
-    public partial class MainForm : MaterialSkin.Controls.MaterialForm
+    public partial class MainForm : FormBase
     {
         public static MainForm _mainForm;
         public static CrBrowser crBrowser;
@@ -32,24 +34,9 @@ namespace Nacollector
         public MainForm()
         {
             _mainForm = this;
-            
-            InitSkin(); // 初始化窗体皮肤
+
             InitializeComponent(); // 初始化控件
             InitBrowser(); // 初始化浏览器
-        }
-
-        private void InitSkin()
-        {
-            MaterialSkinManager skinManager = MaterialSkinManager.Instance;
-            skinManager.AddFormToManage(this);
-            skinManager.Theme = MaterialSkinManager.Themes.DARK;
-            skinManager.ColorScheme = new ColorScheme(Primary.Blue800, Primary.Blue800, Primary.Blue500, Accent.LightBlue200, TextShade.WHITE);
-        }
-
-        private void MainForm_Load(object sender, EventArgs e)
-        {
-            // 程序启动画面
-            SetIsStarting(true);
         }
 
         private void InitBrowser()
@@ -61,104 +48,20 @@ namespace Nacollector
                 Application.Exit(); // 退出程序
             }
             
-            crBrowser = new CrBrowser(htmlPath);
-            crBrowser.GetBrowser().RegisterAsyncJsObject("AppAction", new AppActionForJs());
-            crBrowser.GetBrowser().RegisterAsyncJsObject("TaskController", new TaskControllerForJs());
-            crBrowser.GetBrowser().FrameLoadEnd += new EventHandler<FrameLoadEndEventArgs>(Browser_FrameLoadEnd); // 浏览器初始化完毕时执行
+            crBrowser = new CrBrowser(this, htmlPath);
+
+            // Need Update: https://github.com/cefsharp/CefSharp/issues/2246
+
+            //For legacy biding we'll still have support for
+            CefSharpSettings.LegacyJavascriptBindingEnabled = true;
+            crBrowser.GetBrowser().RegisterAsyncJsObject("AppAction", new AppAction(this, crBrowser));
+            crBrowser.GetBrowser().RegisterAsyncJsObject("TaskController", new TaskControllerAction(this, crBrowser));
+
+            crBrowser.GetBrowser().FrameLoadEnd += new EventHandler<FrameLoadEndEventArgs>(SplashScreen_Browser_FrameLoadEnd); // 浏览器初始化完毕时执行
 
             crDownloads = new CrDownloads(crBrowser);
             
             ContentPanel.Controls.Add(crBrowser.GetBrowser());
-        }
-
-        private void Browser_FrameLoadEnd(object sender, FrameLoadEndEventArgs e)
-        {
-            // 关闭程序启动画面
-            SetIsStarting(false);
-        }
-
-        /// <summary>
-        /// 程序JS操作
-        /// </summary>
-        public class AppActionForJs
-        {
-            // 获取程序版本
-            public string getVersion()
-            {
-                crBrowser.RunJS($"AppConfig.updateCheckUrl=\"{GlobalConstant.UpdateCheckUrl}\";AppConfig.updateCheckToken=\"{GlobalConstant.UpdateCheckToken}\"");
-                return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
-            }
-
-            public void showDevTools()
-            {
-                crBrowser.GetBrowser().ShowDevTools();
-            }
-
-            // 采集是否使用IE代理请求
-            public void _utilsReqIeProxy(bool isEnable)
-            {
-                Utils.ReqIeProxy = isEnable;
-            }
-
-            // 日志文件清理
-            public void logFileClear()
-            {
-                Logging.Clear();
-            }
-
-            // 升级操作
-            public void appUpdateAction(string srcUrl, string updateType)
-            {
-                if (!File.Exists(Path.Combine(Application.StartupPath, "Naupdater.exe")))
-                {
-                    MessageBox.Show("升级 Naupdater.exe 模块丢失，无法升级", "未找到 Naupdater.exe", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-
-                Process process = new Process();
-                process.StartInfo.FileName = "Naupdater.exe";
-                process.StartInfo.WorkingDirectory = Application.StartupPath;
-                process.StartInfo.Arguments = $"-{updateType} \"{srcUrl}\"";
-                // MessageBox.Show($"-{updateType} \"{srcUrl}\"");
-                process.Start();
-            }
-        }
-
-        /// <summary>
-        /// 任务控制器
-        /// </summary>
-        public class TaskControllerForJs
-        {
-            private Dictionary<string, Thread> taskThreads = new Dictionary<string, Thread>();
-
-            // 创建新任务
-            public void createTask(string taskId, string className, string classLabel, string parmsJsonStr)
-            {
-                // 配置
-                var settings = new SpiderSettings()
-                {
-                    TaskId = taskId,
-                    ClassName = className,
-                    ClassLabel = classLabel,
-                    ParmsJsonStr = parmsJsonStr
-                };
-                // 创建任务执行线程
-                var thread = new Thread(new ParameterizedThreadStart(_mainForm.StartTask));
-                thread.IsBackground = true;
-                thread.Start(settings);
-                // 加入 Threads Dictionary
-                taskThreads.Add(taskId, thread);
-            }
-
-            // 终止任务
-            public bool abortTask(string taskId)
-            {
-                if (!taskThreads.ContainsKey(taskId))
-                    return false;
-
-                taskThreads[taskId].Abort();
-                return true;
-            }
         }
 
         /// <summary>
@@ -216,41 +119,6 @@ namespace Nacollector
             Utils.ReleaseMemory(true);
         }
 
-
-        private Form startingForm;
-
-        /// <summary>
-        /// 设置程序启动画面
-        /// </summary>
-        public void SetIsStarting(bool isStarting)
-        {
-            if (this.InvokeRequired) { this.Invoke(new SetIsStartingDelegate(SetIsStarting), new object[] { isStarting }); return; }
-
-            if (isStarting)
-            {
-                startingForm = new Form
-                {
-                    Size = new Size(640, 400),
-                    TopMost = true,
-                    ControlBox = false,
-                    ShowInTaskbar = false,
-                    AutoSizeMode = AutoSizeMode.GrowAndShrink,
-                    FormBorderStyle = FormBorderStyle.None,
-                    StartPosition = FormStartPosition.CenterScreen,
-                    BackgroundImageLayout = ImageLayout.Zoom,
-                    BackgroundImage = Properties.Resources.StartingImg
-                };
-                startingForm.Show();
-                this.Opacity = 0;
-            } else
-            {
-                startingForm.Hide();
-                this.Opacity = 1;
-            }
-            
-        }
-        public delegate void SetIsStartingDelegate(bool isStarting);
-
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             // 是否退出弹窗
@@ -263,9 +131,13 @@ namespace Nacollector
 
             DialogResult dr = MessageBox.Show(dialogTxt, "退出 Nacollector", MessageBoxButtons.OKCancel);
             if (dr == DialogResult.OK)
+            {
                 e.Cancel = false;
+            }
             else
+            {
                 e.Cancel = true;
+            }
         }
     }
 }
