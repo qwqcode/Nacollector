@@ -42,12 +42,15 @@ namespace Nacollector
         private void InitBrowser()
         {
             // 初始化内置浏览器
-            string htmlPath = Utils.GetHtmlResPath("app.html");
+#if !DEBUG
+            string htmlPath = Utils.GetHtmlResPath("index.html");
             if (string.IsNullOrEmpty(htmlPath))
             {
                 Application.Exit(); // 退出程序
             }
-            
+#else
+            string htmlPath = "http://127.0.0.1:8080";
+#endif
             crBrowser = new CrBrowser(this, htmlPath);
 
             // Need Update: https://github.com/cefsharp/CefSharp/issues/2246
@@ -125,7 +128,7 @@ namespace Nacollector
             string dialogTxt = "确定退出 Nacollector？";
 
             // 下载任务数统计
-            int downloadingTaskNum = Convert.ToInt32(crBrowser.EvaluateScript("downloads.countDownloadingTask();", 0, TimeSpan.FromSeconds(3)).GetAwaiter().GetResult());
+            int downloadingTaskNum = Convert.ToInt32(crBrowser.EvaluateScript("Downloads.countDownloadingTask();", 0, TimeSpan.FromSeconds(3)).GetAwaiter().GetResult());
             if (downloadingTaskNum > 0)
                 dialogTxt = $"有 {downloadingTaskNum} 个下载任务仍在继续！确定结束下载并关闭程序？";
 

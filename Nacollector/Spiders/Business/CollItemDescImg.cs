@@ -1,4 +1,5 @@
 ﻿using CsQuery;
+using Nacollector.Browser;
 using Nacollector.Util;
 using Newtonsoft.Json.Linq;
 using System;
@@ -13,6 +14,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Web;
 
 namespace Nacollector.Spiders.Business
 {
@@ -36,20 +38,42 @@ namespace Nacollector.Spiders.Business
         public override void BeginWork()
         {
             base.BeginWork();
+
             // 参数设定
             PageUrl = GetParm("PageUrl"); // 若使用 new Uri() 会把 urlencode 的参数自动 decode
             PageType = GetParm("PageType");
             ImgType = GetParm("ImgType");
             CollType = GetParm("CollType");
+
             // 下载页面
             LogInfo("开始下载：" + PageUrl);
-            var downloadPage = Utils.GetPageByUrl(PageUrl);
+
+            // 选择页面格式
+            Dictionary<string, string> headers = new Dictionary<string, string> { };
+            Encoding encoding = Encoding.GetEncoding("UTF-8");
+            if (PageType.Equals("Alibaba"))
+            {
+                // 获取 Cookie
+                var browserCookieGetter = new CrBrowserCookieGetter(startUrl: "https://login.1688.com/member/signin.htm?from=sm&Done=" + HttpUtility.UrlEncode(PageUrl), endUrlReg: @"^" + PageUrl.Substring(0, PageUrl.IndexOf("?")), caption: "登录 1688");
+                browserCookieGetter.UseInputAutoComplete(@"^https://login\.1688.com/member/signin\.htm", new List<string>() { "#TPL_username_1", "#TPL_password_1" });
+                browserCookieGetter.BeginWork();
+                // ... Show Dialog Working
+                String alibabaCookieStr = browserCookieGetter.GetCookieStr();
+                if (string.IsNullOrEmpty(alibabaCookieStr)) { throw new Exception("Cookie 获取未成功"); }
+
+                encoding = Encoding.GetEncoding("gb2312");
+                headers.Add("cookie", alibabaCookieStr);
+            }
+
+            var downloadPage = Utils.GetPageByUrl(PageUrl, headers, null, encoding);
             if (downloadPage.StatusCode != System.Net.HttpStatusCode.OK) { throw new Exception("下载失败 [" + downloadPage.StatusCode + "] " + downloadPage.StatusDescription); }
             pageContent = downloadPage.Html;
             LogSuccess("下载完毕");
             pageDom = CQ.CreateDocument(pageContent);
+
             // 调用指定方法
             this.GetType().GetMethod(PageType + ImgType, BindingFlags.NonPublic | BindingFlags.Instance).Invoke(this, new object[] { });
+
             // 显示&采集
             AfterGetImgUrl();
         }
@@ -199,7 +223,7 @@ namespace Nacollector.Spiders.Business
         {
             pageDom[".imgzoom-thumb-main ul li img"].Each((i, e) => {
                 string picSrcUrl = e.GetAttribute("src-large");
-                AddImgUrl("主图", picSrcUrl.Replace("_800x800", ""));
+                AddImgUrl("主图", picSrcUrl.Replace("_800x800", "").Replace("_800w_800h_4e", ""));
             });
         }
 
@@ -207,7 +231,7 @@ namespace Nacollector.Spiders.Business
         {
             pageDom[".tip-infor img"].Each((i, e) => {
                 string picSrcUrl = e.GetAttribute("src");
-                AddImgUrl("分类图", picSrcUrl.Replace("_60x60", ""));
+                AddImgUrl("分类图", picSrcUrl.Replace("_60x60", "").Replace("_60w_60h_4e", ""));
             });
         }
 
@@ -276,9 +300,9 @@ namespace Nacollector.Spiders.Business
             if (imgUrlPool.Count == 0)
             {
                 throw new Exception(
-                    "喔豁！没有采集到任何的图片URL...\n" +
-                    "╮(╯▽╰)╭   怕是 " + PageTypeTranslation(PageType) + " 页面结构更新了？！\n" +
-                    "如果你觉得是，请 +Q: 1149527164 告诉我");
+                    "诶？！！没有采集到任何的图片...\n" +
+                    "Σ(っ °Д °;)っ   可能是 " + PageTypeTranslation(PageType) + " 页面结构更新了？！\n" +
+                    "快通过 QQ:1149527164 或 <a target=\"_blank\" href=\"https://github.com/qwqcode/Nacollector/issues\">GitHub issue</a> 向我反馈");
             }
             string typeTmp = "";
             foreach (string imgType in imgUrlPool.Keys)
@@ -291,7 +315,7 @@ namespace Nacollector.Spiders.Business
                 {
                     var number = imgIndex + 1;
                     var imgSrcUrl = imgUrlPool[imgType][imgIndex];
-                    Log($"[{number}]  <a href=\"{imgSrcUrl}\" target=\"_blank\" onclick=\"downloadFile($(this).text());return false;\" onmouseover=\"AppWidget.floatImg(this, $(this).text())\" >{imgSrcUrl}</a>");
+                    Log($"[{number}]  <a href=\"{imgSrcUrl}\" target=\"_blank\" onclick=\"AppAction.downloadUrl($(this).text());return false;\" onmouseover=\"AppWidget.floatImg(this, $(this).text())\" >{imgSrcUrl}</a>");
                     imgIndex++;
                 }
             }

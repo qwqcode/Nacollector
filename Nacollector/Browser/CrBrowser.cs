@@ -26,15 +26,20 @@ namespace Nacollector.Browser
             browser = new ChromiumWebBrowser(address);
 
             // BrowserSettings 必须在 Controls.Add 之前
-            BrowserSettings browserSettings = new BrowserSettings();
-            // browserSettings.WebSecurity = CefState.Disabled
-            browserSettings.FileAccessFromFileUrls = CefState.Enabled; // 必须 Enabled 不然 AJAX 请求 file:// 会显示 Cross origin requests are only supported for protocol schemes: http, data, chrome, chrome-extension, https.
-            browserSettings.UniversalAccessFromFileUrls = CefState.Enabled;
-            browserSettings.DefaultEncoding = "UTF-8";
-            browserSettings.BackgroundColor = (uint)ColorTranslator.FromHtml("#333333").ToArgb();
+            BrowserSettings browserSettings = new BrowserSettings
+            {
+                // FileAccessFromFileUrls 必须 Enabled
+                // 不然 AJAX 请求 file:// 会显示 
+                // Cross origin requests are only supported for protocol schemes: http, data, chrome, chrome-extension, https.
+                FileAccessFromFileUrls = CefState.Enabled,
+                UniversalAccessFromFileUrls = CefState.Enabled,
+                DefaultEncoding = "UTF-8",
+                BackgroundColor = (uint)ColorTranslator.FromHtml("#21252b").ToArgb()
+            };
+            browserSettings.WebSecurity = CefState.Disabled;
             browser.BrowserSettings = browserSettings;
             
-            browser.MenuHandler = new MenuHandler();
+            browser.MenuHandler = new MenuHandler(this);
             browser.LifeSpanHandler = new LifeSpanHandler();
             browser.LoadHandler = new LoadHandler();
             browser.DragHandler = new DragDropHandler();
@@ -42,7 +47,7 @@ namespace Nacollector.Browser
             browser.FrameLoadEnd += new EventHandler<FrameLoadEndEventArgs>(Browser_onFrameLoadEnd);
             browser.IsBrowserInitializedChanged += new EventHandler<IsBrowserInitializedChangedEventArgs>(Browser_onIsBrowserInitializedChanged);
         }
-        
+
         // Frame 加载完毕时执行
         private void Browser_onFrameLoadEnd(object sender, FrameLoadEndEventArgs e)
         {
@@ -70,8 +75,11 @@ namespace Nacollector.Browser
                         }
                         else if (message.Msg == (int)WindowMessages.WM_LBUTTONDOWN) // 鼠标左键按下
                         {
-                            NativeMethods.ReleaseCapture();
-                            form.SendHandleMessage(); // 执行 模拟标题栏拖动
+                            form.Invoke((MethodInvoker)delegate
+                            {
+                                NativeMethods.ReleaseCapture();
+                                NativeMethods.SendMessage(form.Handle, (int)WindowMessages.WM_NCLBUTTONDOWN, (int)HitTestValues.HTCAPTION, 0); // 执行 模拟标题栏拖动
+                            });
                         }
                         else if (message.Msg == (int)WindowMessages.WM_RBUTTONDOWN) // 鼠标右键按下
                         {
@@ -138,6 +146,13 @@ namespace Nacollector.Browser
                 }
             }
             return result;
+        }
+
+        public void DownloadUrl(string url)
+        {
+            var cefBrowser = browser.GetBrowser();
+            IBrowserHost ibwhost = cefBrowser == null ? null : cefBrowser.GetHost();
+            ibwhost.StartDownload(url);
         }
     }
 }

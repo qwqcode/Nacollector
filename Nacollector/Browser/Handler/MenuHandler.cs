@@ -11,10 +11,12 @@ namespace Nacollector.Browser.Handler
 {
     public class MenuHandler : IContextMenuHandler
     {
+        private CrBrowser crBrowser;
         private bool _showReload = false;
 
-        public MenuHandler(bool showReload = false)
+        public MenuHandler(CrBrowser crBrowser, bool showReload = false)
         {
+            this.crBrowser = crBrowser;
             _showReload = showReload;
         }
 
@@ -24,7 +26,7 @@ namespace Nacollector.Browser.Handler
         private const int SaveLink = 26504;
         private const int CopyLink = 26505;
         private const int LinkOpenDefaultBrowser = 26506;
-        private const int LinkToZneiatProject = 26507;
+        private const int LinkToQWQCODEProject = 26507;
         private const int FeedbackProject = 26508;
 
         void IContextMenuHandler.OnBeforeContextMenu(IWebBrowser browserControl, IBrowser browser, IFrame frame, IContextMenuParams parameters, IMenuModel model)
@@ -80,7 +82,7 @@ namespace Nacollector.Browser.Handler
                 if (_showReload)
                     model.AddItem(CefMenuCommand.ReloadNoCache, "刷新 (ReloadNoCache)");
                 model.AddItem((CefMenuCommand)FeedbackProject, "反馈问题");
-                model.AddItem((CefMenuCommand)LinkToZneiatProject, "开源项目");
+                model.AddItem((CefMenuCommand)LinkToQWQCODEProject, "开源项目");
 # if DEBUG
                 model.AddItem((CefMenuCommand)ShowDevTools, "检查 (ShowDevTools)");
 # endif
@@ -114,11 +116,11 @@ namespace Nacollector.Browser.Handler
                 case LinkOpenDefaultBrowser:
                     System.Diagnostics.Process.Start("explorer.exe", parameters.UnfilteredLinkUrl);
                     break;
-                case LinkToZneiatProject:
-                    System.Diagnostics.Process.Start("https://github.com/Zneiat/Nacollector");
+                case LinkToQWQCODEProject:
+                    System.Diagnostics.Process.Start("https://github.com/qwqcode/Nacollector");
                     break;
                 case FeedbackProject:
-                    System.Diagnostics.Process.Start("https://github.com/Zneiat/Nacollector/issues");
+                    System.Diagnostics.Process.Start("https://github.com/qwqcode/Nacollector/issues");
                     break;
             }
 
@@ -132,7 +134,7 @@ namespace Nacollector.Browser.Handler
         /// <param name="frame"></param>
         void ExecuteSaveFileByUrl(string url, IFrame frame)
         {
-            frame.ExecuteJavaScriptAsync("var a = document.createElement('a');a.setAttribute('href', \"" + url + "\");a.setAttribute('download','');a.click();");
+            crBrowser.DownloadUrl(url);
         }
 
         void IContextMenuHandler.OnContextMenuDismissed(IWebBrowser browserControl, IBrowser browser, IFrame frame)

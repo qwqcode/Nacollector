@@ -79,6 +79,12 @@ namespace Nacollector.JsActions
             Logging.Clear();
         }
 
+        // 调用浏览器下载文件
+        public void downloadUrl(string url)
+        {
+            crBrowser.DownloadUrl(url);
+        }
+
         // 升级操作
         public void appUpdateAction(string srcUrl, string updateType)
         {

@@ -178,7 +178,7 @@ namespace Nacollector
                     downloadUrl = downloadItem.OriginalUrl,
                     totalBytes = downloadItem.TotalBytes,
                 });
-                browser.ExecuteScriptAsync($"downloads.addTask({callbackObj})");
+                browser.ExecuteScriptAsync($"Downloads.addTask({callbackObj})");
             }
             else if (doType == "update")
             {
@@ -191,7 +191,7 @@ namespace Nacollector
                     fullPath = downloadItem.FullPath,
                     downloadUrl = downloadItem.Url
                 });
-                browser.ExecuteScriptAsync($"downloads.updateTask({callbackObj})");
+                browser.ExecuteScriptAsync($"Downloads.updateTask({callbackObj})");
             }
         }
     }

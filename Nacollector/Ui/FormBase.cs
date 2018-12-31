@@ -6,21 +6,9 @@ using Nacollector.JsActions;
 using Nacollector.Spiders;
 using Nacollector.Ui;
 using Nacollector.Util;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
 using System.Drawing;
-using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 
@@ -230,92 +218,10 @@ namespace Nacollector.Ui
                 msg.Result = NativeConstants.TRUE;
             }
         }
-    }
 
-    public partial class FormBase : Form
-    {
         public FormWindowState ToggleMaximize()
         {
             return WindowState = WindowState == FormWindowState.Maximized ? FormWindowState.Normal : FormWindowState.Maximized;
         }
-    }
-
-    public partial class FormBase : Form {
-        /**
-         * 模拟 操作系统的标准标题栏 拖动
-         */
-
-        [System.Runtime.InteropServices.DllImportAttribute("user32.dll")]
-        public static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
-        [System.Runtime.InteropServices.DllImportAttribute("user32.dll")]
-        public static extern bool ReleaseCapture();
-
-        public const int WM_NCLBUTTONDOWN = 0xA1;
-        public const int HT_CAPTION = 0x2;
-
-        // 界面线程执行拖动操作
-        public void SendHandleMessage()
-        {
-            if (InvokeRequired) { Invoke(new SendHandleMessageDelegate(SendHandleMessage), new object[] { }); return; }
-
-            SendMessage(Handle, WM_NCLBUTTONDOWN, HT_CAPTION, 0);
-        }
-        public delegate void SendHandleMessageDelegate();
-    }
-
-    public partial class FormBase : Form
-    {
-        protected Form startingForm;
-
-        /// <summary>
-        /// 设置程序启动画面
-        /// </summary>
-        protected void SetIsStarting(bool isStarting)
-        {
-            if (this.InvokeRequired) { this.Invoke(new SetIsStartingDelegate(SetIsStarting), new object[] { isStarting }); return; }
-
-            if (isStarting)
-            {
-                startingForm = new Form
-                {
-                    Size = new Size(640, 400),
-                    TopMost = true,
-                    ControlBox = false,
-                    ShowInTaskbar = false,
-                    AutoSizeMode = AutoSizeMode.GrowAndShrink,
-                    FormBorderStyle = FormBorderStyle.None,
-                    StartPosition = FormStartPosition.CenterScreen,
-                    BackgroundImageLayout = ImageLayout.Zoom,
-                    BackgroundImage = Properties.Resources.StartingImg,
-                    BackColor = ColorTranslator.FromHtml("#282c34")
-                };
-                startingForm.Show();
-                this.Opacity = 0;
-            }
-            else
-            {
-                startingForm.Hide();
-                this.Opacity = 1;
-            }
-
-        }
-        protected delegate void SetIsStartingDelegate(bool isStarting);
-
-        protected void SplashScreen_MainForm_Load(object sender, EventArgs e)
-        {
-            // 程序启动画面
-            SetIsStarting(true);
-        }
-
-        protected void SplashScreen_Browser_FrameLoadEnd(object sender, FrameLoadEndEventArgs e)
-        {
-            // 关闭程序启动画面
-            SetIsStarting(false);
-        }
-    }
-
-    public partial class FormBase : Form
-    {
-
     }
 }

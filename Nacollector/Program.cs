@@ -109,17 +109,23 @@ namespace Nacollector
         private static void InitCef()
         {
             Cef.EnableHighDPISupport();
-            var setting = new CefSettings();
-            setting.Locale = "zh-CN";
-            setting.AcceptLanguageList = "zh-CN,zh";
-            setting.LogFile = Utils.GetTempPath("cef.log");
-            setting.CachePath = Utils.GetTempPath("cef_cache");
-            setting.BrowserSubprocessPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Resources\cef_sharp\CefSharp.BrowserSubprocess.exe");
-            setting.LocalesDirPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Resources\cef_sharp\locales\");
-            setting.ResourcesDirPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Resources\cef_sharp\");
-            setting.RemoteDebuggingPort = 51228;
-            Cef.Initialize(setting, true, null);
-            // Cef.AddCrossOriginWhitelistEntry("https://", "http", "", true);
+            var settings = new CefSettings();
+            settings.CefCommandLineArgs.Add("--allow-file-access-from-files", "");
+            settings.CefCommandLineArgs.Add("--disable-web-security", "");
+            settings.Locale = "zh-CN";
+            settings.AcceptLanguageList = "zh-CN,zh";
+            settings.LogFile = Utils.GetTempPath("cef.log");
+            settings.CachePath = Utils.GetTempPath("cef_cache");
+            settings.BrowserSubprocessPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Resources\cef_sharp\CefSharp.BrowserSubprocess.exe");
+            settings.LocalesDirPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Resources\cef_sharp\locales\");
+            settings.ResourcesDirPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Resources\cef_sharp\");
+            settings.RemoteDebuggingPort = 51228;
+            /*settings.RegisterScheme(new CefCustomScheme()
+            {
+                SchemeName = ResourceSchemeHandlerFactory.SchemeName,
+                SchemeHandlerFactory = new ResourceSchemeHandlerFactory()
+            });*/
+            Cef.Initialize(settings, true, null);
         }
         
         private static int exited = 0;
