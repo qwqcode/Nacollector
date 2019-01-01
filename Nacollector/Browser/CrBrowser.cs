@@ -68,14 +68,14 @@ namespace Nacollector.Browser
                         // 若现在鼠标指针在可拖动区域内
                         if (message.Msg == (int)WindowMessages.WM_LBUTTONDBLCLK) // 鼠标左键双击
                         {
-                            form.Invoke((MethodInvoker)delegate
+                            form.BeginInvoke((MethodInvoker)delegate
                             {
                                 form.ToggleMaximize();
                             });
                         }
                         else if (message.Msg == (int)WindowMessages.WM_LBUTTONDOWN) // 鼠标左键按下
                         {
-                            form.Invoke((MethodInvoker)delegate
+                            form.BeginInvoke((MethodInvoker)delegate
                             {
                                 NativeMethods.ReleaseCapture();
                                 NativeMethods.SendMessage(form.Handle, (int)WindowMessages.WM_NCLBUTTONDOWN, (int)HitTestValues.HTCAPTION, 0); // 执行 模拟标题栏拖动
@@ -83,7 +83,7 @@ namespace Nacollector.Browser
                         }
                         else if (message.Msg == (int)WindowMessages.WM_RBUTTONDOWN) // 鼠标右键按下
                         {
-                            form.Invoke((MethodInvoker)delegate
+                            form.BeginInvoke((MethodInvoker)delegate
                             {
                                 form.ShowSystemMenu(point);
                             });
