@@ -8,25 +8,70 @@ So... [Nacollector 能做什么？](https://github.com/Zneiat/Nacollector/wiki/W
 
 在使用 Nacollector 前，请仔细阅读[《Nacollector 用户使用许可协议》](./LICENSE)
 
+#### 特性
+- Material Design
+- [CefSharp](https://github.com/cefsharp/CefSharp) 嵌入 Chromium，用 HTML/CSS/JS 制作前端 Ui
+- 前后端分离，[NacollectorFrontend](./NacollectorFrontend)
+- 前端 Console 实时采集日志
+- 多任务管理器，多个采集任务同时进行
+- 下载内容管理器，具有和 Chrome 一样的功能
+- Cookie 获取器（可手动导入 Cookie，自动填充，Cookie 记录，正则表达式配置规则）
+- 多线程异步采集实例
+- 资源快速预览
+- 支持使用代理
+- 在线/离线 自动更新
+- 以及更多...
+
+
 #### Features
 - Material Design
-- WEB 界面（使用 [CefSharp](https://github.com/cefsharp/CefSharp)）
-- 实时采集日志
-- 多任务管理器
-- 下载内容管理器
-- Cookie 获取器（可手动导入 Cookie）
-- 多线程异步采集
-- 使用网络代理
-- 在线更新
-- And More
+- [CefSharp](https://github.com/cefsharp/CefSharp) embed Chromium in the .NET app to use JS/HTML/CSS as Front-end UI
+- Separate Front-end and Back-end, [see NacollectorFrontend](./NacollectorFrontend)
+- Real-time collection logs in the Front-end Console
+- Multitasking Manager to manage multiple collection tasks
+- Download Content Manager like chrome browser
+- Cookie getter (manually import cookies, input auto-complete, keep cookies fresh longer, using regular expressions)
+- Multiple Async Tasks example
+- Resources Preview
+- Support for using proxy
+- Automatically update online/offline
+- And more...
 
 #### Requirements
 - NET >= 4.6.2
-
-#### Using
 - [CefSharp](https://github.com/cefsharp/CefSharp)
 - [CsQuery](https://github.com/jamietre/CsQuery)
 - Selenium.WebDriver
+
+## Builds
+
+#### Get the sources
+
+In order to make development easier, the frontend is included in the backend as a [git submodule](https://git-scm.com/book/en/v2/Git-Tools-Submodules).
+
+Then, in order to tinker with the sources, start by getting both repos at once with:
+
+``` bash
+git clone --recurse-submodules https://github.com/qwqcode/Nacollector.git
+```
+
+> NOTE: since it is a submodule, when developing the frontend remember to update the backend repo accordingly.
+
+#### Quick Start
+
+```bash
+# 1. clone
+git clone --recurse-submodules https://github.com/qwqcode/Nacollector.git
+cd Nacollector
+
+# 2. copy config files
+cp ./Nacollector/GlobalConstant.cs.example ./Nacollector/GlobalConstant.cs
+
+# 3. download `https://github.com/qwqcode/Nacollector/releases/download/1.3.0.0/CefSharp_v69.7z` to `./CefSharp/` and unpack
+
+# 4. open .sln by vs
+start Nacollector.sln
+```
 
 ## Donate
 如果您觉得我的项目对您有帮助，并且您愿意给予我一点小小的支持，您可以通过以下方式向我捐赠，这样可以维持项目持续地发展，非常感谢！ヽ(•̀ω•́ )ゝ

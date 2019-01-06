@@ -114,6 +114,9 @@
     <Compile Include="Browser\Handler\MenuHandler.cs" />
     <Compile Include="Browser\Handler\ResourceSchemeHandler .cs" />
     <Compile Include="Browser\Handler\ResourceSchemeHandlerFactory.cs" />
+    <Compile Include="Ui\Shadow.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Ui\DraggableRegion.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -142,7 +145,6 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Spiders\Business\CollItemDescImg.cs" />
-    <Compile Include="Spiders\Debug\Default.cs" />
     <Compile Include="Spiders\Spider.cs" />
     <Compile Include="Spiders\SpiderSettings.cs" />
     <Compile Include="Spiders\Business\TaobaoSellerColl.cs" />
