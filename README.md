@@ -11,7 +11,7 @@ So... [Nacollector 能做什么？](https://github.com/Zneiat/Nacollector/wiki/W
 #### 特性
 - Material Design
 - [CefSharp](https://github.com/cefsharp/CefSharp) 嵌入 Chromium，用 HTML/CSS/JS 制作前端 Ui
-- 前后端分离，[NacollectorFrontend](./NacollectorFrontend)
+- 前后端分离，[NacollectorFrontend](https://github.com/qwqcode/NacollectorFrontend)
 - 前端 Console 实时采集日志
 - 多任务管理器，多个采集任务同时进行
 - 下载内容管理器，具有和 Chrome 一样的功能
@@ -26,7 +26,7 @@ So... [Nacollector 能做什么？](https://github.com/Zneiat/Nacollector/wiki/W
 #### Features
 - Material Design
 - [CefSharp](https://github.com/cefsharp/CefSharp) embed Chromium in the .NET app to use JS/HTML/CSS as Front-end UI
-- Separate Front-end and Back-end, [see NacollectorFrontend](./NacollectorFrontend)
+- Separate Front-end and Back-end, [see NacollectorFrontend](https://github.com/qwqcode/NacollectorFrontend)
 - Real-time collection logs in the Front-end Console
 - Multitasking Manager to manage multiple collection tasks
 - Download Content Manager like chrome browser
