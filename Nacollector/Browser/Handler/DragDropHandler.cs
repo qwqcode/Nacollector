@@ -16,6 +16,7 @@ namespace Nacollector.Browser.Handler
     {
         public Region draggableRegion = new Region();
         public event Action<Region> RegionsChanged;
+        public bool Enable { get; set; } = true;
 
         public bool OnDragEnter(IWebBrowser browserControl, IBrowser browser, IDragData dragData, DragOperationsMask mask)
         {
@@ -24,10 +25,15 @@ namespace Nacollector.Browser.Handler
 
         public void OnDraggableRegionsChanged(IWebBrowser browserControl, IBrowser browser, IList<DraggableRegion> regions)
         {
+            if (!Enable)
+            {
+                return;
+            }
+
             if (browser.IsPopup == false)
             {
                 draggableRegion = null;
-                if (regions.Count > 0)
+                if (regions != null && regions.Count > 0)
                 {
                     foreach (var region in regions)
                     {

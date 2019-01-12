@@ -1,12 +1,16 @@
-<p align="center"><img src="./docs/NacollectorLogo_2.png"></p>
-
 # Nacollector
+
+<p align="center"><img src="./docs/NacollectorLogo_2.png"></p>
 
 > Nacollector 可以说是一个用于采集各种 WEB 资源的工作站？！ #(滑稽)
 
 So... [Nacollector 能做什么？](https://github.com/Zneiat/Nacollector/wiki/What-you-can-do-with-Nacollector)
 
 在使用 Nacollector 前，请仔细阅读[《Nacollector 用户使用许可协议》](./LICENSE)
+
+[![](https://img.shields.io/github/release/qwqcode/Nacollector.svg?style=for-the-badge)](https://github.com/qwqcode/Nacollector/releases/latest) ![](https://img.shields.io/badge/NET-%3E%3D%204.6.2-green.svg?style=for-the-badge) ![](https://img.shields.io/badge/BUILD%20WITH-%E2%9D%A4-red.svg?style=for-the-badge) [![](https://img.shields.io/gitter/room/qwqcode/Nacollector.svg?style=for-the-badge)](https://gitter.im/Nacollector/community) [![](https://img.shields.io/badge/%24-donate-ff69b4.svg?style=for-the-badge)](https://github.com/qwqcode/donate-qwqaq)
+
+[![](https://img.shields.io/github/downloads/qwqcode/Nacollector/total.svg?style=for-the-badge)](https://github.com/qwqcode/Nacollector/releases) [![](https://img.shields.io/github/last-commit/qwqcode/Nacollector.svg?style=for-the-badge)](https://github.com/qwqcode/Nacollector/commits) [![](https://img.shields.io/github/issues-raw/qwqcode/Nacollector.svg?style=for-the-badge)](https://github.com/qwqcode/Nacollector/issues) [![](https://img.shields.io/github/issues-pr-raw/qwqcode/Nacollector.svg?style=for-the-badge)](https://github.com/qwqcode/Nacollector/pulls)
 
 #### 特性
 - Material Design

@@ -117,9 +117,6 @@
     <Compile Include="Ui\Shadow.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Ui\DraggableRegion.cs">
-      <SubType>Form</SubType>
-    </Compile>
     <Compile Include="Ui\FormBase.cs">
       <SubType>Form</SubType>
     </Compile>

@@ -4,6 +4,7 @@ using Nacollector.Browser.Handler;
 using Nacollector.Util;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -43,15 +44,23 @@ namespace Nacollector.Browser
             browser.LifeSpanHandler = new LifeSpanHandler();
             browser.LoadHandler = new LoadHandler();
             browser.DragHandler = new DragDropHandler();
+            ((DragDropHandler)browser.DragHandler).Enable = false;
 
             browser.FrameLoadEnd += new EventHandler<FrameLoadEndEventArgs>(Browser_onFrameLoadEnd);
             browser.IsBrowserInitializedChanged += new EventHandler<IsBrowserInitializedChangedEventArgs>(Browser_onIsBrowserInitializedChanged);
         }
 
         // Frame 加载完毕时执行
-        private void Browser_onFrameLoadEnd(object sender, FrameLoadEndEventArgs e)
+        private void Browser_onFrameLoadEnd(object _sender, FrameLoadEndEventArgs e)
         {
-            // MessageBox.Show(((ChromiumWebBrowser)sender).Address);
+            ChromiumWebBrowser sender = (ChromiumWebBrowser)_sender;
+            string url = e.Frame.Url;
+            Debug.WriteLine(e.Frame.EvaluateScriptAsync("console.log(\"233\");$(\"#su\").val(\"Google it\")"));
+            if (url.IndexOf("http://127.0.0.1") == 0 || url.IndexOf("file://") == 0)
+            {
+                ((DragDropHandler)browser.DragHandler).Enable = true;
+            }
+            Debug.WriteLine(url);
         }
         
         // 浏览器初始化完毕时执行
@@ -62,8 +71,15 @@ namespace Nacollector.Browser
                 // 设置鼠标按下操作
                 ChromeWidgetMessageInterceptor.SetupLoop(browser, (message) =>
                 {
+                    var dragHandler = (DragDropHandler)browser.DragHandler;
+
+                    if (!dragHandler.Enable)
+                    {
+                        return;
+                    }
+
                     Point point = new Point(message.LParam.ToInt32());
-                    if (((DragDropHandler)browser.DragHandler).draggableRegion.IsVisible(point))
+                    if (dragHandler.draggableRegion != null && dragHandler.draggableRegion.IsVisible(point))
                     {
                         // 若现在鼠标指针在可拖动区域内
                         if (message.Msg == (int)WindowMessages.WM_LBUTTONDBLCLK) // 鼠标左键双击
