@@ -2,9 +2,7 @@
 
 <p align="center"><img src="./docs/NacollectorLogo_2.png"></p>
 
-[![](https://img.shields.io/github/release/qwqcode/Nacollector.svg?style=for-the-badge)](https://github.com/qwqcode/Nacollector/releases/latest) ![](https://img.shields.io/badge/NET-%3E%3D%204.6.2-green.svg?style=for-the-badge) ![](https://img.shields.io/badge/BUILD%20WITH-%E2%9D%A4-red.svg?style=for-the-badge) [![](https://img.shields.io/gitter/room/qwqcode/Nacollector.svg?style=for-the-badge)](https://gitter.im/Nacollector/community) [![](https://img.shields.io/badge/%24-donate-ff69b4.svg?style=for-the-badge)](https://github.com/qwqcode/donate-qwqaq)
-
-[![](https://img.shields.io/github/downloads/qwqcode/Nacollector/total.svg?style=for-the-badge)](https://github.com/qwqcode/Nacollector/releases) [![](https://img.shields.io/github/last-commit/qwqcode/Nacollector.svg?style=for-the-badge)](https://github.com/qwqcode/Nacollector/commits) [![](https://img.shields.io/github/issues-raw/qwqcode/Nacollector.svg?style=for-the-badge)](https://github.com/qwqcode/Nacollector/issues) [![](https://img.shields.io/github/issues-pr-raw/qwqcode/Nacollector.svg?style=for-the-badge)](https://github.com/qwqcode/Nacollector/pulls)
+[![](https://img.shields.io/github/release/qwqcode/Nacollector.svg?style=for-the-badge)](https://github.com/qwqcode/Nacollector/releases/latest) ![](https://img.shields.io/badge/NET-%3E%3D%204.6.2-green.svg?style=for-the-badge) [![](https://img.shields.io/github/downloads/qwqcode/Nacollector/total.svg?style=for-the-badge)](https://github.com/qwqcode/Nacollector/releases) [![](https://img.shields.io/gitter/room/qwqcode/Nacollector.svg?style=for-the-badge)](https://gitter.im/Nacollector/community) [![](https://img.shields.io/badge/%24-donate-ff69b4.svg?style=for-the-badge)](https://github.com/qwqcode/donate-qwqaq)
 
 ## Introduction
 
@@ -49,7 +47,9 @@ So... [Nacollector 能做什么？](https://github.com/Zneiat/Nacollector/wiki/W
 - [CsQuery](https://github.com/jamietre/CsQuery)
 - Selenium.WebDriver
 
-## Builds
+## Development
+
+[![](https://img.shields.io/github/last-commit/qwqcode/Nacollector.svg?style=for-the-badge)](https://github.com/qwqcode/Nacollector/commits) [![](https://img.shields.io/github/issues/qwqcode/Nacollector.svg?style=for-the-badge)](https://github.com/qwqcode/Nacollector/issues) [![](https://img.shields.io/github/issues-pr/qwqcode/Nacollector.svg?style=for-the-badge)](https://github.com/qwqcode/Nacollector/pulls)
 
 #### Get the sources
 
