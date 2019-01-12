@@ -1,16 +1,12 @@
-# Nacollector
-
 <p align="center"><img src="./docs/NacollectorLogo_2.png"></p>
 
-[![](https://img.shields.io/github/release/qwqcode/Nacollector.svg?style=for-the-badge)](https://github.com/qwqcode/Nacollector/releases/latest) ![](https://img.shields.io/badge/NET-%3E%3D%204.6.2-green.svg?style=for-the-badge) [![](https://img.shields.io/github/downloads/qwqcode/Nacollector/total.svg?style=for-the-badge)](https://github.com/qwqcode/Nacollector/releases) [![](https://img.shields.io/gitter/room/qwqcode/Nacollector.svg?style=for-the-badge)](https://gitter.im/Nacollector/community) [![](https://img.shields.io/badge/%24-donate-ff69b4.svg?style=for-the-badge)](https://github.com/qwqcode/donate-qwqaq)
+# Nacollector
 
-## Introduction
+[![](https://img.shields.io/github/release/qwqcode/Nacollector.svg?style=flat-square)](https://github.com/qwqcode/Nacollector/releases/latest) ![](https://img.shields.io/badge/NET-%3E%3D%204.6.2-green.svg?style=flat-square) [![](https://img.shields.io/github/downloads/qwqcode/Nacollector/total.svg?style=flat-square)](https://github.com/qwqcode/Nacollector/releases) [![](https://img.shields.io/github/last-commit/qwqcode/Nacollector.svg?style=flat-square)](https://github.com/qwqcode/Nacollector/commits) [![](https://img.shields.io/github/issues/qwqcode/Nacollector.svg?style=flat-square)](https://github.com/qwqcode/Nacollector/issues) [![](https://img.shields.io/github/issues-pr/qwqcode/Nacollector.svg?style=flat-square)](https://github.com/qwqcode/Nacollector/pulls) [![](https://img.shields.io/gitter/room/qwqcode/Nacollector.svg?style=flat-square)](https://gitter.im/Nacollector/community) [![](https://img.shields.io/badge/%24-donate-ff69b4.svg?style=flat-square)](https://github.com/qwqcode/donate-qwqaq)
 
 > Nacollector 可以说是一个用于采集各种 WEB 资源的工作站？！ #(滑稽)
 
-So... [Nacollector 能做什么？](https://github.com/Zneiat/Nacollector/wiki/What-you-can-do-with-Nacollector)
-
-在使用 Nacollector 前，请仔细阅读[《Nacollector 用户使用许可协议》](./LICENSE)
+注：在使用 Nacollector 前，请仔细阅读[《Nacollector 用户使用许可协议》](./LICENSE)
 
 #### 特性
 - Material Design
@@ -25,7 +21,6 @@ So... [Nacollector 能做什么？](https://github.com/Zneiat/Nacollector/wiki/W
 - 支持使用代理
 - 在线/离线 自动更新
 - 以及更多...
-
 
 #### Features
 - Material Design
@@ -47,11 +42,25 @@ So... [Nacollector 能做什么？](https://github.com/Zneiat/Nacollector/wiki/W
 - [CsQuery](https://github.com/jamietre/CsQuery)
 - Selenium.WebDriver
 
+#### 功能
+
+- 商品详情页图片解析
+  - 支持网站： 淘宝、天猫、苏宁、国美
+  - 支持图片类型：主图、分类图、详情图
+  - 支持即时预览 显示 URL
+  - 支持下载单张图片 右键另存为
+  - 支持下载所有图片 打包为压缩文件并保存
+- 淘宝店铺搜索卖家ID名采集
+  - 支持忽略天猫店铺
+- 天猫供销平台分销商一键邀请
+  - 支持卖家账号登录 得到 Cookie（也可以手动输入 Cookie 字符串）
+- 天猫供销平台分销商一键撤回
+- 将来会有更多功能，随缘更新
+
 ## Development
 
-[![](https://img.shields.io/github/last-commit/qwqcode/Nacollector.svg?style=for-the-badge)](https://github.com/qwqcode/Nacollector/commits) [![](https://img.shields.io/github/issues/qwqcode/Nacollector.svg?style=for-the-badge)](https://github.com/qwqcode/Nacollector/issues) [![](https://img.shields.io/github/issues-pr/qwqcode/Nacollector.svg?style=for-the-badge)](https://github.com/qwqcode/Nacollector/pulls)
-
 #### Get the sources
+
 
 In order to make development easier, the frontend is included in the backend as a [git submodule](https://git-scm.com/book/en/v2/Git-Tools-Submodules).
 
@@ -92,11 +101,11 @@ If you are enjoying this app, please consider making a donation to keep it alive
 
 ## License
 
-[《Nacollector 用户使用许可协议》](./LICENSE)
+请务必仔细阅读 [《Nacollector 用户使用许可协议》](./LICENSE)
 
 [Nacollector](https://github.com/qwqcode/Nacollector) Copyright (C) 2018 [qwqaq.com](https://qwqaq.com)
 
-未经允许代码和衍生品不得用于商业用途，侵权必究
+禁止擅自以任何收费形式盈利，禁止擅自修改版权信息，侵权必究！
 
 ## Screenshots
 <p align="center">
