@@ -11,7 +11,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Nacollector")]
-[assembly: AssemblyCopyright("Copyright © qwqaq.com")]
+[assembly: AssemblyCopyright("Copyright (C) 2019 qwqaq.com")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

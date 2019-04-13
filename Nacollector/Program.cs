@@ -37,7 +37,7 @@ namespace Nacollector
                 "Nacollector 无法运行", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
                 Process.Start(
-                    "http://dotnetsocial.cloudapp.net/GetDotnet?tfm=.NETFramework,Version=v4.6.2");
+                    "https://www.microsoft.com/zh-cn/download/details.aspx?id=53344");
                 return;
             }
 
@@ -119,13 +119,14 @@ namespace Nacollector
             settings.BrowserSubprocessPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Resources\cef_sharp\CefSharp.BrowserSubprocess.exe");
             settings.LocalesDirPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Resources\cef_sharp\locales\");
             settings.ResourcesDirPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Resources\cef_sharp\");
-            settings.RemoteDebuggingPort = 51228;
+            CefSharpSettings.SubprocessExitIfParentProcessClosed = true; // default is false, see https://github.com/cefsharp/CefSharp/issues/2359
+            //settings.RemoteDebuggingPort = 51228;
             /*settings.RegisterScheme(new CefCustomScheme()
             {
                 SchemeName = ResourceSchemeHandlerFactory.SchemeName,
                 SchemeHandlerFactory = new ResourceSchemeHandlerFactory()
             });*/
-            Cef.Initialize(settings, true, null);
+            Cef.Initialize(settings, performDependencyCheck: true, browserProcessHandler: null);
         }
         
         private static int exited = 0;

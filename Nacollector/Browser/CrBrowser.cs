@@ -55,7 +55,6 @@ namespace Nacollector.Browser
         {
             ChromiumWebBrowser sender = (ChromiumWebBrowser)_sender;
             string url = e.Frame.Url;
-            Debug.WriteLine(e.Frame.EvaluateScriptAsync("console.log(\"233\");$(\"#su\").val(\"Google it\")"));
             if (url.IndexOf("http://127.0.0.1") == 0 || url.IndexOf("file://") == 0)
             {
                 ((DragDropHandler)browser.DragHandler).Enable = true;
