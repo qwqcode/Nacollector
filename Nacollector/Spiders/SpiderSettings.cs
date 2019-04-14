@@ -12,55 +12,29 @@ namespace Nacollector.Spiders
     /// </summary>
     public class SpiderSettings
     {
-        private string taskId;
-        private string className;
-        private string classLabel;
-        private string parmsJsonStr;
-        private CrBrowser crBrowser;
-
         /// <summary>
         /// 任务ID
         /// </summary>
-        public string TaskId
-        {
-            get { return taskId; }
-            set { taskId = value; }
-        }
+        public string TaskId { get; set; }
 
         /// <summary>
         /// 任务调用类名
         /// </summary>
-        public string ClassName
-        {
-            get { return className; }
-            set { className = value; }
-        }
+        public string ClassName { get; set; }
 
         /// <summary>
         /// 任务调用类标题
         /// </summary>
-        public string ClassLabel
-        {
-            get { return classLabel; }
-            set { classLabel = value; }
-        }
+        public string ClassLabel { get; set; }
 
         /// <summary>
         /// 任务参数 JSON 字符串
         /// </summary>
-        public string ParmsJsonStr
-        {
-            get { return parmsJsonStr; }
-            set { parmsJsonStr = value; }
-        }
+        public string ParmsJsonStr { get; set; }
 
         /// <summary>
         /// 浏览器（调用执行JS日志显示）
         /// </summary>
-        public CrBrowser CrBrowser
-        {
-            get { return crBrowser; }
-            set { crBrowser = value; }
-        }
+        public CrBrowser CrBrowser { get; set; }
     }
 }

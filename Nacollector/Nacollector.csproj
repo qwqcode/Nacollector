@@ -223,6 +223,12 @@
   <ItemGroup>
     <Folder Include="Spiders\Picture\" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\NacollectorSpiders\NacollectorSpiders.csproj">
+      <Project>{a14a1a19-db06-4ae8-b518-3156629b4862}</Project>
+      <Name>NacollectorSpiders</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

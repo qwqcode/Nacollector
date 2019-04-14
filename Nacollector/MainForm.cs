@@ -17,7 +17,9 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Security.Policy;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -73,6 +75,25 @@ namespace Nacollector
         /// <param name="obj"></param>
         public void StartTask(object obj)
         {
+            // 创建新的 AppDomain
+            AppDomainSetup domaininfo = new AppDomainSetup
+            {
+                ApplicationBase = Environment.CurrentDirectory
+            };
+            Evidence adevidence = AppDomain.CurrentDomain.Evidence;
+            AppDomain domain = AppDomain.CreateDomain("NacollectorSpiders", adevidence, domaininfo);
+
+            // 动态加载 dll
+            Type type = typeof(SpiderTask);
+            var spiderTask = (SpiderTask)domain.CreateInstanceAndUnwrap(type.Assembly.FullName, type.FullName);
+            spiderTask.LoadAssembly(Path.Combine(Application.StartupPath, "NacollectorSpiders.dll"));
+
+            // 调用目标函数
+            spiderTask.Invoke("NacollectorSpiders.Class1", "HelloWorld");
+
+            // 卸载 dll
+            AppDomain.Unload(domain);
+            return;
             SpiderSettings settings = (SpiderSettings)obj;
             settings.CrBrowser = crBrowser;
 
@@ -120,6 +141,41 @@ namespace Nacollector
             crBrowser.RunJS($"Task.get('{settings.TaskId}').taskIsEnd();");
 
             Utils.ReleaseMemory(true);
+        }
+
+        /// <summary>
+        /// 执行爬虫任务，新的 AppDomain 中
+        /// </summary>
+        public class SpiderTask : MarshalByRefObject
+        {
+            Assembly assembly = null;
+
+            public void LoadAssembly(string assemblyPath)
+            {
+                try
+                {
+                    assembly = Assembly.LoadFile(assemblyPath);
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException(ex.Message);
+                }
+            }
+
+            public bool Invoke(string fullClassName, string methodName, params Object[] args)
+            {
+                if (assembly == null)
+                    return false;
+                Type tp = assembly.GetType(fullClassName);
+                if (tp == null)
+                    return false;
+                MethodInfo method = tp.GetMethod(methodName);
+                if (method == null)
+                    return false;
+                Object obj = Activator.CreateInstance(tp);
+                method.Invoke(obj, args);
+                return true;
+            }
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
