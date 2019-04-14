@@ -1,11 +1,12 @@
 ﻿using Nacollector.Browser;
-using Nacollector.Spiders;
+using NacollectorSpiders;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace Nacollector.JsActions
 {
@@ -29,13 +30,14 @@ namespace Nacollector.JsActions
         public void createTask(string taskId, string className, string classLabel, string parmsJsonStr)
         {
             // 配置
-            var settings = new SpiderSettings()
+            var settings = new Dictionary<string, object>
             {
-                TaskId = taskId,
-                ClassName = className,
-                ClassLabel = classLabel,
-                ParmsJsonStr = parmsJsonStr
+                { "TaskId", taskId },
+                { "ClassName", className },
+                { "ClassLabel", classLabel },
+                { "ParmsJsonStr", parmsJsonStr }
             };
+
             // 创建任务执行线程
             var thread = new Thread(new ParameterizedThreadStart(_form.StartTask))
             {

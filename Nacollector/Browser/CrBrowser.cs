@@ -124,13 +124,11 @@ namespace Nacollector.Browser
         /// <param name="jsCodeStr"></param>
         public void RunJS(string jsCodeStr)
         {
-            if (browser.InvokeRequired) { browser.Invoke(new runJSDelegate(RunJS), new object[] { jsCodeStr }); return; }
-
-            if (browser == null || !browser.IsBrowserInitialized || browser.IsDisposed || browser.Disposing) { return; }
-            
-            browser.ExecuteScriptAsync(jsCodeStr);
+            form.BeginInvoke((MethodInvoker)delegate
+            {
+                browser.ExecuteScriptAsync(jsCodeStr);
+            });
         }
-        public delegate void runJSDelegate(string jsCodeStr);
 
         /// <summary>
         /// 浏览器执行JS代码获取返回值

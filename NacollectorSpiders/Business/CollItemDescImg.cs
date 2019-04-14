@@ -1,5 +1,4 @@
 ﻿using CsQuery;
-using Nacollector.Browser;
 using NacollectorUtils;
 using Newtonsoft.Json.Linq;
 using System;
@@ -16,7 +15,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Web;
 
-namespace Nacollector.Spiders.Business
+namespace NacollectorSpiders.Business
 {
     /// <summary>
     /// 商品详情页图片解析
@@ -51,7 +50,7 @@ namespace Nacollector.Spiders.Business
             // 选择页面格式
             Dictionary<string, string> headers = new Dictionary<string, string> { };
             Encoding encoding = Encoding.GetEncoding("UTF-8");
-            if (PageType.Equals("Alibaba"))
+            /*if (PageType.Equals("Alibaba"))
             {
                 // 获取 Cookie
                 var browserCookieGetter = new CrBrowserCookieGetter(startUrl: "https://login.1688.com/member/signin.htm?from=sm&Done=" + HttpUtility.UrlEncode(PageUrl), endUrlReg: @"^" + PageUrl.Substring(0, PageUrl.IndexOf("?")), caption: "登录 1688");
@@ -63,7 +62,7 @@ namespace Nacollector.Spiders.Business
 
                 encoding = Encoding.GetEncoding("gb2312");
                 headers.Add("cookie", alibabaCookieStr);
-            }
+            }*/
 
             var downloadPage = Utils.GetPageByUrl(PageUrl, headers, null, encoding);
             if (downloadPage.StatusCode != System.Net.HttpStatusCode.OK) { throw new Exception("下载失败 [" + downloadPage.StatusCode + "] " + downloadPage.StatusDescription); }

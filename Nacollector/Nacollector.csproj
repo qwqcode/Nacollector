@@ -145,7 +145,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Spiders\Business\CollItemDescImg.cs" />
     <Compile Include="Spiders\Spider.cs" />
     <Compile Include="Spiders\SpiderSettings.cs" />
     <Compile Include="Spiders\Business\TaobaoSellerColl.cs" />

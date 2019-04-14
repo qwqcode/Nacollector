@@ -3,7 +3,6 @@ using CefSharp.WinForms;
 using Nacollector.Browser;
 using Nacollector.Browser.Handler;
 using Nacollector.JsActions;
-using Nacollector.Spiders;
 using Nacollector.Ui;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -44,7 +43,8 @@ namespace Nacollector
         private void InitBrowser()
         {
             // 初始化内置浏览器
-#if !DEBUG
+#warning 记得修改
+#if DEBUG
             string htmlPath = Utils.GetHtmlResPath("index.html");
             if (string.IsNullOrEmpty(htmlPath))
             {
@@ -69,6 +69,11 @@ namespace Nacollector
             ContentPanel.Controls.Add(crBrowser.GetBrowser());
         }
 
+        public CrBrowser GetCrBrowser()
+        {
+            return crBrowser;
+        }
+
         /// <summary>
         /// 开始执行任务
         /// </summary>
@@ -89,15 +94,15 @@ namespace Nacollector
             spiderTask.LoadAssembly(Path.Combine(Application.StartupPath, "NacollectorSpiders.dll"));
 
             // 调用目标函数
-            spiderTask.Invoke("NacollectorSpiders.Class1", "HelloWorld");
+            var settings = (Dictionary<string, object>)obj;
+            spiderTask.Invoke("NacollectorSpiders.Class1", "HelloWorld", settings, new Action<string>((string str) => {
+                this.GetCrBrowser().RunJS(str);
+            }));
 
             // 卸载 dll
             AppDomain.Unload(domain);
-            return;
-            SpiderSettings settings = (SpiderSettings)obj;
-            settings.CrBrowser = crBrowser;
-
-            Spider spider = null;
+            
+            /*Spider spider = null;
 
             // 实例化 Spider 对象
             string typeName = $"{this.GetType().Namespace}.Spiders.{settings.ClassName}";
@@ -141,6 +146,7 @@ namespace Nacollector
             crBrowser.RunJS($"Task.get('{settings.TaskId}').taskIsEnd();");
 
             Utils.ReleaseMemory(true);
+            */
         }
 
         /// <summary>
@@ -162,7 +168,7 @@ namespace Nacollector
                 }
             }
 
-            public bool Invoke(string fullClassName, string methodName, params Object[] args)
+            public bool Invoke(string fullClassName, string methodName, params object[] args)
             {
                 if (assembly == null)
                     return false;
@@ -172,7 +178,7 @@ namespace Nacollector
                 MethodInfo method = tp.GetMethod(methodName);
                 if (method == null)
                     return false;
-                Object obj = Activator.CreateInstance(tp);
+                object obj = Activator.CreateInstance(tp);
                 method.Invoke(obj, args);
                 return true;
             }

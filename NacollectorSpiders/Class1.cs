@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+﻿using NacollectorUtils;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -7,31 +6,36 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static NacollectorSpiders.SpiderSettings;
 
 namespace NacollectorSpiders
 {
     public class Class1
     {
-
-
-        public void HelloWorld()
+        public void HelloWorld(Dictionary<string, object> taskSettings, Action<string> BrowserJsRunFunc)
         {
-            Form f1 = new Form();
-            f1.ShowDialog();
+            //Form f1 = new Form();
+            //f1.ShowDialog();
             
-            MessageBox.Show(NacollectorUtils.Utils.GetTempPath());
+            //MessageBox.Show(NacollectorUtils.Utils.GetTempPath());
 
-            JArray array = new JArray();
-            array.Add("Manual text");
-            array.Add(new DateTime(2000, 5, 23));
+            //MessageBox.Show(NacollectorUtils.Utils.GetIsUseIeProxyReq().ToString());
 
-            JObject o = new JObject();
-            o["MyArray"] = array;
+            SpiderSettings settings = new SpiderSettings
+            {
+                TaskId = (string)taskSettings["TaskId"],
+                ClassName = (string)taskSettings["ClassName"],
+                ClassLabel = (string)taskSettings["ClassLabel"],
+                ParmsJsonStr = (string)taskSettings["ParmsJsonStr"],
+                BrowserJsRunFunc = BrowserJsRunFunc
+            };
 
-            string json = o.ToString();
-            MessageBox.Show(json);
-
-            MessageBox.Show(NacollectorUtils.Utils.GetIsUseIeProxyReq().ToString());
+            BrowserJsRunFunc($"Task.log('{settings.TaskId}', '{Utils.Base64Encode("23333")}', 'i', '{Utils.GetTimeStamp()}', true);");
+            var spider = new Business.CollItemDescImg();
+            spider.importSettings(settings);
+            spider.BeginWork();
+            BrowserJsRunFunc($"Task.get('{settings.TaskId}').taskIsEnd();");
+            Utils.ReleaseMemory(true);
         }
     }
 }
