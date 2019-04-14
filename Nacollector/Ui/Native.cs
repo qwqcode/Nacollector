@@ -4,7 +4,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Nacollector.Util
+namespace Nacollector.Ui
 {
     public enum GetWindow_Cmd : uint
     {

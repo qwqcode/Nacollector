@@ -1,7 +1,7 @@
 ﻿using CefSharp;
 using CefSharp.Internals;
 using CefSharp.WinForms;
-using Nacollector.Util;
+using NacollectorUtils;
 using System;
 using System.Collections.Generic;
 using System.Drawing;

@@ -1,5 +1,5 @@
 ﻿using CefSharp.WinForms;
-using Nacollector.Util;
+using NacollectorUtils;
 using System;
 using System.Runtime.InteropServices;
 using System.Text;

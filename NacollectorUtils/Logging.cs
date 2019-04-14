@@ -1,5 +1,4 @@
-﻿using Nacollector.Util;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -10,9 +9,9 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Nacollector
+namespace NacollectorUtils
 {
-    class Logging
+    public class Logging
     {
         public static string LogFilePath;
 

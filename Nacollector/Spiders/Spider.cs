@@ -11,9 +11,9 @@ using Newtonsoft.Json.Linq;
 using CefSharp.WinForms;
 using CefSharp;
 using System.Threading;
-using Nacollector.Util;
 using Nacollector.Browser;
 using System.IO;
+using NacollectorUtils;
 
 namespace Nacollector.Spiders
 {

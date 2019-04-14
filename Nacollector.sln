@@ -5,10 +5,16 @@ VisualStudioVersion = 15.0.26430.16
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nacollector", "Nacollector\Nacollector.csproj", "{BDE07438-1B63-4C47-9358-555105D0E11F}"
 	ProjectSection(ProjectDependencies) = postProject
+		{34410408-BDE1-4700-A317-BD455CA550EB} = {34410408-BDE1-4700-A317-BD455CA550EB}
 		{A14A1A19-DB06-4AE8-B518-3156629B4862} = {A14A1A19-DB06-4AE8-B518-3156629B4862}
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NacollectorSpiders", "NacollectorSpiders\NacollectorSpiders.csproj", "{A14A1A19-DB06-4AE8-B518-3156629B4862}"
+	ProjectSection(ProjectDependencies) = postProject
+		{34410408-BDE1-4700-A317-BD455CA550EB} = {34410408-BDE1-4700-A317-BD455CA550EB}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NacollectorUtils", "NacollectorUtils\NacollectorUtils.csproj", "{34410408-BDE1-4700-A317-BD455CA550EB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -32,6 +38,14 @@ Global
 		{A14A1A19-DB06-4AE8-B518-3156629B4862}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A14A1A19-DB06-4AE8-B518-3156629B4862}.Release|x86.ActiveCfg = Release|Any CPU
 		{A14A1A19-DB06-4AE8-B518-3156629B4862}.Release|x86.Build.0 = Release|Any CPU
+		{34410408-BDE1-4700-A317-BD455CA550EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{34410408-BDE1-4700-A317-BD455CA550EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{34410408-BDE1-4700-A317-BD455CA550EB}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{34410408-BDE1-4700-A317-BD455CA550EB}.Debug|x86.Build.0 = Debug|Any CPU
+		{34410408-BDE1-4700-A317-BD455CA550EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{34410408-BDE1-4700-A317-BD455CA550EB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{34410408-BDE1-4700-A317-BD455CA550EB}.Release|x86.ActiveCfg = Release|Any CPU
+		{34410408-BDE1-4700-A317-BD455CA550EB}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

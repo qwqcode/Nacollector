@@ -12,12 +12,14 @@ namespace NacollectorSpiders
 {
     public class Class1
     {
-        public void HelloWorld ()
+
+
+        public void HelloWorld()
         {
             Form f1 = new Form();
             f1.ShowDialog();
-
-            Debug.WriteLine(Utils.SpiderHelper.GetTempPath());
+            
+            MessageBox.Show(NacollectorUtils.Utils.GetTempPath());
 
             JArray array = new JArray();
             array.Add("Manual text");
@@ -28,6 +30,8 @@ namespace NacollectorSpiders
 
             string json = o.ToString();
             MessageBox.Show(json);
+
+            MessageBox.Show(NacollectorUtils.Utils.GetIsUseIeProxyReq().ToString());
         }
     }
 }

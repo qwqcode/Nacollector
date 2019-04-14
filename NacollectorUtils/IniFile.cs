@@ -7,12 +7,12 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Nacollector.Util
+namespace NacollectorUtils
 {
     public class IniFile
     {
         string Path;
-        string EXE = Assembly.GetExecutingAssembly().GetName().Name;
+        string EXE = "Nacollector"; // Assembly.GetExecutingAssembly().GetName().Name;
 
         [DllImport("kernel32", CharSet = CharSet.Unicode)]
         static extern long WritePrivateProfileString(string Section, string Key, string Value, string FilePath);

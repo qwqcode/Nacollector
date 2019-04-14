@@ -1,7 +1,6 @@
 ﻿using CefSharp;
 using CefSharp.WinForms;
 using Nacollector.Browser.Handler;
-using Nacollector.Util;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,6 +10,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using NacollectorUtils;
+using Nacollector.Ui;
 
 namespace Nacollector.Browser
 {

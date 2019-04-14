@@ -76,9 +76,8 @@
       <HintPath>..\packages\CsQuery.1.3.4\lib\net40\CsQuery.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.12.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="Pathoschild.Http.Client, Version=3.2.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Pathoschild.Http.FluentClient.3.2.0\lib\net45\Pathoschild.Http.Client.dll</HintPath>
@@ -120,6 +119,7 @@
     <Compile Include="Browser\Handler\MenuHandler.cs" />
     <Compile Include="Browser\Handler\ResourceSchemeHandler .cs" />
     <Compile Include="Browser\Handler\ResourceSchemeHandlerFactory.cs" />
+    <Compile Include="Ui\Native.cs" />
     <Compile Include="Ui\Shadow.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -129,7 +129,6 @@
     <Compile Include="GlobalConstant.cs" />
     <Compile Include="JsActions\AppAction.cs" />
     <Compile Include="JsActions\TaskControllerAction.cs" />
-    <Compile Include="Logging.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -139,7 +138,6 @@
     <Compile Include="Ui\SplashScreen.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Util\Native.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
@@ -153,9 +151,6 @@
     <Compile Include="Spiders\Business\TaobaoSellerColl.cs" />
     <Compile Include="Spiders\Business\TmallGxptInvite.cs" />
     <Compile Include="Spiders\Business\TmallGxptInviteDelete.cs" />
-    <Compile Include="Util\HttpHelper.cs" />
-    <Compile Include="Util\IniFile.cs" />
-    <Compile Include="Util\Utils.cs" />
     <Content Include="..\packages\Chromium.ChromeDriver.2.30\content\chromedriver.exe">
       <Link>chromedriver.exe</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -227,6 +222,10 @@
     <ProjectReference Include="..\NacollectorSpiders\NacollectorSpiders.csproj">
       <Project>{a14a1a19-db06-4ae8-b518-3156629b4862}</Project>
       <Name>NacollectorSpiders</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\NacollectorUtils\NacollectorUtils.csproj">
+      <Project>{34410408-bde1-4700-a317-bd455ca550eb}</Project>
+      <Name>NacollectorUtils</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

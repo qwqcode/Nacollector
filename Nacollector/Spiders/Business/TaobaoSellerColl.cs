@@ -1,5 +1,5 @@
 ﻿using CsQuery;
-using Nacollector.Util;
+using NacollectorUtils;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;

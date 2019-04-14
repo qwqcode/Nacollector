@@ -5,7 +5,6 @@ using Nacollector.Browser.Handler;
 using Nacollector.JsActions;
 using Nacollector.Spiders;
 using Nacollector.Ui;
-using Nacollector.Util;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -24,6 +23,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using NacollectorUtils;
 
 namespace Nacollector
 {

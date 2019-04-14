@@ -1,6 +1,5 @@
 ﻿using CefSharp;
 using Nacollector.Browser;
-using Nacollector.Util;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -10,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using NacollectorUtils;
 
 namespace Nacollector.JsActions
 {
@@ -70,7 +70,7 @@ namespace Nacollector.JsActions
         // 采集是否使用IE代理请求
         public void _utilsReqIeProxy(bool isEnable)
         {
-            Utils.ReqIeProxy = isEnable;
+            Utils.GetIniFile().Write("ReqByIeProxy", isEnable ? "1" : "0", "Request");
         }
 
         // 日志文件清理
