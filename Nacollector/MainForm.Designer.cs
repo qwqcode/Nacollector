@@ -39,7 +39,6 @@
             this.ContentPanel.Margin = new System.Windows.Forms.Padding(0);
             this.ContentPanel.Name = "ContentPanel";
             this.ContentPanel.Size = new System.Drawing.Size(1150, 698);
-            this.ContentPanel.TabIndex = 3;
             // 
             // MainForm
             // 
@@ -47,9 +46,9 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1150, 698);
             this.ControlBox = false;
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Sizable;
             this.Controls.Add(this.ContentPanel);
             this.Icon = global::Nacollector.Properties.Resources.app_ico;
+            this.Location = new System.Drawing.Point(0, 0);
             this.Name = "MainForm";
             this.Opacity = 0D;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;

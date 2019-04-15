@@ -43,8 +43,7 @@ namespace Nacollector
         private void InitBrowser()
         {
             // 初始化内置浏览器
-#warning 记得修改
-#if DEBUG
+#if !DEBUG
             string htmlPath = Utils.GetHtmlResPath("index.html");
             if (string.IsNullOrEmpty(htmlPath))
             {
@@ -74,85 +73,144 @@ namespace Nacollector
             return crBrowser;
         }
 
-        /// <summary>
-        /// 开始执行任务
-        /// </summary>
-        /// <param name="obj"></param>
-        public void StartTask(object obj)
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
+            // 是否退出弹窗
+            string dialogTxt = "确定退出 Nacollector？";
+
+            // 下载任务数统计
+            int downloadingTaskNum = Convert.ToInt32(crBrowser.EvaluateScript("Downloads.countDownloadingTask();", 0, TimeSpan.FromSeconds(3)).GetAwaiter().GetResult());
+            if (downloadingTaskNum > 0)
+                dialogTxt = $"有 {downloadingTaskNum} 个下载任务仍在继续！确定结束下载并关闭程序？";
+
+            DialogResult dr = MessageBox.Show(dialogTxt, "退出 Nacollector", MessageBoxButtons.OKCancel);
+            if (dr == DialogResult.OK)
+            {
+                e.Cancel = false;
+            }
+            else
+            {
+                e.Cancel = true;
+            }
+        }
+
+        ///
+        /// 任务执行
+        ///
+
+        public AppDomain _spiderRawDomain = null;
+        public SpiderDomain _spiderDomain = null;
+
+        public SpiderDomain GetLoadSpiderDomain()
+        {
+            if (this._spiderDomain != null)
+            {
+                return this._spiderDomain;
+            }
+
             // 创建新的 AppDomain
             AppDomainSetup domaininfo = new AppDomainSetup
             {
                 ApplicationBase = Environment.CurrentDirectory
             };
             Evidence adevidence = AppDomain.CurrentDomain.Evidence;
-            AppDomain domain = AppDomain.CreateDomain("NacollectorSpiders", adevidence, domaininfo);
+            AppDomain rawDomain = AppDomain.CreateDomain("NacollectorSpiders", adevidence, domaininfo);
 
             // 动态加载 dll
-            Type type = typeof(SpiderTask);
-            var spiderTask = (SpiderTask)domain.CreateInstanceAndUnwrap(type.Assembly.FullName, type.FullName);
-            spiderTask.LoadAssembly(Path.Combine(Application.StartupPath, "NacollectorSpiders.dll"));
+            Type type = typeof(SpiderDomain);
+            var spiderDomain = (SpiderDomain)rawDomain.CreateInstanceAndUnwrap(type.Assembly.FullName, type.FullName);
+            spiderDomain.LoadAssembly(Path.Combine(Application.StartupPath, "NacollectorSpiders.dll"));
 
-            // 调用目标函数
-            var settings = (Dictionary<string, object>)obj;
-            spiderTask.Invoke("NacollectorSpiders.Class1", "HelloWorld", settings, new Action<string>((string str) => {
-                this.GetCrBrowser().RunJS(str);
-            }));
+            this._spiderRawDomain = rawDomain;
+            this._spiderDomain = spiderDomain;
+            return spiderDomain;
+        }
+
+        public void UnloadSpiderDomain()
+        {
+            if (_spiderRawDomain == null)
+            {
+                return;
+            }
 
             // 卸载 dll
-            AppDomain.Unload(domain);
-            
-            /*Spider spider = null;
+            AppDomain.Unload(_spiderRawDomain);
+            _spiderRawDomain = null;
+            _spiderDomain = null;
+        }
 
-            // 实例化 Spider 对象
-            string typeName = $"{this.GetType().Namespace}.Spiders.{settings.ClassName}";
+        /// <summary>
+        /// 任务线程
+        /// </summary>
+        public Dictionary<string, Thread> taskThreads = new Dictionary<string, Thread>();
+
+        public bool AbortTask(string taskId)
+        {
+            if (!taskThreads.ContainsKey(taskId))
+                return false;
+
+            // 主线程委托执行，防止 Abort() 后面的代码无效
+            this.BeginInvoke((MethodInvoker)delegate
+            {
+                taskThreads[taskId].Abort();
+                taskThreads.Remove(taskId);
+                if (taskThreads.Count <= 0)
+                {
+                    UnloadSpiderDomain();
+                }
+            });
+            
+            return true;
+        }
+
+        public void NewTaskThread(Dictionary<string, object> settings)
+        {
+            // 创建任务执行线程
+            var thread = new Thread(new ParameterizedThreadStart(StartTask))
+            {
+                IsBackground = true
+            };
+            thread.Start(settings);
+
+            // 加入 Threads Dictionary
+            taskThreads.Add((string)settings["TaskId"], thread);
+        }
+
+        /// <summary>
+        /// 开始执行任务
+        /// </summary>
+        /// <param name="obj"></param>
+        public void StartTask(object obj)
+        {
+            var spiderDomain = GetLoadSpiderDomain();
+
+            // 调用目标函数
+#if !DEBUG
             try
             {
-                spider = (Spider)Activator.CreateInstance(Type.GetType(typeName));
-                spider.importSettings(settings); // 导入配置
+#endif
+            var settings = (Dictionary<string, object>)obj;
+            spiderDomain.Invoke("NacollectorSpiders.PokerDealer", "NewTask", settings, new Action<string>((string str) => {
+                this.GetCrBrowser().RunJS(str);
+            }));
+#if !DEBUG
             }
             catch
             {
-                string errorText = "任务新建失败，无法实例化对象 " + typeName;
+                string errorText = "任务新建失败,无法调用 NacollectorSpiders.PokerDealer.NewTask";
                 Logging.Error(errorText);
                 MessageBox.Show(errorText, "Nacollector 错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-
-            // 开始任务工作
-            DateTime beforWorkDt = DateTime.Now;
-
-            try
-            {
-                spider.BeginWork();
-            }
-            catch (Exception e)
-            {
-                // 任务执行中抛出的错误被接住了...
-                spider.LogError(e.Message);
-                Logging.Error(e.ToString()); // 保存错误详情
-#if DEBUG
-                spider.Log(e.ToString());
 #endif
-            }
 
-            // 任务执行完毕
-            DateTime afterWorkDt = DateTime.Now;
-            double timeSpent = afterWorkDt.Subtract(beforWorkDt).TotalSeconds;
-            spider.Log("\n");
-            spider.Log($"&gt;&gt; 任务执行完毕 （执行耗时：{timeSpent.ToString()}s）");
-
-            // 报告JS任务结束
-            crBrowser.RunJS($"Task.get('{settings.TaskId}').taskIsEnd();");
-
-            Utils.ReleaseMemory(true);
-            */
+            AbortTask((string)settings["TaskId"]);
         }
 
         /// <summary>
         /// 执行爬虫任务，新的 AppDomain 中
         /// </summary>
-        public class SpiderTask : MarshalByRefObject
+        public class SpiderDomain : MarshalByRefObject
         {
             Assembly assembly = null;
 
@@ -181,27 +239,6 @@ namespace Nacollector
                 object obj = Activator.CreateInstance(tp);
                 method.Invoke(obj, args);
                 return true;
-            }
-        }
-
-        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            // 是否退出弹窗
-            string dialogTxt = "确定退出 Nacollector？";
-
-            // 下载任务数统计
-            int downloadingTaskNum = Convert.ToInt32(crBrowser.EvaluateScript("Downloads.countDownloadingTask();", 0, TimeSpan.FromSeconds(3)).GetAwaiter().GetResult());
-            if (downloadingTaskNum > 0)
-                dialogTxt = $"有 {downloadingTaskNum} 个下载任务仍在继续！确定结束下载并关闭程序？";
-
-            DialogResult dr = MessageBox.Show(dialogTxt, "退出 Nacollector", MessageBoxButtons.OKCancel);
-            if (dr == DialogResult.OK)
-            {
-                e.Cancel = false;
-            }
-            else
-            {
-                e.Cancel = true;
             }
         }
     }
