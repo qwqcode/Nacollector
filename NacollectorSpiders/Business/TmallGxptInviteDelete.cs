@@ -1,5 +1,4 @@
 ﻿using CsQuery;
-using Nacollector.Browser;
 using NacollectorUtils;
 using Newtonsoft.Json.Linq;
 using System;
@@ -10,7 +9,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace Nacollector.Spiders.Business
+namespace NacollectorSpiders.Business
 {
     /// <summary>
     /// 天猫供销平台分销商一键撤回
@@ -36,11 +35,16 @@ namespace Nacollector.Spiders.Business
             if (!DeleteEndPageIsInt) throw new Exception("参数 DeleteEndPage 不是数字");
             if (DeleteBeginPage <= 0 || DeleteEndPage <= 0 || DeleteBeginPage > DeleteEndPage) throw new Exception("老铁，你输入的参数是什么鬼？");
             // 获取 Cookie
-            var browserCookieGetter = new CrBrowserCookieGetter(startUrl: "https://qudao.gongxiao.tmall.com/supplier/user/invitation_list.htm", endUrlReg: @"^(https|http)://qudao\.gongxiao\.tmall\.com/supplier/user/invitation_list\.htm", caption: "登录天猫供销平台");
-            browserCookieGetter.UseInputAutoComplete(@"^https://login\.taobao\.com/member/login\.jhtml", new List<string>() { "#TPL_username_1", "#TPL_password_1" });
-            browserCookieGetter.BeginWork();
+            var cgSettings = new NacollectorUtils.Settings.CookieGetterSettings
+            {
+                StartUrl = "https://qudao.gongxiao.tmall.com/supplier/user/invitation_list.htm",
+                EndUrlReg = @"^(https|http)://qudao\.gongxiao\.tmall\.com/supplier/user/invitation_list\.htm",
+                Caption = "登录天猫供销平台",
+
+            };
+            cgSettings.UseInputAutoComplete(@"^https://login\.taobao\.com/member/login\.jhtml", new List<string>() { "#TPL_username_1", "#TPL_password_1" });
             // ... Show Dialog Working
-            cookieStr = browserCookieGetter.GetCookieStr();
+            cookieStr = GetSpiderSettings().CrBrowserCookieGetter(cgSettings);
             if (string.IsNullOrEmpty(cookieStr)) { throw new Exception("Cookie 获取未成功"); }
             Log("\n");
             // 执行撤回操作

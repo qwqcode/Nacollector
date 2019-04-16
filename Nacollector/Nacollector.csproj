@@ -145,11 +145,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Spiders\Spider.cs" />
-    <Compile Include="Spiders\SpiderSettings.cs" />
-    <Compile Include="Spiders\Business\TaobaoSellerColl.cs" />
-    <Compile Include="Spiders\Business\TmallGxptInvite.cs" />
-    <Compile Include="Spiders\Business\TmallGxptInviteDelete.cs" />
     <Content Include="..\packages\Chromium.ChromeDriver.2.30\content\chromedriver.exe">
       <Link>chromedriver.exe</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -214,9 +209,7 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Spiders\Picture\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="..\NacollectorSpiders\NacollectorSpiders.csproj">
       <Project>{a14a1a19-db06-4ae8-b518-3156629b4862}</Project>

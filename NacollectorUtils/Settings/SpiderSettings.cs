@@ -36,5 +36,7 @@ namespace NacollectorUtils.Settings
         /// 浏览器（调用执行JS日志显示）
         /// </summary>
         public Action<string> BrowserJsRunFunc { get; set; }
+
+        public Func<CookieGetterSettings, string> CrBrowserCookieGetter { get; set; }
     }
 }

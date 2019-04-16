@@ -1,5 +1,4 @@
-﻿using Nacollector.Browser;
-using NacollectorUtils;
+﻿using NacollectorUtils;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -10,7 +9,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace Nacollector.Spiders.Business
+namespace NacollectorSpiders.Business
 {
     /// <summary>
     /// 天猫供销平台分销商一键邀请
@@ -35,11 +34,16 @@ namespace Nacollector.Spiders.Business
             SellerIdArr = SellerId.Split(new string[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries);
             if (SellerIdArr.Length <= 0) { throw new Exception("卖家ID不能一个也没有啊"); }
             // 获取 Cookie
-            var browserCookieGetter = new CrBrowserCookieGetter(startUrl: "https://qudao.gongxiao.tmall.com/supplier/user/invitation_list.htm", endUrlReg: @"^(https|http)://qudao\.gongxiao\.tmall\.com/supplier/user/invitation_list\.htm", caption: "登录天猫供销平台");
-            browserCookieGetter.UseInputAutoComplete(@"^https://login\.taobao\.com/member/login\.jhtml", new List<string>() { "#TPL_username_1", "#TPL_password_1" });
-            browserCookieGetter.BeginWork();
+            var cgSettings = new NacollectorUtils.Settings.CookieGetterSettings
+            {
+                StartUrl = "https://qudao.gongxiao.tmall.com/supplier/user/invitation_list.htm",
+                EndUrlReg = @"^(https|http)://qudao\.gongxiao\.tmall\.com/supplier/user/invitation_list\.htm",
+                Caption = "登录天猫供销平台",
+
+            };
+            cgSettings.UseInputAutoComplete(@"^https://login\.taobao\.com/member/login\.jhtml", new List<string>() { "#TPL_username_1", "#TPL_password_1" });
             // ... Show Dialog Working
-            cookieStr = browserCookieGetter.GetCookieStr();
+            cookieStr = GetSpiderSettings().CrBrowserCookieGetter(cgSettings);
             if (string.IsNullOrEmpty(cookieStr)) { throw new Exception("Cookie 获取未成功"); }
             // 获取 _tb_token_
             var homePageUrl = "https://qudao.gongxiao.tmall.com/supplier/user/invitation_list.htm";

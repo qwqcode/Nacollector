@@ -193,9 +193,27 @@ namespace Nacollector
 #endif
             var settings = (SpiderSettings)obj;
 
+            // Funcs
             settings.BrowserJsRunFunc = new Action<string>((string str) => {
                 this.GetCrBrowser().RunJS(str);
             });
+            settings.CrBrowserCookieGetter = new Func<CookieGetterSettings, string>((CookieGetterSettings cgSettings) =>
+            {
+                var cookieGetter = new CrBrowserCookieGetter(cgSettings.StartUrl, cgSettings.EndUrlReg, cgSettings.Caption);
+
+                if (cgSettings.InputAutoCompleteConfig != null)
+                {
+                    cookieGetter.UseInputAutoComplete(
+                        (string)cgSettings.InputAutoCompleteConfig["pageUrlReg"],
+                        (List<string>)cgSettings.InputAutoCompleteConfig["inputElemCssSelectors"]
+                    );
+                }
+
+                cookieGetter.BeginWork();
+
+                return cookieGetter.GetCookieStr();
+            });
+
             spiderDomain.Invoke("NacollectorSpiders.PokerDealer", "NewTask", settings);
 #if !DEBUG
             }

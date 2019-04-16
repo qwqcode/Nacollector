@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Windows.Forms;
 
-namespace Nacollector.Spiders.Business
+namespace NacollectorSpiders.Business
 {
     /// <summary>
     /// 淘宝店铺搜索卖家ID名采集

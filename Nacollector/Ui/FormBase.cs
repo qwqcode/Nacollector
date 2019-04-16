@@ -3,7 +3,6 @@ using CefSharp.WinForms;
 using Nacollector.Browser;
 using Nacollector.Browser.Handler;
 using Nacollector.JsActions;
-using Nacollector.Spiders;
 using Nacollector.Ui;
 using NacollectorUtils;
 using System;

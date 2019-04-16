@@ -21,6 +21,11 @@ namespace NacollectorSpiders
         protected Hashtable parms = new Hashtable(); // 参数哈希表
         protected SpiderSettings spiderSettings = null;
 
+        public SpiderSettings GetSpiderSettings()
+        {
+            return this.spiderSettings;
+        }
+
         /// <summary>
         /// 1.设置配置
         /// </summary>
