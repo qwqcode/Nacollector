@@ -47,7 +47,9 @@ namespace Nacollector.JsActions
         // 终止任务
         public bool abortTask(string taskId)
         {
-            return _form.AbortTask(taskId);
+            _form.AbortTask(taskId);
+
+            return true;
         }
     }
 }

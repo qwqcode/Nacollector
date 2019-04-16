@@ -18,8 +18,8 @@ namespace Nacollector.Browser
         public static List<string> visitedAddress = new List<string>(); // 所有已访问过的页面地址
         public static Dictionary<string, string> historyCookie = new Dictionary<string, string>(); // 所有 已得到的 历史Cookie 字符串
 
-        public string StartUrl { get; } // 初始页 URL
-        public string EndUrlReg { get; } // 获取Cookie页 Url 正则表达式
+        public string StartUrl { get; set; } // 初始页 URL
+        public string EndUrlReg { get; set; } // 获取Cookie页 Url 正则表达式
 
         private Form form = null;
         private ChromiumWebBrowser browser = null;
@@ -27,8 +27,11 @@ namespace Nacollector.Browser
 
         private string cookie = null;
 
-        public CrBrowserCookieGetter(string startUrl, string endUrlReg, string caption = "")
+        private bool isEnding = false;
+        
+        public void CreateNew(string startUrl, string endUrlReg, string caption = "")
         {
+            isEnding = false;
             StartUrl = startUrl;
             EndUrlReg = endUrlReg;
 
@@ -39,8 +42,14 @@ namespace Nacollector.Browser
                 EndWork(null, historyCookie[EndUrlReg]);
                 return;
             }
-            
+
             // 新建一个 form
+            if (form != null)
+            {
+                form.Dispose();
+                form = null;
+            }
+
             form = new Form()
             {
                 ClientSize = new Size(1300, 700),
@@ -68,7 +77,7 @@ namespace Nacollector.Browser
                 BackgroundColor = (uint)ColorTranslator.FromHtml("#333333").ToArgb()
             };
             browser.MenuHandler = new MenuHandler(this); // 右键菜单
-            // 当页面加载开始
+                                                         // 当页面加载开始
             browser.FrameLoadStart += (s, e) =>
             {
                 var address = ((ChromiumWebBrowser)s).Address;
@@ -96,6 +105,7 @@ namespace Nacollector.Browser
         /// <param name="inputElemCssSelectors">输入框元素CSS选择器</param>
         public void UseInputAutoComplete(string pageUrlReg, List<string> inputElemCssSelectors)
         {
+            if (isEnding) return;
             if (browser == null) return;
             inputAutoComplete = new InputAutoComplete(browser, pageUrlReg, inputElemCssSelectors);
         }
@@ -105,6 +115,7 @@ namespace Nacollector.Browser
         /// </summary>
         public void BeginWork()
         {
+            if (isEnding) return;
             if (browser == null) return;
             form.Controls.Add(browser);
             MainForm._mainForm.Invoke(new Action(() =>
@@ -121,6 +132,7 @@ namespace Nacollector.Browser
         /// <param name="closeForm">是否关闭窗体</param>
         public async void EndWork(string cookieAddress, string cookieStr = null)
         {
+            isEnding = true;
             string cookieHeader = null;
             if (!string.IsNullOrEmpty(cookieAddress) && cookieStr == null)
             {
@@ -147,6 +159,9 @@ namespace Nacollector.Browser
                     form.Close();
                 }));
             }
+
+            form = null;
+            browser = null;
 
             // 清理 Cookie
             if (visitedAddress.Count > 0)

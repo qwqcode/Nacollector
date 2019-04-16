@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using NacollectorUtils.Settings;
+using System.Threading;
 
 namespace NacollectorSpiders
 {
@@ -23,20 +24,21 @@ namespace NacollectorSpiders
             spider.importSettings(settings);
 
             // 开始任务工作
-#if !DEBUG
             try
             {
-#endif
-            spider.BeginWork();
-#if !DEBUG
-        }
+                spider.BeginWork();
+            }
+            catch (ThreadAbortException)
+            {
+                // 进程正在被中止
+                // 不进行操作
+            }
             catch (Exception e)
             {
                 // 任务执行中抛出的错误被接住了...
                 spider.LogError(e.Message);
                 Logging.Error(e.ToString()); // 保存错误详情
             }
-#endif
 
             // 任务执行完毕
             DateTime afterWorkDt = DateTime.Now;

@@ -32,6 +32,7 @@ namespace Nacollector
         public static MainForm _mainForm;
         public static CrBrowser crBrowser;
         public static CrDownloads crDownloads;
+        public static CrBrowserCookieGetter crCookieGetter;
 
         public MainForm()
         {
@@ -68,11 +69,18 @@ namespace Nacollector
             crDownloads = new CrDownloads(crBrowser);
             
             ContentPanel.Controls.Add(crBrowser.GetBrowser());
+
+            crCookieGetter = new CrBrowserCookieGetter();
         }
 
         public CrBrowser GetCrBrowser()
         {
             return crBrowser;
+        }
+
+        public CrBrowserCookieGetter GetCrCookieGetter()
+        {
+            return crCookieGetter;
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -121,6 +129,7 @@ namespace Nacollector
             // 动态加载 dll
             Type type = typeof(SpiderDomain);
             var spiderDomain = (SpiderDomain)rawDomain.CreateInstanceAndUnwrap(type.Assembly.FullName, type.FullName);
+
             spiderDomain.LoadAssembly(Path.Combine(Application.StartupPath, "NacollectorSpiders.dll"));
 
             this._spiderRawDomain = rawDomain;
@@ -146,15 +155,19 @@ namespace Nacollector
         /// </summary>
         public Dictionary<string, Thread> taskThreads = new Dictionary<string, Thread>();
 
-        public bool AbortTask(string taskId)
+        public void AbortTask(string taskId)
         {
             if (!taskThreads.ContainsKey(taskId))
-                return false;
-
+                return;
+            
             // 主线程委托执行，防止 Abort() 后面的代码无效
             this.BeginInvoke((MethodInvoker)delegate
             {
-                taskThreads[taskId].Abort();
+                if (taskThreads[taskId].IsAlive)
+                {
+                    taskThreads[taskId].Abort();
+                }
+                
                 taskThreads.Remove(taskId);
                 if (taskThreads.Count <= 0)
                 {
@@ -162,7 +175,7 @@ namespace Nacollector
                 }
             });
             
-            return true;
+            return;
         }
 
         public void NewTaskThread(SpiderSettings settings)
@@ -178,53 +191,75 @@ namespace Nacollector
             taskThreads.Add(settings.TaskId, thread);
         }
 
+        private void ShowCreateTaskError(string taskId, string msg, Exception ex)
+        {
+            string errorText = "任务新建失败, " + msg;
+            Logging.Error($"{errorText} [{ex.Data.Keys + ": " + ex.Message}]");
+            MessageBox.Show(errorText, "Nacollector 错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            AbortTask(taskId);
+        }
+
         /// <summary>
         /// 开始执行任务
         /// </summary>
         /// <param name="obj"></param>
         public void StartTask(object obj)
         {
-            var spiderDomain = GetLoadSpiderDomain();
-
-            // 调用目标函数
-#if !DEBUG
-            try
-            {
-#endif
             var settings = (SpiderSettings)obj;
 
-            // Funcs
-            settings.BrowserJsRunFunc = new Action<string>((string str) => {
-                this.GetCrBrowser().RunJS(str);
-            });
-            settings.CrBrowserCookieGetter = new Func<CookieGetterSettings, string>((CookieGetterSettings cgSettings) =>
+            SpiderDomain spiderDomain = null;
+            try
             {
-                var cookieGetter = new CrBrowserCookieGetter(cgSettings.StartUrl, cgSettings.EndUrlReg, cgSettings.Caption);
-
-                if (cgSettings.InputAutoCompleteConfig != null)
-                {
-                    cookieGetter.UseInputAutoComplete(
-                        (string)cgSettings.InputAutoCompleteConfig["pageUrlReg"],
-                        (List<string>)cgSettings.InputAutoCompleteConfig["inputElemCssSelectors"]
-                    );
-                }
-
-                cookieGetter.BeginWork();
-
-                return cookieGetter.GetCookieStr();
-            });
-
-            spiderDomain.Invoke("NacollectorSpiders.PokerDealer", "NewTask", settings);
-#if !DEBUG
+                spiderDomain = GetLoadSpiderDomain();
             }
-            catch
+            catch (Exception ex)
             {
-                string errorText = "任务新建失败,无法调用 NacollectorSpiders.PokerDealer.NewTask";
-                Logging.Error(errorText);
-                MessageBox.Show(errorText, "Nacollector 错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ShowCreateTaskError((string)settings.TaskId, "NacollectorSpiders.dll 调用失败", ex);
+#if DEBUG
+                Debugger.Break();
+#endif
                 return;
             }
+            
+            // 调用目标函数
+            try
+            {
+                // Funcs
+                settings.BrowserJsRunFunc = new Action<string>((string str) => {
+                    this.GetCrBrowser().RunJS(str);
+                });
+                settings.CrBrowserCookieGetter = new Func<CookieGetterSettings, string>((CookieGetterSettings cgSettings) =>
+                {
+                    GetCrCookieGetter().CreateNew(cgSettings.StartUrl, cgSettings.EndUrlReg, cgSettings.Caption);
+
+                    if (cgSettings.InputAutoCompleteConfig != null)
+                    {
+                        GetCrCookieGetter().UseInputAutoComplete(
+                            (string)cgSettings.InputAutoCompleteConfig["pageUrlReg"],
+                            (List<string>)cgSettings.InputAutoCompleteConfig["inputElemCssSelectors"]
+                        );
+                    }
+
+                    GetCrCookieGetter().BeginWork();
+
+                    return GetCrCookieGetter().GetCookieStr();
+                });
+
+                spiderDomain.Invoke("NacollectorSpiders.PokerDealer", "NewTask", settings);
+            }
+            catch (ThreadAbortException)
+            {
+                // 进程正在被中止
+                // 不进行操作
+            }
+            catch (Exception ex)
+            {
+                ShowCreateTaskError((string)settings.TaskId, "无法调用 NacollectorSpiders.PokerDealer.NewTask", ex);
+#if DEBUG
+                Debugger.Break();
 #endif
+                return;
+            }
 
             AbortTask((string)settings.TaskId);
         }

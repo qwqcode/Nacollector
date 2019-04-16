@@ -50,19 +50,24 @@ namespace NacollectorSpiders.Business
             // 选择页面格式
             Dictionary<string, string> headers = new Dictionary<string, string> { };
             Encoding encoding = Encoding.GetEncoding("UTF-8");
-            /*if (PageType.Equals("Alibaba"))
+            if (PageType.Equals("Alibaba"))
             {
                 // 获取 Cookie
-                var browserCookieGetter = new CrBrowserCookieGetter(startUrl: "https://login.1688.com/member/signin.htm?from=sm&Done=" + HttpUtility.UrlEncode(PageUrl), endUrlReg: @"^" + PageUrl.Substring(0, PageUrl.IndexOf("?")), caption: "登录 1688");
-                browserCookieGetter.UseInputAutoComplete(@"^https://login\.1688.com/member/signin\.htm", new List<string>() { "#TPL_username_1", "#TPL_password_1" });
-                browserCookieGetter.BeginWork();
+                var cgSettings = new NacollectorUtils.Settings.CookieGetterSettings
+                {
+                    StartUrl = "https://login.1688.com/member/signin.htm?from=sm&Done=" + HttpUtility.UrlEncode(PageUrl),
+                    EndUrlReg = @"^" + PageUrl.Substring(0, PageUrl.IndexOf("?")),
+                    Caption = "登录 1688",
+
+                };
+                cgSettings.UseInputAutoComplete(@"^https://login\.1688.com/member/signin\.htm", new List<string>() { "#TPL_username_1", "#TPL_password_1" });
                 // ... Show Dialog Working
-                String alibabaCookieStr = browserCookieGetter.GetCookieStr();
+                string alibabaCookieStr = GetSpiderSettings().CrBrowserCookieGetter(cgSettings);
                 if (string.IsNullOrEmpty(alibabaCookieStr)) { throw new Exception("Cookie 获取未成功"); }
 
                 encoding = Encoding.GetEncoding("gb2312");
                 headers.Add("cookie", alibabaCookieStr);
-            }*/
+            }
 
             var downloadPage = Utils.GetPageByUrl(PageUrl, headers, null, encoding);
             if (downloadPage.StatusCode != System.Net.HttpStatusCode.OK) { throw new Exception("下载失败 [" + downloadPage.StatusCode + "] " + downloadPage.StatusDescription); }
