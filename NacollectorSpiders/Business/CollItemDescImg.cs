@@ -1,6 +1,5 @@
 ﻿using CsQuery;
-using Nacollector.Browser;
-using Nacollector.Util;
+using NacollectorUtils;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections;
@@ -16,7 +15,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Web;
 
-namespace Nacollector.Spiders.Business
+namespace NacollectorSpiders.Business
 {
     /// <summary>
     /// 商品详情页图片解析
@@ -54,11 +53,16 @@ namespace Nacollector.Spiders.Business
             if (PageType.Equals("Alibaba"))
             {
                 // 获取 Cookie
-                var browserCookieGetter = new CrBrowserCookieGetter(startUrl: "https://login.1688.com/member/signin.htm?from=sm&Done=" + HttpUtility.UrlEncode(PageUrl), endUrlReg: @"^" + PageUrl.Substring(0, PageUrl.IndexOf("?")), caption: "登录 1688");
-                browserCookieGetter.UseInputAutoComplete(@"^https://login\.1688.com/member/signin\.htm", new List<string>() { "#TPL_username_1", "#TPL_password_1" });
-                browserCookieGetter.BeginWork();
+                var cgSettings = new NacollectorUtils.Settings.CookieGetterSettings
+                {
+                    StartUrl = "https://login.1688.com/member/signin.htm?from=sm&Done=" + HttpUtility.UrlEncode(PageUrl),
+                    EndUrlReg = @"^" + PageUrl.Substring(0, PageUrl.IndexOf("?")),
+                    Caption = "登录 1688",
+
+                };
+                cgSettings.UseInputAutoComplete(@"^https://login\.1688.com/member/signin\.htm", new List<string>() { "#TPL_username_1", "#TPL_password_1" });
                 // ... Show Dialog Working
-                String alibabaCookieStr = browserCookieGetter.GetCookieStr();
+                string alibabaCookieStr = GetSpiderSettings().CrBrowserCookieGetter(cgSettings);
                 if (string.IsNullOrEmpty(alibabaCookieStr)) { throw new Exception("Cookie 获取未成功"); }
 
                 encoding = Encoding.GetEncoding("gb2312");

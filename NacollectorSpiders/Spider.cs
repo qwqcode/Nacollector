@@ -8,20 +8,23 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using CefSharp.WinForms;
-using CefSharp;
 using System.Threading;
-using Nacollector.Util;
-using Nacollector.Browser;
 using System.IO;
+using NacollectorUtils;
+using NacollectorUtils.Settings;
 
-namespace Nacollector.Spiders
+namespace NacollectorSpiders
 {
     public class Spider
     {
         protected string TaskId = null; // 任务ID
         protected Hashtable parms = new Hashtable(); // 参数哈希表
-        protected CrBrowser crBrowser;
+        protected SpiderSettings spiderSettings = null;
+
+        public SpiderSettings GetSpiderSettings()
+        {
+            return this.spiderSettings;
+        }
 
         /// <summary>
         /// 1.设置配置
@@ -29,6 +32,7 @@ namespace Nacollector.Spiders
         /// <param name="spiderSettings"></param>
         public void importSettings(SpiderSettings spiderSettings)
         {
+            this.spiderSettings = spiderSettings;
             TaskId = spiderSettings.TaskId;
 
             JArray ja = (JArray)JsonConvert.DeserializeObject(spiderSettings.ParmsJsonStr);
@@ -38,10 +42,8 @@ namespace Nacollector.Spiders
                 string parmValue = item["value"].ToString();
                 parms[parmName] = parmValue;
             }
-
-            crBrowser = spiderSettings.CrBrowser;
         }
-        
+
         /// <summary>
         /// 2.开始工作
         /// </summary>
@@ -64,7 +66,7 @@ namespace Nacollector.Spiders
                 return null;
             return (string)parms[parmName];
         }
-        
+
         public void Log(string content)
         {
             _Log(content);
@@ -98,10 +100,10 @@ namespace Nacollector.Spiders
         /// <param name="level"></param>
         public void _Log(string content, string level = "")
         {
-            Logging.Info("[" + TaskId + "]" + (!string.IsNullOrEmpty(level)?$"[{level}]":"") + " " + content);
-            crBrowser.RunJS($"Task.log('{TaskId}', '{Utils.Base64Encode(content)}', '{level}', '{Utils.GetTimeStamp()}', true);");
+            Logging.Info("[" + TaskId + "]" + (!string.IsNullOrEmpty(level) ? $"[{level}]" : "") + " " + content);
+            spiderSettings.BrowserJsRunFunc($"Task.log('{TaskId}', '{Utils.Base64Encode(content)}', '{level}', '{Utils.GetTimeStamp()}', true);");
         }
-        
+
         /// <summary>
         /// 自动填充 URL Scheme
         /// </summary>

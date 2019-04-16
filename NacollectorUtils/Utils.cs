@@ -12,11 +12,21 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace Nacollector.Util
+namespace NacollectorUtils
 {
     public class Utils
     {
+        private static IniFile _iniFile = null;
         private static string _tempPath = null;
+        
+        public static IniFile GetIniFile()
+        {
+            if (_iniFile == null)
+            {
+                _iniFile = new IniFile();
+            }
+            return _iniFile;
+        }
 
         // return path to store temporary files
         public static string GetTempPath()
@@ -44,7 +54,10 @@ namespace Nacollector.Util
             return Path.Combine(GetTempPath(), filename);
         }
 
-        public static bool ReqIeProxy { get; set; }
+        public static bool GetIsUseIeProxyReq()
+        {
+            return GetIniFile().Read("ReqByIeProxy", "Request") == "1";
+        }
 
         public static HttpResult GetPageByUrl(string reqUrl, Dictionary<string, string> headers=null, Dictionary<string, string> postData=null, Encoding encoding = null)
         {
@@ -102,7 +115,7 @@ namespace Nacollector.Util
                 item.Encoding = Encoding.GetEncoding("UTF-8");
             
             // 是否使用IE代理
-            if (ReqIeProxy)
+            if (GetIsUseIeProxyReq())
                 item.ProxyIp = "ieproxy";
 
             HttpResult result = http.GetHtml(item);
@@ -127,7 +140,7 @@ namespace Nacollector.Util
             using (WebClient wc = new WebClient())
             {
                 // 是否使用IE代理
-                if (!ReqIeProxy)
+                if (!GetIsUseIeProxyReq())
                     wc.Proxy = null;
 
                 byte[] fileBytes = wc.DownloadData(url);

@@ -1,17 +1,23 @@
 ﻿using Nacollector.Browser;
-using Nacollector.Spiders;
+using NacollectorSpiders;
+using NacollectorUtils.Settings;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Security.Policy;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace Nacollector.JsActions
 {
     /// <summary>
     /// 任务控制器操作
     /// </summary>
+    [Serializable]
     class TaskControllerAction
     {
         private MainForm _form;
@@ -22,37 +28,27 @@ namespace Nacollector.JsActions
             this._form = form;
             this.crBrowser = crBrowser;
         }
-
-        private Dictionary<string, Thread> taskThreads = new Dictionary<string, Thread>();
-
+        
         // 创建新任务
         public void createTask(string taskId, string className, string classLabel, string parmsJsonStr)
         {
             // 配置
-            var settings = new SpiderSettings()
+            var settings = new SpiderSettings
             {
                 TaskId = taskId,
                 ClassName = className,
                 ClassLabel = classLabel,
                 ParmsJsonStr = parmsJsonStr
             };
-            // 创建任务执行线程
-            var thread = new Thread(new ParameterizedThreadStart(_form.StartTask))
-            {
-                IsBackground = true
-            };
-            thread.Start(settings);
-            // 加入 Threads Dictionary
-            taskThreads.Add(taskId, thread);
+
+            _form.NewTaskThread(settings);
         }
 
         // 终止任务
         public bool abortTask(string taskId)
         {
-            if (!taskThreads.ContainsKey(taskId))
-                return false;
+            _form.AbortTask(taskId);
 
-            taskThreads[taskId].Abort();
             return true;
         }
     }

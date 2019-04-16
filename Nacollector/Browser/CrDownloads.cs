@@ -2,7 +2,7 @@
 using CefSharp.WinForms;
 using Nacollector.Browser;
 using Nacollector.Browser.Handler;
-using Nacollector.Util;
+using NacollectorUtils;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;

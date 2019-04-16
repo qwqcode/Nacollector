@@ -39,7 +39,6 @@
             this.ContentPanel.Margin = new System.Windows.Forms.Padding(0);
             this.ContentPanel.Name = "ContentPanel";
             this.ContentPanel.Size = new System.Drawing.Size(1150, 698);
-            this.ContentPanel.TabIndex = 3;
             // 
             // MainForm
             // 
