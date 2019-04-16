@@ -1,5 +1,6 @@
 ﻿using Nacollector.Browser;
 using NacollectorSpiders;
+using NacollectorUtils.Settings;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -32,12 +33,12 @@ namespace Nacollector.JsActions
         public void createTask(string taskId, string className, string classLabel, string parmsJsonStr)
         {
             // 配置
-            var settings = new Dictionary<string, object>
+            var settings = new SpiderSettings
             {
-                { "TaskId", taskId },
-                { "ClassName", className },
-                { "ClassLabel", classLabel },
-                { "ParmsJsonStr", parmsJsonStr }
+                TaskId = taskId,
+                ClassName = className,
+                ClassLabel = classLabel,
+                ParmsJsonStr = parmsJsonStr
             };
 
             _form.NewTaskThread(settings);

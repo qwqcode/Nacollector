@@ -23,6 +23,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using NacollectorUtils;
+using NacollectorUtils.Settings;
 
 namespace Nacollector
 {
@@ -43,7 +44,8 @@ namespace Nacollector
         private void InitBrowser()
         {
             // 初始化内置浏览器
-#if !DEBUG
+#warning 记得修改
+#if DEBUG
             string htmlPath = Utils.GetHtmlResPath("index.html");
             if (string.IsNullOrEmpty(htmlPath))
             {
@@ -163,7 +165,7 @@ namespace Nacollector
             return true;
         }
 
-        public void NewTaskThread(Dictionary<string, object> settings)
+        public void NewTaskThread(SpiderSettings settings)
         {
             // 创建任务执行线程
             var thread = new Thread(new ParameterizedThreadStart(StartTask))
@@ -173,7 +175,7 @@ namespace Nacollector
             thread.Start(settings);
 
             // 加入 Threads Dictionary
-            taskThreads.Add((string)settings["TaskId"], thread);
+            taskThreads.Add(settings.TaskId, thread);
         }
 
         /// <summary>
@@ -189,10 +191,12 @@ namespace Nacollector
             try
             {
 #endif
-            var settings = (Dictionary<string, object>)obj;
-            spiderDomain.Invoke("NacollectorSpiders.PokerDealer", "NewTask", settings, new Action<string>((string str) => {
+            var settings = (SpiderSettings)obj;
+
+            settings.BrowserJsRunFunc = new Action<string>((string str) => {
                 this.GetCrBrowser().RunJS(str);
-            }));
+            });
+            spiderDomain.Invoke("NacollectorSpiders.PokerDealer", "NewTask", settings);
 #if !DEBUG
             }
             catch
@@ -204,7 +208,7 @@ namespace Nacollector
             }
 #endif
 
-            AbortTask((string)settings["TaskId"]);
+            AbortTask((string)settings.TaskId);
         }
 
         /// <summary>

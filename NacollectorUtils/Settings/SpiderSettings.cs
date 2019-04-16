@@ -4,11 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NacollectorSpiders
+namespace NacollectorUtils.Settings
 {
     /// <summary>
     /// 蜘蛛配置
     /// </summary>
+    [Serializable]
     public class SpiderSettings
     {
         /// <summary>

@@ -6,23 +6,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using NacollectorUtils.Settings;
 
 namespace NacollectorSpiders
 {
     public class PokerDealer
     {
-        public void NewTask(Dictionary<string, object> taskSettings, Action<string> BrowserJsRunFunc)
+        public void NewTask(SpiderSettings settings)
         {
             DateTime beforWorkDt = DateTime.Now;
-
-            SpiderSettings settings = new SpiderSettings
-            {
-                TaskId = (string)taskSettings["TaskId"],
-                ClassName = (string)taskSettings["ClassName"],
-                ClassLabel = (string)taskSettings["ClassLabel"],
-                ParmsJsonStr = (string)taskSettings["ParmsJsonStr"],
-                BrowserJsRunFunc = BrowserJsRunFunc
-            };
 
             string typeName = $"{this.GetType().Namespace}.{settings.ClassName}";
 
@@ -51,7 +43,7 @@ namespace NacollectorSpiders
             double timeSpent = afterWorkDt.Subtract(beforWorkDt).TotalSeconds;
             spider.Log("\n");
             spider.Log($"&gt;&gt; 任务执行完毕 （执行耗时：{timeSpent.ToString()}s）");
-            BrowserJsRunFunc($"Task.get('{settings.TaskId}').taskIsEnd();"); // 报告JS任务结束
+            settings.BrowserJsRunFunc($"Task.get('{settings.TaskId}').taskIsEnd();"); // 报告JS任务结束
 
             Utils.ReleaseMemory(true);
         }

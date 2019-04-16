@@ -11,6 +11,7 @@ using Newtonsoft.Json.Linq;
 using System.Threading;
 using System.IO;
 using NacollectorUtils;
+using NacollectorUtils.Settings;
 
 namespace NacollectorSpiders
 {
