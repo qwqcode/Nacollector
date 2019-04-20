@@ -1,5 +1,4 @@
 ﻿using CefSharp;
-using CefSharp.WinForms;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
@@ -11,16 +10,17 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using NacollectorUtils;
+using CefSharp.Wpf;
 
 namespace Nacollector
 {
-    static class Program
+    public static class Program
     {
         /// <summary>
         /// 应用程序的主入口点。
         /// </summary>
         [STAThread]
-        static void Main()
+        public static void Main()
         {
             // 检查系统版本
             if (!Utils.IsWinVistaOrHigher())
@@ -77,7 +77,9 @@ namespace Nacollector
                 InitCef();
 
                 // 启动主界面
-                Application.Run(new MainForm());
+                var application = new App();
+                application.InitializeComponent();
+                application.Run();
             }
         }
 

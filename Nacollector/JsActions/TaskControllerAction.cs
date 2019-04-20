@@ -20,10 +20,10 @@ namespace Nacollector.JsActions
     [Serializable]
     class TaskControllerAction
     {
-        private MainForm _form;
+        private MainWin _form;
         private CrBrowser crBrowser;
 
-        public TaskControllerAction(MainForm form, CrBrowser crBrowser)
+        public TaskControllerAction(MainWin form, CrBrowser crBrowser)
         {
             this._form = form;
             this.crBrowser = crBrowser;

@@ -1,6 +1,6 @@
 ﻿using CefSharp;
 using CefSharp.Internals;
-using CefSharp.WinForms;
+using CefSharp.Wpf;
 using NacollectorUtils;
 using System;
 using System.Collections.Generic;
@@ -64,6 +64,7 @@ namespace Nacollector.Browser
             });
 
             // 浏览器 初始化
+            /*
             browser = new ChromiumWebBrowser(StartUrl)
             {
                 Dock = DockStyle.Fill,
@@ -96,6 +97,7 @@ namespace Nacollector.Browser
                     EndWork(address);
                 }
             };
+            */
         }
 
         /// <summary>
@@ -117,11 +119,13 @@ namespace Nacollector.Browser
         {
             if (isEnding) return;
             if (browser == null) return;
+            /*
             form.Controls.Add(browser);
             MainForm._mainForm.Invoke(new Action(() =>
             {
                 form.ShowDialog();
             }));
+            */
         }
 
         /// <summary>
@@ -154,10 +158,12 @@ namespace Nacollector.Browser
             // 关闭窗体
             if (form != null && !form.IsDisposed)
             {
+                /*
                 MainForm._mainForm.Invoke(new Action(() =>
                 {
                     form.Close();
                 }));
+                */
             }
 
             form = null;

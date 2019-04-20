@@ -1,5 +1,5 @@
 ﻿using CefSharp;
-using CefSharp.WinForms;
+using CefSharp.Wpf;
 using Nacollector.Browser;
 using Nacollector.Browser.Handler;
 using Nacollector.JsActions;
@@ -40,6 +40,7 @@ namespace Nacollector.Ui
                     BackColor = ColorTranslator.FromHtml("#282c34")
                 };
                 startingForm.Show();
+                DropShadowToWindow(startingForm.Handle);
                 this.Opacity = 0;
             }
             else
@@ -54,6 +55,10 @@ namespace Nacollector.Ui
         protected void SplashScreen_MainForm_Load(object sender, EventArgs e)
         {
             // 程序启动画面
+            BeginInvoke((MethodInvoker)delegate
+            {
+                DropShadowToWindow(Handle);
+            });
             SetIsStarting(true);
         }
 

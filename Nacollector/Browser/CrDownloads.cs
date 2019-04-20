@@ -1,5 +1,5 @@
 ﻿using CefSharp;
-using CefSharp.WinForms;
+using CefSharp.Wpf;
 using Nacollector.Browser;
 using Nacollector.Browser.Handler;
 using NacollectorUtils;

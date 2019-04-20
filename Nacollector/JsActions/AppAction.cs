@@ -8,8 +8,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using NacollectorUtils;
+using System.Windows;
 
 namespace Nacollector.JsActions
 {
@@ -18,10 +18,10 @@ namespace Nacollector.JsActions
     /// </summary>
     class AppAction
     {
-        private MainForm _form;
+        private MainWin _form;
         private CrBrowser crBrowser;
 
-        public AppAction(MainForm form, CrBrowser crBrowser)
+        public AppAction(MainWin form, CrBrowser crBrowser)
         {
             this._form = form;
             this.crBrowser = crBrowser;
@@ -29,28 +29,28 @@ namespace Nacollector.JsActions
 
         public void appClose()
         {
-            _form.Invoke((MethodInvoker)delegate {
-                Application.Exit();
+            _form.Dispatcher.Invoke((Action)delegate {
+                Application.Current.Shutdown();
             });
         }
 
         public void appMaxMini()
         {
-            _form.Invoke((MethodInvoker)delegate {
+            _form.Dispatcher.Invoke((Action)delegate {
                 _form.ToggleMaximize();
             });
         }
 
         public void appMin()
         {
-            _form.Invoke((MethodInvoker)delegate {
+            _form.Dispatcher.Invoke((Action)delegate {
                 if (!_form.ShowInTaskbar)
                 {
                     _form.Hide();
                 }
                 else
                 {
-                    _form.WindowState = FormWindowState.Minimized;
+                    _form.WindowState = WindowState.Minimized;
                 }
             });
         }
@@ -88,15 +88,15 @@ namespace Nacollector.JsActions
         // 升级操作
         public void appUpdateAction(string srcUrl, string updateType)
         {
-            if (!File.Exists(Path.Combine(Application.StartupPath, "Naupdater.exe")))
+            if (!File.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Naupdater.exe")))
             {
-                MessageBox.Show("升级 Naupdater.exe 模块丢失，无法升级", "未找到 Naupdater.exe", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                System.Windows.Forms.MessageBox.Show("升级 Naupdater.exe 模块丢失，无法升级", "未找到 Naupdater.exe", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Error);
                 return;
             }
 
             Process process = new Process();
             process.StartInfo.FileName = "Naupdater.exe";
-            process.StartInfo.WorkingDirectory = Application.StartupPath;
+            process.StartInfo.WorkingDirectory = AppDomain.CurrentDomain.BaseDirectory;
             process.StartInfo.Arguments = $"-{updateType} \"{srcUrl}\"";
             // MessageBox.Show($"-{updateType} \"{srcUrl}\"");
             process.Start();

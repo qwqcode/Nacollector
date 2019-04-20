@@ -1,5 +1,5 @@
 ﻿using CefSharp;
-using CefSharp.WinForms;
+using CefSharp.Wpf;
 using Nacollector.Browser;
 using Nacollector.Browser.Handler;
 using Nacollector.JsActions;
@@ -18,6 +18,30 @@ namespace Nacollector.Ui
     /// </summary>
     public partial class FormBase : Form
     {
+        [DllImport("dwmapi.dll")]
+        public static extern int DwmExtendFrameIntoClientArea(IntPtr hWnd, ref MARGINS pMarInset);
+        [DllImport("dwmapi.dll")]
+        public static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
+        [DllImport("dwmapi.dll")]
+        public static extern int DwmIsCompositionEnabled(ref int pfEnabled);
+        [DllImport("Gdi32.dll", EntryPoint = "CreateRoundRectRgn")]
+        private static extern IntPtr CreateRoundRectRgn
+        (
+            int nLeftRect,
+            int nTopRect,
+            int nRightRect,
+            int nBottomRect,
+            int nWidthEllipse,
+            int nHeightEllipse
+         );
+        public struct MARGINS
+        {
+            public int leftWidth;
+            public int rightWidth;
+            public int topHeight;
+            public int bottomHeight;
+        }
+
         public void DecorationMouseDown(HitTestValues hit, Point p)
         {
             NativeMethods.ReleaseCapture();
@@ -45,9 +69,6 @@ namespace Nacollector.Ui
         protected override void OnHandleCreated(EventArgs e)
         {
             base.OnHandleCreated(e);
-
-            if (!DesignMode)
-                SetWindowRegion(Handle, 0, 0, Width, Height);
         }
 
         protected static int MakeLong(short lowPart, short highPart)
@@ -70,36 +91,6 @@ namespace Nacollector.Ui
 
             switch (m.Msg)
             {
-                case (int)WindowMessages.WM_NCCALCSIZE:
-                    {
-                        // Provides new coordinates for the window client area.
-                        WmNCCalcSize(ref m);
-                        break;
-                    }
-                case (int)WindowMessages.WM_NCPAINT:
-                    {
-                        // Here should all our painting occur, but...
-                        WmNCPaint(ref m);
-                        break;
-                    }
-                case (int)WindowMessages.WM_NCACTIVATE:
-                    {
-                        // ... WM_NCACTIVATE does some painting directly 
-                        // without bothering with WM_NCPAINT ...
-                        WmNCActivate(ref m);
-                        break;
-                    }
-                case (int)WindowMessages.WM_SETTEXT:
-                    {
-                        // ... and some painting is required in here as well
-                        WmSetText(ref m);
-                        break;
-                    }
-                case (int)WindowMessages.WM_WINDOWPOSCHANGED:
-                    {
-                        WmWindowPosChanged(ref m);
-                        break;
-                    }
                 case 174: // ignore magic message number
                     {
                         break;
@@ -221,6 +212,28 @@ namespace Nacollector.Ui
         public FormWindowState ToggleMaximize()
         {
             return WindowState = WindowState == FormWindowState.Maximized ? FormWindowState.Normal : FormWindowState.Maximized;
+        }
+
+        public static bool DropShadowToWindow(IntPtr handle)
+        {
+            try
+            {
+                var v = 2;
+                DwmSetWindowAttribute(handle, 2, ref v, 4);
+                MARGINS margins = new MARGINS()
+                {
+                    bottomHeight = 1,
+                    leftWidth = 0,
+                    rightWidth = 0,
+                    topHeight = 0
+                };
+                int ret2 = DwmExtendFrameIntoClientArea(handle, ref margins);
+                return ret2 == 0;
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }

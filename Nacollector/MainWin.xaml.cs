@@ -1,42 +1,40 @@
 ﻿using CefSharp;
-using CefSharp.WinForms;
 using Nacollector.Browser;
-using Nacollector.Browser.Handler;
 using Nacollector.JsActions;
-using Nacollector.Ui;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
-using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Security.Policy;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 using NacollectorUtils;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Drawing;
+using System.Reflection;
+using System.Diagnostics;
+using System.Threading;
 using NacollectorUtils.Settings;
+using System.IO;
+using System.Security.Policy;
 
 namespace Nacollector
 {
-    public partial class MainForm : FormBase
+    public partial class MainWin : Window
     {
-        public static MainForm _mainForm;
+        public static MainWin _mainWin;
         public static CrBrowser crBrowser;
         public static CrDownloads crDownloads;
         public static CrBrowserCookieGetter crCookieGetter;
 
-        public MainForm()
+        public MainWin()
         {
-            _mainForm = this;
+            _mainWin = this;
 
             InitializeComponent(); // 初始化控件
             InitBrowser(); // 初始化浏览器
@@ -50,7 +48,7 @@ namespace Nacollector
             string htmlPath = Utils.GetHtmlResPath("index.html");
             if (string.IsNullOrEmpty(htmlPath))
             {
-                Application.Exit(); // 退出程序
+                Application.Current.Shutdown(); // 退出程序
             }
 #else
             string htmlPath = "http://127.0.0.1:8080";
@@ -64,26 +62,30 @@ namespace Nacollector
             crBrowser.GetBrowser().RegisterAsyncJsObject("AppAction", new AppAction(this, crBrowser));
             crBrowser.GetBrowser().RegisterAsyncJsObject("TaskController", new TaskControllerAction(this, crBrowser));
 
-            crBrowser.GetBrowser().FrameLoadEnd += new EventHandler<FrameLoadEndEventArgs>(SplashScreen_Browser_FrameLoadEnd); // 浏览器初始化完毕时执行
+            //crBrowser.GetBrowser().FrameLoadEnd += new EventHandler<FrameLoadEndEventArgs>(SplashScreen_Browser_FrameLoadEnd); // 浏览器初始化完毕时执行
 
             crDownloads = new CrDownloads(crBrowser);
-            
-            ContentPanel.Controls.Add(crBrowser.GetBrowser());
 
-            crCookieGetter = new CrBrowserCookieGetter();
+            browserContainer.Content = crBrowser.GetBrowser();
+
+            //crCookieGetter = new CrBrowserCookieGetter();
         }
 
-        public CrBrowser GetCrBrowser()
+        public void ToggleMaximize()
         {
-            return crBrowser;
+            if (WindowState == WindowState.Maximized)
+                WindowState = WindowState.Normal;
+            else
+                WindowState = WindowState.Maximized;
         }
 
-        public CrBrowserCookieGetter GetCrCookieGetter()
+        public void ShowSystemMenu(System.Drawing.Point point)
         {
-            return crCookieGetter;
+
+
         }
 
-        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             // 是否退出弹窗
             string dialogTxt = "确定退出 Nacollector？";
@@ -93,8 +95,8 @@ namespace Nacollector
             if (downloadingTaskNum > 0)
                 dialogTxt = $"有 {downloadingTaskNum} 个下载任务仍在继续！确定结束下载并关闭程序？";
 
-            DialogResult dr = MessageBox.Show(dialogTxt, "退出 Nacollector", MessageBoxButtons.OKCancel);
-            if (dr == DialogResult.OK)
+            System.Windows.Forms.DialogResult dr = System.Windows.Forms.MessageBox.Show(dialogTxt, "退出 Nacollector", System.Windows.Forms.MessageBoxButtons.OKCancel);
+            if (dr == System.Windows.Forms.DialogResult.OK)
             {
                 e.Cancel = false;
             }
@@ -107,6 +109,15 @@ namespace Nacollector
         ///
         /// 任务执行
         ///
+        public CrBrowser GetCrBrowser()
+        {
+            return crBrowser;
+        }
+
+        public CrBrowserCookieGetter GetCrCookieGetter()
+        {
+            return crCookieGetter;
+        }
 
         public AppDomain _spiderRawDomain = null;
         public SpiderDomain _spiderDomain = null;
@@ -130,7 +141,7 @@ namespace Nacollector
             Type type = typeof(SpiderDomain);
             var spiderDomain = (SpiderDomain)rawDomain.CreateInstanceAndUnwrap(type.Assembly.FullName, type.FullName);
 
-            spiderDomain.LoadAssembly(Path.Combine(Application.StartupPath, "NacollectorSpiders.dll"));
+            spiderDomain.LoadAssembly(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "NacollectorSpiders.dll"));
 
             this._spiderRawDomain = rawDomain;
             this._spiderDomain = spiderDomain;
@@ -159,22 +170,22 @@ namespace Nacollector
         {
             if (!taskThreads.ContainsKey(taskId))
                 return;
-            
+
             // 主线程委托执行，防止 Abort() 后面的代码无效
-            this.BeginInvoke((MethodInvoker)delegate
+            this.Dispatcher.BeginInvoke((Action)delegate
             {
                 if (taskThreads[taskId].IsAlive)
                 {
                     taskThreads[taskId].Abort();
                 }
-                
+
                 taskThreads.Remove(taskId);
                 if (taskThreads.Count <= 0)
                 {
                     UnloadSpiderDomain();
                 }
             });
-            
+
             return;
         }
 
@@ -195,7 +206,7 @@ namespace Nacollector
         {
             string errorText = "任务新建失败, " + msg;
             Logging.Error($"{errorText} [{ex.Data.Keys + ": " + ex.Message}]");
-            MessageBox.Show(errorText, "Nacollector 错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            System.Windows.Forms.MessageBox.Show(errorText, "Nacollector 错误", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Error);
             AbortTask(taskId);
         }
 
@@ -220,7 +231,7 @@ namespace Nacollector
 #endif
                 return;
             }
-            
+
             // 调用目标函数
             try
             {

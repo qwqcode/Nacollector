@@ -1,5 +1,5 @@
 ﻿using CefSharp;
-using CefSharp.WinForms;
+using CefSharp.Wpf;
 using Nacollector.Browser.Handler;
 using System;
 using System.Collections.Generic;
@@ -9,23 +9,27 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using NacollectorUtils;
 using Nacollector.Ui;
+using System.Windows;
+using System.Windows.Interop;
 
 namespace Nacollector.Browser
 {
     public class CrBrowser
     {
-        private MainForm form;
+        private MainWin form;
         private ChromiumWebBrowser browser;
 
-        public CrBrowser(MainForm form, string address)
+        public CrBrowser(MainWin form, string address)
         {
             this.form = form;
 
             // 初始化浏览器
-            browser = new ChromiumWebBrowser(address);
+            browser = new ChromiumWebBrowser()
+            {
+                Address = address
+            };
 
             // BrowserSettings 必须在 Controls.Add 之前
             BrowserSettings browserSettings = new BrowserSettings
@@ -48,7 +52,7 @@ namespace Nacollector.Browser
             ((DragDropHandler)browser.DragHandler).Enable = false;
 
             browser.FrameLoadEnd += new EventHandler<FrameLoadEndEventArgs>(Browser_onFrameLoadEnd);
-            browser.IsBrowserInitializedChanged += new EventHandler<IsBrowserInitializedChangedEventArgs>(Browser_onIsBrowserInitializedChanged);
+            browser.IsBrowserInitializedChanged += Browser_IsBrowserInitializedChanged;
         }
 
         // Frame 加载完毕时执行
@@ -64,11 +68,12 @@ namespace Nacollector.Browser
         }
         
         // 浏览器初始化完毕时执行
-        private void Browser_onIsBrowserInitializedChanged(object sender, IsBrowserInitializedChangedEventArgs args)
+        private void Browser_IsBrowserInitializedChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            if (args.IsBrowserInitialized)
+            if ((bool)e.NewValue)
             {
                 // 设置鼠标按下操作
+                /*
                 ChromeWidgetMessageInterceptor.SetupLoop(browser, (message) =>
                 {
                     var dragHandler = (DragDropHandler)browser.DragHandler;
@@ -78,34 +83,34 @@ namespace Nacollector.Browser
                         return;
                     }
 
-                    Point point = new Point(message.LParam.ToInt32());
+                    var point = new System.Drawing.Point(message.LParam.ToInt32());
                     if (dragHandler.draggableRegion != null && dragHandler.draggableRegion.IsVisible(point))
                     {
                         // 若现在鼠标指针在可拖动区域内
                         if (message.Msg == (int)WindowMessages.WM_LBUTTONDBLCLK) // 鼠标左键双击
                         {
-                            form.BeginInvoke((MethodInvoker)delegate
-                            {
+                            form.Dispatcher.BeginInvoke((Action)delegate{
                                 form.ToggleMaximize();
                             });
                         }
                         else if (message.Msg == (int)WindowMessages.WM_LBUTTONDOWN) // 鼠标左键按下
                         {
-                            form.BeginInvoke((MethodInvoker)delegate
+                            form.Dispatcher.BeginInvoke((Action)delegate
                             {
                                 NativeMethods.ReleaseCapture();
-                                NativeMethods.SendMessage(form.Handle, (int)WindowMessages.WM_NCLBUTTONDOWN, (int)HitTestValues.HTCAPTION, 0); // 执行 模拟标题栏拖动
+                                NativeMethods.SendMessage(new WindowInteropHelper(form).Handle, (int)WindowMessages.WM_NCLBUTTONDOWN, (int)HitTestValues.HTCAPTION, 0); // 执行 模拟标题栏拖动
                             });
                         }
                         else if (message.Msg == (int)WindowMessages.WM_RBUTTONDOWN) // 鼠标右键按下
                         {
-                            form.BeginInvoke((MethodInvoker)delegate
+                            form.Dispatcher.BeginInvoke((Action)delegate
                             {
                                 form.ShowSystemMenu(point);
                             });
                         }
                     }
                 });
+                */
             }
         }
 
@@ -124,7 +129,7 @@ namespace Nacollector.Browser
         /// <param name="jsCodeStr"></param>
         public void RunJS(string jsCodeStr)
         {
-            form.BeginInvoke((MethodInvoker)delegate
+            form.Dispatcher.BeginInvoke((Action)delegate
             {
                 browser.ExecuteScriptAsync(jsCodeStr);
             });
@@ -141,7 +146,7 @@ namespace Nacollector.Browser
         public async Task<object> EvaluateScript(string script, object defaultValue, TimeSpan timeout)
         {
             object result = defaultValue;
-            if (browser.IsBrowserInitialized && !browser.IsDisposed && !browser.Disposing)
+            if (browser.IsBrowserInitialized && !browser.IsDisposed)
             {
                 try
                 {

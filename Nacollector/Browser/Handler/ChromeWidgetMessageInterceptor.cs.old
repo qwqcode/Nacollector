@@ -1,4 +1,4 @@
-﻿using CefSharp.WinForms;
+﻿using CefSharp.Wpf;
 using NacollectorUtils;
 using System;
 using System.Runtime.InteropServices;
