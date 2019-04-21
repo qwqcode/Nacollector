@@ -110,7 +110,7 @@ namespace Nacollector
         {
             Cef.EnableHighDPISupport();
             var settings = new CefSettings();
-            settings.CefCommandLineArgs.Add("--allow-file-access-from-files", "");
+            //settings.CefCommandLineArgs.Add("--allow-file-access-from-files", "");
             settings.CefCommandLineArgs.Add("--disable-web-security", "");
             settings.Locale = "zh-CN";
             settings.AcceptLanguageList = "zh-CN,zh";
@@ -121,11 +121,11 @@ namespace Nacollector
             settings.ResourcesDirPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Resources\cef_sharp\");
             CefSharpSettings.SubprocessExitIfParentProcessClosed = true; // default is false, see https://github.com/cefsharp/CefSharp/issues/2359
             //settings.RemoteDebuggingPort = 51228;
-            /*settings.RegisterScheme(new CefCustomScheme()
+            settings.RegisterScheme(new CefCustomScheme()
             {
                 SchemeName = ResourceSchemeHandlerFactory.SchemeName,
                 SchemeHandlerFactory = new ResourceSchemeHandlerFactory()
-            });*/
+            });
             Cef.Initialize(settings, performDependencyCheck: true, browserProcessHandler: null);
         }
         

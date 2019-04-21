@@ -9,11 +9,15 @@ public class ResourceSchemeHandler : ResourceHandler
 {
     public override bool ProcessRequestAsync(IRequest request, ICallback callback)
     {
+        var names = this.GetType().Assembly.GetManifestResourceNames();
+
+        Console.WriteLine(names);
+
         Uri u = new Uri(request.Url);
         String file = u.Authority + u.AbsolutePath;
         
         Assembly ass = Assembly.GetExecutingAssembly();
-        String resourcePath = ass.GetName().Name + "." + file.Replace("/", ".");
+        String resourcePath = ass.GetName().Name + ".Resources." +  file.Replace("/", ".");
 
         Task.Run(() =>
         {
@@ -31,10 +35,14 @@ public class ResourceSchemeHandler : ResourceHandler
                         case ".js":
                             mimeType = "text/javascript";
                             break;
+                        case ".css":
+                            mimeType = "text/css";
+                            break;
                         case ".png":
                             mimeType = "image/png";
                             break;
                         case ".appcache":
+                            break;
                         case ".manifest":
                             mimeType = "text/cache-manifest";
                             break;
