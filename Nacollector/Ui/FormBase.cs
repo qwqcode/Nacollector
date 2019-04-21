@@ -46,8 +46,11 @@ namespace Nacollector.Ui
         {
             base.OnHandleCreated(e);
 
-            if (!DesignMode)
-                SetWindowRegion(Handle, 0, 0, Width, Height);
+            // 启动 Drop Shaow
+            this.BeginInvoke((MethodInvoker)delegate
+            {
+                DropShadowToWindow(this.Handle);
+            });
         }
 
         protected static int MakeLong(short lowPart, short highPart)
@@ -76,6 +79,11 @@ namespace Nacollector.Ui
                         WmNCCalcSize(ref m);
                         break;
                     }
+                case (int)WindowMessages.WM_WINDOWPOSCHANGED:
+                    {
+                        WmWindowPosChanged(ref m);
+                        break;
+                    }
                 case (int)WindowMessages.WM_NCPAINT:
                     {
                         // Here should all our painting occur, but...
@@ -95,11 +103,7 @@ namespace Nacollector.Ui
                         WmSetText(ref m);
                         break;
                     }
-                case (int)WindowMessages.WM_WINDOWPOSCHANGED:
-                    {
-                        WmWindowPosChanged(ref m);
-                        break;
-                    }
+                
                 case 174: // ignore magic message number
                     {
                         break;
@@ -109,19 +113,6 @@ namespace Nacollector.Ui
                         base.WndProc(ref m);
                         break;
                     }
-            }
-        }
-
-        private void SetWindowRegion(IntPtr hwnd, int left, int top, int right, int bottom)
-        {
-            var hrg = new HandleRef((object)this, NativeMethods.CreateRectRgn(0, 0, 0, 0));
-            var r = NativeMethods.GetWindowRgn(hwnd, hrg.Handle);
-            RECT box;
-            NativeMethods.GetRgnBox(hrg.Handle, out box);
-            if (box.left != left || box.top != top || box.right != right || box.bottom != bottom)
-            {
-                var hr = new HandleRef((object)this, NativeMethods.CreateRectRgn(left, top, right, bottom));
-                NativeMethods.SetWindowRgn(hwnd, hr.Handle, NativeMethods.IsWindowVisible(hwnd));
             }
         }
 
@@ -142,16 +133,11 @@ namespace Nacollector.Ui
         {
             DefWndProc(ref m);
             UpdateBounds();
-            var pos = (WINDOWPOS)Marshal.PtrToStructure(m.LParam, typeof(WINDOWPOS));
-            SetWindowRegion(m.HWnd, 0, 0, pos.cx, pos.cy);
             m.Result = NativeConstants.TRUE;
         }
 
         private void WmNCCalcSize(ref Message m)
         {
-            // http://msdn.microsoft.com/library/default.asp?url=/library/en-us/winui/winui/windowsuserinterface/windowing/windows/windowreference/windowmessages/wm_nccalcsize.asp
-            // http://groups.google.pl/groups?selm=OnRNaGfDEHA.1600%40tk2msftngp13.phx.gbl
-
             var r = (RECT)Marshal.PtrToStructure(m.LParam, typeof(RECT));
             var max = MinMaxState == FormWindowState.Maximized;
 
@@ -179,7 +165,7 @@ namespace Nacollector.Ui
             m.Result = IntPtr.Zero;
         }
 
-        private void WmNCPaint(ref Message msg)
+        private void WmNCPaint(ref Message m)
         {
             // http://msdn.microsoft.com/library/default.asp?url=/library/en-us/gdi/pantdraw_8gdw.asp
             // example in q. 2.9 on http://www.syncfusion.com/FAQ/WindowsForms/FAQ_c41c.aspx#q1026q
@@ -188,7 +174,10 @@ namespace Nacollector.Ui
             //PaintNonClientArea(msg.HWnd, (IntPtr)msg.WParam);
 
             // we handled everything
-            msg.Result = NativeConstants.TRUE;
+
+            // msg.Result = NativeConstants.FALSE; // 会让 DropShadow 丢失
+
+            base.WndProc(ref m);
         }
 
         private void WmSetText(ref Message msg)

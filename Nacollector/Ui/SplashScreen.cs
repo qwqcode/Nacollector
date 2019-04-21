@@ -39,6 +39,7 @@ namespace Nacollector.Ui
                     BackgroundImage = Properties.Resources.StartingImg,
                     BackColor = ColorTranslator.FromHtml("#282c34")
                 };
+                DropShadowToWindow(startingForm.Handle);
                 startingForm.Show();
                 this.Opacity = 0;
             }
