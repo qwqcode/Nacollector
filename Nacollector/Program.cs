@@ -110,7 +110,7 @@ namespace Nacollector
         {
             Cef.EnableHighDPISupport();
             var settings = new CefSettings();
-            settings.CefCommandLineArgs.Add("--allow-file-access-from-files", "");
+            //settings.CefCommandLineArgs.Add("--allow-file-access-from-files", "");
             settings.CefCommandLineArgs.Add("--disable-web-security", "");
             settings.Locale = "zh-CN";
             settings.AcceptLanguageList = "zh-CN,zh";

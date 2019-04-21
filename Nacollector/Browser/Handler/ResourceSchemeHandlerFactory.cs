@@ -12,5 +12,5 @@ class ResourceSchemeHandlerFactory : ISchemeHandlerFactory
         return new ResourceSchemeHandler();
     }
 
-    public static string SchemeName { get { return "resource"; } }
+    public static string SchemeName { get { return "nacollector"; } }
 }
