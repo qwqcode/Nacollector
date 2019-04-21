@@ -47,11 +47,7 @@ namespace Nacollector
             // 初始化内置浏览器
 #warning 记得修改
 #if DEBUG
-            string htmlPath = Utils.GetHtmlResPath("index.html");
-            if (string.IsNullOrEmpty(htmlPath))
-            {
-                Application.Exit(); // 退出程序
-            }
+            string htmlPath = "resource://html_res/index.html";
 #else
             string htmlPath = "http://127.0.0.1:8080";
 #endif

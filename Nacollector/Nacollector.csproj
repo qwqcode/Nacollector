@@ -157,10 +157,9 @@
       <Link>README.md</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="..\NacollectorFrontend\dist\**\*.*">
+    <EmbeddedResource Include="..\NacollectorFrontend\dist\**\*.*">
       <Link>Resources\html_res\%(RecursiveDir)%(Filename)%(Extension)</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    </EmbeddedResource>
     <Content Include="..\CefSharp\**\*.*">
       <Link>Resources\cef_sharp\%(RecursiveDir)%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
