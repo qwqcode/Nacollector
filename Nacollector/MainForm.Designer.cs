@@ -45,7 +45,6 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1150, 698);
-            this.ControlBox = false;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Sizable;
             this.Controls.Add(this.ContentPanel);
             this.Icon = global::Nacollector.Properties.Resources.app_ico;
