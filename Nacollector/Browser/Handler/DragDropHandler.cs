@@ -2,6 +2,7 @@
 using CefSharp.Enums;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -14,9 +15,9 @@ namespace Nacollector.Browser.Handler
      */
     public class DragDropHandler : IDragHandler
     {
-        public Region draggableRegion = new Region();
+        public Region draggableRegion = null;
         public event Action<Region> RegionsChanged;
-        public bool Enable { get; set; } = true;
+        public bool Enable { get; set; } = false;
 
         public bool OnDragEnter(IWebBrowser browserControl, IBrowser browser, IDragData dragData, DragOperationsMask mask)
         {
@@ -25,7 +26,7 @@ namespace Nacollector.Browser.Handler
 
         public void OnDraggableRegionsChanged(IWebBrowser browserControl, IBrowser browser, IList<DraggableRegion> regions)
         {
-            if (!Enable)
+            if (Enable == false)
             {
                 return;
             }
