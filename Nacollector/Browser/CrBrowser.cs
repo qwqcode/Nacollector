@@ -68,17 +68,18 @@ namespace Nacollector.Browser
         {
             if (args.IsBrowserInitialized)
             {
-                // 设置鼠标按下操作
+                // 监听 CefSharp 的 Windows Message
                 ChromeWidgetMessageInterceptor.SetupLoop(browser, (message) =>
                 {
                     var dragHandler = (DragDropHandler)browser.DragHandler;
-
                     if (!dragHandler.Enable)
                     {
                         return;
                     }
 
                     Point point = new Point(message.LParam.ToInt32());
+
+                    // 指定区域拖拽
                     if (dragHandler.draggableRegion != null && dragHandler.draggableRegion.IsVisible(point))
                     {
                         // 若现在鼠标指针在可拖动区域内
@@ -103,6 +104,69 @@ namespace Nacollector.Browser
                             {
                                 form.ShowSystemMenu(point);
                             });
+                        }
+                    }
+                    else
+                    {
+                        // 拖拽改变窗口大小
+                        const uint HTLEFT = 10;
+                        const uint HTRIGHT = 11;
+                        const uint HTBOTTOMRIGHT = 17;
+                        const uint HTBOTTOM = 15;
+                        const uint HTBOTTOMLEFT = 16;
+                        const uint HTTOP = 12;
+                        const uint HTTOPLEFT = 13;
+                        const uint HTTOPRIGHT = 14;
+
+                        const int RESIZE_HANDLE_SIZE = 5;
+
+                        if (message.Msg == (int)WindowMessages.WM_MOUSEMOVE || message.Msg == (int)WindowMessages.WM_LBUTTONDOWN)
+                        {
+                            form.BeginInvoke((MethodInvoker)delegate
+                            {
+                                Size formSize = form.Size;
+                                //Point screenPoint = new Point(message.LParam.ToInt32());
+                                //Point clientPoint = form.PointToClient(screenPoint);
+
+                                Dictionary<uint, Rectangle> boxes = new Dictionary<uint, Rectangle>() {
+            {HTBOTTOMLEFT, new Rectangle(0, formSize.Height - RESIZE_HANDLE_SIZE, RESIZE_HANDLE_SIZE, RESIZE_HANDLE_SIZE)},
+            {HTBOTTOM, new Rectangle(RESIZE_HANDLE_SIZE, formSize.Height - RESIZE_HANDLE_SIZE, formSize.Width - 2*RESIZE_HANDLE_SIZE, RESIZE_HANDLE_SIZE)},
+            {HTBOTTOMRIGHT, new Rectangle(formSize.Width - RESIZE_HANDLE_SIZE, formSize.Height - RESIZE_HANDLE_SIZE, RESIZE_HANDLE_SIZE, RESIZE_HANDLE_SIZE)},
+            {HTRIGHT, new Rectangle(formSize.Width - RESIZE_HANDLE_SIZE, RESIZE_HANDLE_SIZE, RESIZE_HANDLE_SIZE, formSize.Height - 2*RESIZE_HANDLE_SIZE)},
+            {HTTOPRIGHT, new Rectangle(formSize.Width - RESIZE_HANDLE_SIZE, 0, RESIZE_HANDLE_SIZE, RESIZE_HANDLE_SIZE) },
+            {HTTOP, new Rectangle(RESIZE_HANDLE_SIZE, 0, formSize.Width - 2*RESIZE_HANDLE_SIZE, RESIZE_HANDLE_SIZE) },
+            {HTTOPLEFT, new Rectangle(0, 0, RESIZE_HANDLE_SIZE, RESIZE_HANDLE_SIZE) },
+            {HTLEFT, new Rectangle(0, RESIZE_HANDLE_SIZE, RESIZE_HANDLE_SIZE, formSize.Height - 2*RESIZE_HANDLE_SIZE) }
+        };
+
+                                Dictionary<uint, Cursor> cursors = new Dictionary<uint, Cursor>() {
+            {HTBOTTOMLEFT, Cursors.SizeNESW },
+            {HTBOTTOM, Cursors.SizeNS },
+            {HTBOTTOMRIGHT, Cursors.SizeNWSE},
+            {HTRIGHT, Cursors.SizeWE },
+            {HTTOPRIGHT, Cursors.SizeNESW },
+            {HTTOP, Cursors.SizeNS },
+            {HTTOPLEFT, Cursors.SizeNWSE },
+            {HTLEFT, Cursors.SizeWE }
+        };
+
+                                // 判断此刻指针是否在 boxes 内
+                                foreach (KeyValuePair<uint, Rectangle> hitBox in boxes)
+                                {
+                                    if (hitBox.Value.Contains(point))
+                                    {
+                                        browser.Cursor = cursors[hitBox.Key]; // 设置指针图标
+                                        if (message.Msg == (int)WindowMessages.WM_LBUTTONDOWN)
+                                        {
+                                            NativeMethods.ReleaseCapture();
+                                            NativeMethods.SendMessage(form.Handle, (int)WindowMessages.WM_NCLBUTTONDOWN, (int)hitBox.Key, 0);
+                                        }
+                                        break;
+                                    }
+                                }
+                            });
+
+                            return;
                         }
                     }
                 });
