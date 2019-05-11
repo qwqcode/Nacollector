@@ -43,7 +43,7 @@ namespace NacollectorSpiders.Business
             };
             cgSettings.UseInputAutoComplete(@"^https://login\.taobao\.com/member/login\.jhtml", new List<string>() { "#TPL_username_1", "#TPL_password_1" });
             // ... Show Dialog Working
-            cookieStr = GetSpiderSettings().CrBrowserCookieGetter(cgSettings);
+            cookieStr = CrBrowserCookieGetter(cgSettings);
             if (string.IsNullOrEmpty(cookieStr)) { throw new Exception("Cookie 获取未成功"); }
             // 获取 _tb_token_
             var homePageUrl = "https://qudao.gongxiao.tmall.com/supplier/user/invitation_list.htm";

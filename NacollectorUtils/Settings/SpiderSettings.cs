@@ -31,12 +31,5 @@ namespace NacollectorUtils.Settings
         /// 任务参数 JSON 字符串
         /// </summary>
         public string ParmsJsonStr { get; set; }
-
-        /// <summary>
-        /// 浏览器（调用执行JS日志显示）
-        /// </summary>
-        public Action<string> BrowserJsRunFunc { get; set; }
-
-        public Func<CookieGetterSettings, string> CrBrowserCookieGetter { get; set; }
     }
 }

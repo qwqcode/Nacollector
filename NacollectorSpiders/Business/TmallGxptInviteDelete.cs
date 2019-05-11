@@ -44,7 +44,7 @@ namespace NacollectorSpiders.Business
             };
             cgSettings.UseInputAutoComplete(@"^https://login\.taobao\.com/member/login\.jhtml", new List<string>() { "#TPL_username_1", "#TPL_password_1" });
             // ... Show Dialog Working
-            cookieStr = GetSpiderSettings().CrBrowserCookieGetter(cgSettings);
+            cookieStr = CrBrowserCookieGetter(cgSettings);
             if (string.IsNullOrEmpty(cookieStr)) { throw new Exception("Cookie 获取未成功"); }
             Log("\n");
             // 执行撤回操作

@@ -2,7 +2,6 @@
 using CefSharp.WinForms;
 using Nacollector.Browser;
 using Nacollector.Browser.Handler;
-using Nacollector.JsActions;
 using Nacollector.Ui;
 using NacollectorUtils;
 using System;
@@ -13,9 +12,6 @@ using System.Windows.Forms;
 
 namespace Nacollector.Ui
 {
-    /// <summary>
-    /// Based on http://customerborderform.codeplex.com/
-    /// </summary>
     public partial class FormBase : Form
     {
         public void DecorationMouseDown(HitTestValues hit, Point p)
@@ -46,11 +42,41 @@ namespace Nacollector.Ui
         {
             base.OnHandleCreated(e);
 
-            // 启动 Drop Shaow
+            // 启动 DropShadow
             this.BeginInvoke((MethodInvoker)delegate
             {
                 DropShadowToWindow(this.Handle);
             });
+        }
+
+        public FormWindowState ToggleMaximize()
+        {
+            return WindowState = WindowState == FormWindowState.Maximized ? FormWindowState.Normal : FormWindowState.Maximized;
+        }
+
+        public static bool DropShadowToWindow(IntPtr hwnd)
+        {
+            try
+            {
+                int val = 2;
+                int ret1 = NativeMethods.DwmSetWindowAttribute(hwnd, 2, ref val, 4);
+
+                if (ret1 == 0)
+                {
+                    Margins m = new Margins { Bottom = 1, Left = 0, Right = 0, Top = 0 };
+                    int ret2 = NativeMethods.DwmExtendFrameIntoClientArea(hwnd, ref m);
+                    return ret2 == 0;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            catch
+            {
+                // Probably dwmapi.dll not found (incompatible OS)
+                return false;
+            }
         }
 
         protected static int MakeLong(short lowPart, short highPart)
@@ -205,11 +231,6 @@ namespace Nacollector.Ui
                 // allow to deactivate window
                 msg.Result = NativeConstants.TRUE;
             }
-        }
-
-        public FormWindowState ToggleMaximize()
-        {
-            return WindowState = WindowState == FormWindowState.Maximized ? FormWindowState.Normal : FormWindowState.Maximized;
         }
     }
 }

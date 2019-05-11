@@ -13,7 +13,7 @@ using System.Windows.Forms;
 
 namespace Nacollector.Browser
 {
-    public class CrBrowserCookieGetter
+    public class CookieGetterBrowser
     {
         public static List<string> visitedAddress = new List<string>(); // 所有已访问过的页面地址
         public static Dictionary<string, string> historyCookie = new Dictionary<string, string>(); // 所有 已得到的 历史Cookie 字符串
@@ -22,12 +22,18 @@ namespace Nacollector.Browser
         public string EndUrlReg { get; set; } // 获取Cookie页 Url 正则表达式
 
         private Form form = null;
+        private Form _parentForm;
         private ChromiumWebBrowser browser = null;
         private InputAutoComplete inputAutoComplete = null;
 
         private string cookie = null;
 
         private bool isEnding = false;
+
+        public CookieGetterBrowser(Form parentForm)
+        {
+            _parentForm = parentForm;
+        }
         
         public void CreateNew(string startUrl, string endUrlReg, string caption = "")
         {
@@ -118,7 +124,7 @@ namespace Nacollector.Browser
             if (isEnding) return;
             if (browser == null) return;
             form.Controls.Add(browser);
-            MainForm._mainForm.Invoke(new Action(() =>
+            _parentForm.Invoke(new Action(() =>
             {
                 form.ShowDialog();
             }));
@@ -154,7 +160,7 @@ namespace Nacollector.Browser
             // 关闭窗体
             if (form != null && !form.IsDisposed)
             {
-                MainForm._mainForm.Invoke(new Action(() =>
+                _parentForm.Invoke(new Action(() =>
                 {
                     form.Close();
                 }));
@@ -337,9 +343,9 @@ namespace Nacollector.Browser
             private const int InputCookie = 26502;
             private const int ShowDevTools = 26503;
 
-            private CrBrowserCookieGetter _this;
+            private CookieGetterBrowser _this;
 
-            public MenuHandler(CrBrowserCookieGetter thisObj)
+            public MenuHandler(CookieGetterBrowser thisObj)
             {
                 _this = thisObj;
             }
