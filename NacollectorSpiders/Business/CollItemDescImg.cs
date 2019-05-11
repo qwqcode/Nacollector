@@ -62,7 +62,7 @@ namespace NacollectorSpiders.Business
                 };
                 cgSettings.UseInputAutoComplete(@"^https://login\.1688.com/member/signin\.htm", new List<string>() { "#TPL_username_1", "#TPL_password_1" });
                 // ... Show Dialog Working
-                string alibabaCookieStr = GetSpiderSettings().CrBrowserCookieGetter(cgSettings);
+                string alibabaCookieStr = CrBrowserCookieGetter(cgSettings);
                 if (string.IsNullOrEmpty(alibabaCookieStr)) { throw new Exception("Cookie 获取未成功"); }
 
                 encoding = Encoding.GetEncoding("gb2312");

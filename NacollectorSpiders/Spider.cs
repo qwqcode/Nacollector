@@ -20,17 +20,57 @@ namespace NacollectorSpiders
         protected string TaskId = null; // 任务ID
         protected Hashtable parms = new Hashtable(); // 参数哈希表
         protected SpiderSettings spiderSettings = null;
+        protected SpiderCallback spiderCallback = null;
 
         public SpiderSettings GetSpiderSettings()
         {
             return this.spiderSettings;
         }
 
+        public SpiderCallback GetSpiderCallback()
+        {
+            return this.spiderCallback;
+        }
+
+        public void NewTask(SpiderSettings settings, SpiderCallback callback)
+        {
+            DateTime beforWorkDt = DateTime.Now;
+
+            this.spiderCallback = callback;
+            ImportSettings(settings);
+
+            // 开始任务工作
+            try
+            {
+                BeginWork();
+            }
+            catch (ThreadAbortException)
+            {
+                // 进程正在被中止
+                // 不进行操作
+            }
+            catch (Exception e)
+            {
+                // 任务执行中抛出的错误被接住了...
+                LogError(e.Message);
+                Logging.Error(e.ToString()); // 保存错误详情
+            }
+
+            // 任务执行完毕
+            DateTime afterWorkDt = DateTime.Now;
+            double timeSpent = afterWorkDt.Subtract(beforWorkDt).TotalSeconds;
+            Log("\n");
+            Log($"&gt;&gt; 任务执行完毕 （执行耗时：{timeSpent.ToString()}s）");
+            RunJs($"Task.get('{settings.TaskId}').taskIsEnd();"); // 报告JS任务结束
+
+            Utils.ReleaseMemory(true);
+        }
+
         /// <summary>
         /// 1.设置配置
         /// </summary>
         /// <param name="spiderSettings"></param>
-        public void importSettings(SpiderSettings spiderSettings)
+        public void ImportSettings(SpiderSettings spiderSettings)
         {
             this.spiderSettings = spiderSettings;
             TaskId = spiderSettings.TaskId;
@@ -101,7 +141,18 @@ namespace NacollectorSpiders
         public void _Log(string content, string level = "")
         {
             Logging.Info("[" + TaskId + "]" + (!string.IsNullOrEmpty(level) ? $"[{level}]" : "") + " " + content);
-            spiderSettings.BrowserJsRunFunc($"Task.log('{TaskId}', '{Utils.Base64Encode(content)}', '{level}', '{Utils.GetTimeStamp()}', true);");
+
+            RunJs($"Task.log('{TaskId}', '{Utils.Base64Encode(content)}', '{level}', '{Utils.GetTimeStamp()}', true);");
+        }
+
+        public void RunJs(string code)
+        {
+            GetSpiderCallback().OnJsRun(code);
+        }
+
+        public string CrBrowserCookieGetter(CookieGetterSettings settings)
+        {
+            return GetSpiderCallback().OnCookieGetterBrowser(settings);
         }
 
         /// <summary>

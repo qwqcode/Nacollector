@@ -58,7 +58,6 @@
     <Compile Include="Business\TaobaoSellerColl.cs" />
     <Compile Include="Business\TmallGxptInvite.cs" />
     <Compile Include="Business\TmallGxptInviteDelete.cs" />
-    <Compile Include="PokerDealer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Spider.cs" />
   </ItemGroup>

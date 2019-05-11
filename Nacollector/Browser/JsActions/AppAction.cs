@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using NacollectorUtils;
 
-namespace Nacollector.JsActions
+namespace Nacollector.Browser.JsActions
 {
     /// <summary>
     /// App 杂项操作
@@ -19,12 +19,12 @@ namespace Nacollector.JsActions
     class AppAction
     {
         private MainForm _form;
-        private CrBrowser crBrowser;
+        private CrBrowser _crBrowser;
 
         public AppAction(MainForm form, CrBrowser crBrowser)
         {
             this._form = form;
-            this.crBrowser = crBrowser;
+            this._crBrowser = crBrowser;
         }
 
         public void appClose()
@@ -58,13 +58,13 @@ namespace Nacollector.JsActions
         // 获取程序版本
         public string getVersion()
         {
-            crBrowser.RunJS($"AppConfig.updateCheckUrl=\"{GlobalConstant.UpdateCheckUrl}\";AppConfig.updateCheckToken=\"{GlobalConstant.UpdateCheckToken}\"");
+            _crBrowser.RunJS($"AppConfig.updateCheckUrl=\"{GlobalConstant.UpdateCheckUrl}\";AppConfig.updateCheckToken=\"{GlobalConstant.UpdateCheckToken}\"");
             return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
         }
 
         public void showDevTools()
         {
-            crBrowser.GetBrowser().ShowDevTools();
+            _crBrowser.GetBrowser().ShowDevTools();
         }
 
         // 采集是否使用IE代理请求
@@ -82,7 +82,7 @@ namespace Nacollector.JsActions
         // 调用浏览器下载文件
         public void downloadUrl(string url)
         {
-            crBrowser.DownloadUrl(url);
+            _crBrowser.DownloadUrl(url);
         }
 
         // 升级操作

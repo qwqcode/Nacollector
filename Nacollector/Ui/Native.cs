@@ -243,6 +243,14 @@ namespace Nacollector.Ui
         public short Y;
     }
 
+    public struct Margins
+    {
+        public int Bottom;
+        public int Left;
+        public int Right;
+        public int Top;
+    }
+
     [Flags]
     public enum WindowStyle
     {
@@ -368,6 +376,12 @@ namespace Nacollector.Ui
 
         [DllImport("shell32.dll")]
         public static extern int SHAppBarMessage(uint dwMessage, [In] ref APPBARDATA pData);
+
+        [DllImport("dwmapi.dll")]
+        public static extern int DwmExtendFrameIntoClientArea(IntPtr hWnd, ref Margins pMarInset);
+
+        [DllImport("dwmapi.dll")]
+        public static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
     }
 
     public static class NativeConstants

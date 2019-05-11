@@ -106,8 +106,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Browser\CrBrowserCookieGetter.cs" />
-    <Compile Include="Browser\CrDownloads.cs" />
+    <Compile Include="Browser\CookieGetterBrowser.cs" />
+    <Compile Include="Browser\DownloadManager.cs" />
     <Compile Include="Browser\CrBrowser.cs" />
     <Compile Include="Browser\Handler\BeforeDownloadUpdatedEventArgs.cs" />
     <Compile Include="Browser\Handler\ChromeWidgetMessageInterceptor.cs" />
@@ -119,28 +119,21 @@
     <Compile Include="Browser\Handler\MenuHandler.cs" />
     <Compile Include="Browser\Handler\ResourceSchemeHandler .cs" />
     <Compile Include="Browser\Handler\ResourceSchemeHandlerFactory.cs" />
-    <Compile Include="Task.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="Browser\JsActions\TaskControllerAction.cs" />
+    <Compile Include="TaskManager\SpiderDomain.cs" />
+    <Compile Include="TaskManager\TaskRunner.cs" />
     <Compile Include="Ui\Native.cs" />
-    <Compile Include="Ui\Shadow.cs">
-      <SubType>Form</SubType>
-    </Compile>
     <Compile Include="Ui\FormBase.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="GlobalConstant.cs" />
-    <Compile Include="JsActions\AppAction.cs" />
-    <Compile Include="JsActions\TaskControllerAction.cs" />
+    <Compile Include="Browser\JsActions\AppAction.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Ui\SplashScreen.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="Ui\SplashScreen.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
@@ -216,6 +209,7 @@
     <ProjectReference Include="..\NacollectorSpiders\NacollectorSpiders.csproj">
       <Project>{a14a1a19-db06-4ae8-b518-3156629b4862}</Project>
       <Name>NacollectorSpiders</Name>
+      <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\NacollectorUtils\NacollectorUtils.csproj">
       <Project>{34410408-bde1-4700-a317-bd455ca550eb}</Project>

@@ -1,19 +1,30 @@
-﻿using Nacollector.Ui;
+﻿using CefSharp;
+using Nacollector.Browser;
+using Nacollector.Ui;
+using NacollectorUtils;
+using NacollectorSpiders;
+using NacollectorUtils.Settings;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
-using System.Reflection;
 using System.Security.Policy;
 using System.Threading;
 using System.Windows.Forms;
-using NacollectorUtils;
-using NacollectorUtils.Settings;
-using System.Diagnostics;
 
-namespace Nacollector
+namespace Nacollector.TaskManager
 {
-    public partial class MainForm : FormBase
+    public class TaskRunner
     {
+        public MainForm _form;
+        public SpiderCallback _spiderCallback;
+
+        public TaskRunner(MainForm form, SpiderCallback spiderCallback)
+        {
+            _form = form;
+            _spiderCallback = spiderCallback;
+        }
+
         ///
         /// 任务执行
         ///
@@ -71,7 +82,7 @@ namespace Nacollector
                 return;
 
             // 主线程委托执行，防止 Abort() 后面的代码无效
-            this.BeginInvoke((MethodInvoker)delegate
+            _form.BeginInvoke((MethodInvoker)delegate
             {
                 if (taskThreads[taskId].IsAlive)
                 {
@@ -131,31 +142,15 @@ namespace Nacollector
                 return;
             }
 
+#if !DEBUG
             // 调用目标函数
             try
             {
-                // Funcs
-                settings.BrowserJsRunFunc = new Action<string>((string str) => {
-                    this.GetCrBrowser().RunJS(str);
-                });
-                settings.CrBrowserCookieGetter = new Func<CookieGetterSettings, string>((CookieGetterSettings cgSettings) =>
-                {
-                    GetCrCookieGetter().CreateNew(cgSettings.StartUrl, cgSettings.EndUrlReg, cgSettings.Caption);
+#endif
 
-                    if (cgSettings.InputAutoCompleteConfig != null)
-                    {
-                        GetCrCookieGetter().UseInputAutoComplete(
-                            (string)cgSettings.InputAutoCompleteConfig["pageUrlReg"],
-                            (List<string>)cgSettings.InputAutoCompleteConfig["inputElemCssSelectors"]
-                        );
-                    }
-
-                    GetCrCookieGetter().BeginWork();
-
-                    return GetCrCookieGetter().GetCookieStr();
-                });
-
-                spiderDomain.Invoke("NacollectorSpiders.PokerDealer", "NewTask", settings);
+            string typeName = $"NacollectorSpiders.{settings.ClassName}";
+            spiderDomain.NewTask(typeName, settings, _spiderCallback);
+#if !DEBUG
             }
             catch (ThreadAbortException)
             {
@@ -170,43 +165,9 @@ namespace Nacollector
 #endif
                 return;
             }
+#endif
 
             AbortTask((string)settings.TaskId);
-        }
-
-        /// <summary>
-        /// 执行爬虫任务，新的 AppDomain 中
-        /// </summary>
-        public class SpiderDomain : MarshalByRefObject
-        {
-            Assembly assembly = null;
-
-            public void LoadAssembly(string assemblyPath)
-            {
-                try
-                {
-                    assembly = Assembly.LoadFile(assemblyPath);
-                }
-                catch (Exception ex)
-                {
-                    throw new InvalidOperationException(ex.Message);
-                }
-            }
-
-            public bool Invoke(string fullClassName, string methodName, params object[] args)
-            {
-                if (assembly == null)
-                    return false;
-                Type tp = assembly.GetType(fullClassName);
-                if (tp == null)
-                    return false;
-                MethodInfo method = tp.GetMethod(methodName);
-                if (method == null)
-                    return false;
-                object obj = Activator.CreateInstance(tp);
-                method.Invoke(obj, args);
-                return true;
-            }
         }
     }
 }

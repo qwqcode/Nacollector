@@ -12,33 +12,36 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Nacollector
+namespace Nacollector.Browser
 {
     /// <summary>
     /// 浏览器下载管理器
     /// 配合 JS
     /// </summary>
-    public class CrDownloads
+    public class DownloadManager
     {
-        public CrBrowser crBrowser;
+        public CrBrowser _crBrowser;
         public static DownloadHandler downloadHandler;
+        
+        private static Dictionary<int, string> dlTaskIndex = new Dictionary<int, string>();
+        private static Dictionary<string, int> dlTaskAction = new Dictionary<string, int>();
 
-        public CrDownloads(CrBrowser _crBrowser)
+        public DownloadManager(CrBrowser crBrowser)
         {
-            crBrowser = _crBrowser;
+            _crBrowser = crBrowser;
 
             downloadHandler = new DownloadHandler();
             downloadHandler.OnBeforeDownloadFired += (s, e) =>
             {
-                DownloadDo("add", crBrowser.GetBrowser(), e);
+                DownloadDo("add", _crBrowser.GetBrowser(), e);
             };
             downloadHandler.OnDownloadUpdatedFired += (s, e) =>
             {
-                DownloadDo("update", crBrowser.GetBrowser(), e);
+                DownloadDo("update", _crBrowser.GetBrowser(), e);
             };
 
-            crBrowser.GetBrowser().DownloadHandler = downloadHandler;
-            crBrowser.GetBrowser().RegisterAsyncJsObject("CrDownloadsCallBack", new CrDownloadsCallBack());
+            _crBrowser.GetBrowser().DownloadHandler = downloadHandler;
+            _crBrowser.GetBrowser().RegisterAsyncJsObject("CrDownloadsCallBack", new CrDownloadsCallBack());
         }
 
         public class CrDownloadsCallBack
@@ -82,9 +85,6 @@ namespace Nacollector
                 dlTaskAction[key] = action;
             }
         }
-
-        private static Dictionary<int, string> dlTaskIndex = new Dictionary<int, string>();
-        private static Dictionary<string, int> dlTaskAction = new Dictionary<string, int>();
 
         private void DownloadDo(string doType, ChromiumWebBrowser browser, EventArgs e)
         {

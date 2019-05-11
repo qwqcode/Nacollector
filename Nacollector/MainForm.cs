@@ -1,30 +1,41 @@
 ﻿using CefSharp;
 using Nacollector.Browser;
-using Nacollector.JsActions;
+using Nacollector.TaskManager;
 using Nacollector.Ui;
 using System;
 using System.Windows.Forms;
+using NacollectorUtils.Settings;
+using System.Collections.Generic;
 
 namespace Nacollector
 {
     public partial class MainForm : FormBase
     {
-        public static MainForm _mainForm;
-        public static CrBrowser crBrowser;
-        public static CrDownloads crDownloads;
-        public static CrBrowserCookieGetter crCookieGetter;
+        public MainForm _mainForm;
+        public SplashScreen _splashScreen;
+        public CrBrowser crBrowser;
+        public CookieGetterBrowser cookieGetterBrowser;
+        public TaskRunner taskRunner;
 
         public MainForm()
         {
             _mainForm = this;
 
+            this.Opacity = 0;
+            _splashScreen = new SplashScreen(this);
+            _splashScreen.Show();
+
             InitializeComponent(); // 初始化控件
-            InitBrowser(); // 初始化浏览器
+
+            InitBrowser();
+            InitTaskRunner();
         }
 
+        /// <summary>
+        /// 初始化浏览器
+        /// </summary>
         private void InitBrowser()
         {
-            // 初始化内置浏览器
 #warning 记得修改
 #if DEBUG
             string htmlPath = "nacollector://html_res/index.html";
@@ -32,31 +43,48 @@ namespace Nacollector
             string htmlPath = "http://127.0.0.1:8080";
 #endif
             crBrowser = new CrBrowser(this, htmlPath);
-
-            // Need Update: https://github.com/cefsharp/CefSharp/issues/2246
-
-            //For legacy biding we'll still have support for
-            CefSharpSettings.LegacyJavascriptBindingEnabled = true;
-            crBrowser.GetBrowser().RegisterAsyncJsObject("AppAction", new AppAction(this, crBrowser));
-            crBrowser.GetBrowser().RegisterAsyncJsObject("TaskController", new TaskControllerAction(this, crBrowser));
-
-            crBrowser.GetBrowser().FrameLoadEnd += new EventHandler<FrameLoadEndEventArgs>(SplashScreen_Browser_FrameLoadEnd); // 浏览器初始化完毕时执行
-
-            crDownloads = new CrDownloads(crBrowser);
+            
+            crBrowser.GetBrowser().FrameLoadEnd += new EventHandler<FrameLoadEndEventArgs>((obj, args) => {
+                _splashScreen.Hide();
+                this.Invoke((MethodInvoker)delegate
+                {
+                    this.Opacity = 1;
+                });
+            }); // 浏览器初始化完毕时执行
             
             ContentPanel.Controls.Add(crBrowser.GetBrowser());
-
-            crCookieGetter = new CrBrowserCookieGetter();
+            cookieGetterBrowser = new CookieGetterBrowser(this);
         }
 
-        public CrBrowser GetCrBrowser()
+        /// <summary>
+        /// 初始化任务管理器
+        /// </summary>
+        private void InitTaskRunner()
         {
-            return crBrowser;
-        }
+            taskRunner = new TaskRunner(this, new SpiderCallback
+            {
+                OnCookieGetterBrowser = new SpiderCallback.OnCookieGetterBrowserDelegate((CookieGetterSettings cgSettings) =>
+                {
+                    cookieGetterBrowser.CreateNew(cgSettings.StartUrl, cgSettings.EndUrlReg, cgSettings.Caption);
 
-        public CrBrowserCookieGetter GetCrCookieGetter()
-        {
-            return crCookieGetter;
+                    if (cgSettings.InputAutoCompleteConfig != null)
+                    {
+                        cookieGetterBrowser.UseInputAutoComplete(
+                            (string)cgSettings.InputAutoCompleteConfig["pageUrlReg"],
+                            (List<string>)cgSettings.InputAutoCompleteConfig["inputElemCssSelectors"]
+                        );
+                    }
+
+                    cookieGetterBrowser.BeginWork();
+
+                    return cookieGetterBrowser.GetCookieStr();
+                }),
+
+                OnJsRun = new SpiderCallback.OnJsRunDelegate((code) =>
+                {
+                    crBrowser.RunJS(code);
+                })
+            });
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)

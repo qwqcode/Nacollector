@@ -11,12 +11,12 @@ namespace Nacollector.Browser.Handler
 {
     public class MenuHandler : IContextMenuHandler
     {
-        private CrBrowser crBrowser;
+        private CrBrowser _crBrowser;
         private bool _showReload = false;
 
         public MenuHandler(CrBrowser crBrowser, bool showReload = false)
         {
-            this.crBrowser = crBrowser;
+            this._crBrowser = crBrowser;
             _showReload = showReload;
         }
 
@@ -134,7 +134,7 @@ namespace Nacollector.Browser.Handler
         /// <param name="frame"></param>
         void ExecuteSaveFileByUrl(string url, IFrame frame)
         {
-            crBrowser.DownloadUrl(url);
+            _crBrowser.DownloadUrl(url);
         }
 
         void IContextMenuHandler.OnContextMenuDismissed(IWebBrowser browserControl, IBrowser browser, IFrame frame)

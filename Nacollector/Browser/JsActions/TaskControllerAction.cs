@@ -12,7 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace Nacollector.JsActions
+namespace Nacollector.Browser.JsActions
 {
     /// <summary>
     /// 任务控制器操作
@@ -21,12 +21,12 @@ namespace Nacollector.JsActions
     class TaskControllerAction
     {
         private MainForm _form;
-        private CrBrowser crBrowser;
+        private CrBrowser _crBrowser;
 
         public TaskControllerAction(MainForm form, CrBrowser crBrowser)
         {
             this._form = form;
-            this.crBrowser = crBrowser;
+            this._crBrowser = crBrowser;
         }
         
         // 创建新任务
@@ -41,13 +41,13 @@ namespace Nacollector.JsActions
                 ParmsJsonStr = parmsJsonStr
             };
 
-            _form.NewTaskThread(settings);
+            _form.taskRunner.NewTaskThread(settings);
         }
 
         // 终止任务
         public bool abortTask(string taskId)
         {
-            _form.AbortTask(taskId);
+            _form.taskRunner.AbortTask(taskId);
 
             return true;
         }
