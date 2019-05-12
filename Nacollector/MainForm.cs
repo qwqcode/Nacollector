@@ -89,23 +89,7 @@ namespace Nacollector
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            // 是否退出弹窗
-            string dialogTxt = "确定退出 Nacollector？";
 
-            // 下载任务数统计
-            int downloadingTaskNum = Convert.ToInt32(crBrowser.EvaluateScript("Downloads.countDownloadingTask();", 0, TimeSpan.FromSeconds(3)).GetAwaiter().GetResult());
-            if (downloadingTaskNum > 0)
-                dialogTxt = $"有 {downloadingTaskNum} 个下载任务仍在继续！确定结束下载并关闭程序？";
-
-            DialogResult dr = MessageBox.Show(dialogTxt, "退出 Nacollector", MessageBoxButtons.OKCancel);
-            if (dr == DialogResult.OK)
-            {
-                e.Cancel = false;
-            }
-            else
-            {
-                e.Cancel = true;
-            }
         }
     }
 }

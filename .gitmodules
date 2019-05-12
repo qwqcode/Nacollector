@@ -1,3 +1,4 @@
 [submodule "NacollectorFrontend"]
 	path = NacollectorFrontend
 	url = https://github.com/qwqcode/NacollectorFrontend
+	branch = master
