@@ -37,14 +37,19 @@ namespace Nacollector
         private void InitBrowser()
         {
 #warning 记得修改
-#if DEBUG
+#if !DEBUG
             string htmlPath = "nacollector://html_res/index.html";
 #else
             string htmlPath = "http://127.0.0.1:8080";
 #endif
             crBrowser = new CrBrowser(this, htmlPath);
             
-            crBrowser.GetBrowser().FrameLoadEnd += new EventHandler<FrameLoadEndEventArgs>((obj, args) => {
+            crBrowser.GetBrowser().FrameLoadEnd += new EventHandler<FrameLoadEndEventArgs>((obj, e) => {
+                string url = e.Frame.Url;
+                if (crBrowser.CheckIsAppUrl(url))
+                {
+                    crBrowser.RunJS(NacollectorUtils.GenFormList.GetCode());
+                }
                 _splashScreen.Hide();
                 this.Invoke((MethodInvoker)delegate
                 {
