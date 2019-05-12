@@ -59,11 +59,16 @@ namespace Nacollector.Browser
             downloadManager = new DownloadManager(this);
         }
 
+        public bool CheckIsAppUrl(string url)
+        {
+            return url.IndexOf("http://127.0.0.1") == 0 || url.IndexOf("nacollector://") == 0;
+        }
+
         // Frame 加载完毕时执行
         private void Browser_onFrameLoadEnd(object sender, FrameLoadEndEventArgs e)
         {
             string url = e.Frame.Url;
-            if (url.IndexOf("http://127.0.0.1") == 0 || url.IndexOf("nacollector://") == 0)
+            if (CheckIsAppUrl(url))
             {
                 ((DragDropHandler)browser.DragHandler).Enable = true; // 开启拖拽功能
             }
