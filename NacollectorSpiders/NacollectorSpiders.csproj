@@ -55,6 +55,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Business\CollItemDescImg.cs" />
+    <Compile Include="Business\CollItemDescVideo.cs" />
     <Compile Include="Business\TaobaoSellerColl.cs" />
     <Compile Include="Business\TmallGxptInvite.cs" />
     <Compile Include="Business\TmallGxptInviteDelete.cs" />
