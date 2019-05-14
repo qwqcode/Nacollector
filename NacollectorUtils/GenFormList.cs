@@ -48,6 +48,9 @@ namespace NacollectorUtils
           'collDownloadImgSrc': '显示图片链接 并 下载打包保存'
         })
 ");
+            NewSpider("Business", "CollItemDescVideo", "商品详情页视频抓取", @"
+        let pageUrlEl = form.textInput('PageUrl', '详情页链接', '', InputValidators.isUrl)
+");
             NewSpider("Business", "TaobaoSellerColl", "淘宝店铺搜索卖家ID名采集", @"
         form.textInput('PageUrl', '店铺搜索页链接', '', InputValidators.isUrl)
         form.numberInput('CollBeginPage', '采集开始页码', 1, 1)
