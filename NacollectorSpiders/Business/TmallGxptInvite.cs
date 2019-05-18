@@ -8,29 +8,33 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using NacollectorSpiders.Lib;
 
 namespace NacollectorSpiders.Business
 {
     /// <summary>
     /// 天猫供销平台分销商一键邀请
     /// </summary>
+    [SpiderRegister(Label = "天猫供销平台分销商一键邀请")]
     public class TmallGxptInvite : Spider
     {
         // 参数
-        string SellerId = "";
-        string[] SellerIdArr = null;
+        [FormTextInput(Label = "分销商ID名（一行一个）", Type = "textareaInput", Parms = "undefined, 250")]
+        public string SellerId;
 
-        string cookieStr = null;
-        string _tb_token_ = null;
+        private string[] SellerIdArr = null;
 
-        List<string> errorSeller = new List<string>(); // 未邀请成功的卖家
-        int maxErrorThreshold = 5; // 最多错误阈值
+        private string cookieStr = null;
+        private string _tb_token_ = null;
+
+        private List<string> errorSeller = new List<string>(); // 未邀请成功的卖家
+        private int maxErrorThreshold = 5; // 最多错误阈值
 
         public override void BeginWork()
         {
             base.BeginWork();
+
             // 参数设定
-            SellerId = GetParm("SellerId").Trim();
             SellerIdArr = SellerId.Split(new string[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries);
             if (SellerIdArr.Length <= 0) { throw new Exception("卖家ID不能一个也没有啊"); }
             // 获取 Cookie

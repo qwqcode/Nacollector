@@ -59,8 +59,12 @@
     <Compile Include="Business\TaobaoSellerColl.cs" />
     <Compile Include="Business\TmallGxptInvite.cs" />
     <Compile Include="Business\TmallGxptInviteDelete.cs" />
+    <Compile Include="Lib\FormTextInputAttribute.cs" />
+    <Compile Include="Lib\SpiderRegisterAttribute.cs" />
+    <Compile Include="Lib\SpiderTypeAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Spider.cs" />
+    <Compile Include="Lib\Spider.cs" />
+    <Compile Include="SpiderIndex.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NacollectorUtils\NacollectorUtils.csproj">

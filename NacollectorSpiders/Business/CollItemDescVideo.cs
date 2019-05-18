@@ -11,19 +11,19 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using System.Windows.Forms;
+using NacollectorSpiders.Lib;
 
 namespace NacollectorSpiders.Business
 {
     /// <summary>
-    /// 详情页视频采集
+    /// 商品详情页视频抓取
     /// </summary>
+    [SpiderRegister(Label = "商品详情页视频抓取")]
     public class CollItemDescVideo : Spider
     {
         // 参数
-        string PageUrl = "";
-
-        // ts 池
-        List<string> tsLinkPool = new List<string>();
+        [FormTextInput(Label = "详情页链接", Type = "textInput", Parms = "'', InputValidators.isUrl")]
+        string PageUrl;
 
         public override void BeginWork()
         {

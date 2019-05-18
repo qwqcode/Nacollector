@@ -48,7 +48,13 @@ namespace Nacollector
                 string url = e.Frame.Url;
                 if (crBrowser.CheckIsAppUrl(url))
                 {
-                    crBrowser.RunJS(NacollectorUtils.GenFormList.GetCode());
+                    // 获取并前端执行表单生成代码
+                    _mainForm.BeginInvoke((MethodInvoker)delegate
+                    {
+                        var spiderDomain = taskRunner.GetLoadSpiderDomain();
+                        crBrowser.RunJS(spiderDomain.GetFormGenJsCode());
+                        taskRunner.UnloadSpiderDomain();
+                    });
                 }
                 _splashScreen.Hide();
                 this.Invoke((MethodInvoker)delegate

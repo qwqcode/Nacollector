@@ -11,33 +11,44 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using System.Windows.Forms;
+using NacollectorSpiders.Lib;
 
 namespace NacollectorSpiders.Business
 {
     /// <summary>
     /// 淘宝店铺搜索卖家ID名采集
     /// </summary>
+    [SpiderRegister(Label = "淘宝店铺搜索卖家ID名采集")]
     public class TaobaoSellerColl : Spider
     {
         // 参数
-        string PageUrl = "";
-        int CollBeginPage = 0;
-        int CollEndPage = 0;
-        bool IgnoreTmall = false;
+        [FormTextInput(Label = "店铺搜索页链接", Type = "textInput", Parms = "'', InputValidators.isUrl")]
+        public string PageUrl;
+
+        [FormTextInput(Label = "采集开始页码", Type = "numberInput", Parms = "1, 1")]
+        public int CollBeginPage;
+
+        [FormTextInput(Label = "采集结束页码", Type = "numberInput", Parms = "undefined, 1")]
+        public int CollEndPage;
+        
+        [FormTextInput(Label = "忽略天猫卖家", Type = "selectInput", Parms = @"{
+          'on': '开启',
+          'off': '关闭'
+        }")]
+        public string IgnoreTmall;
+
+        private bool _IgnoreTmall;
+
         // 卖家名池
-        List<string> sellerNames = new List<string>();
+        private List<string> sellerNames = new List<string>();
 
         public override void BeginWork()
         {
             base.BeginWork();
+
             // 参数设定
-            PageUrl = GetParm("PageUrl").Trim();
-            bool CollBeginPageIsInt = Int32.TryParse(GetParm("CollBeginPage"), out CollBeginPage); // out 到 this.CollBeginPage 里 2333
-            if (!CollBeginPageIsInt) throw new Exception("参数 CollBeginPage 不是数字");
-            bool CollEndPageIsInt = Int32.TryParse(GetParm("CollEndPage"), out CollEndPage);
-            if (!CollEndPageIsInt) throw new Exception("参数 CollEndPage 不是数字");
             if (CollBeginPage <= 0 || CollEndPage <= 0 || CollBeginPage > CollEndPage) throw new Exception("老铁，你输入的参数是什么鬼？");
-            IgnoreTmall = GetParm("IgnoreTmall").Trim().ToLower() == "on" ? true : false;
+            _IgnoreTmall = IgnoreTmall.Trim().ToLower() == "on" ? true : false;
 
             for (int i = CollBeginPage; i <= CollEndPage; i++)
             {
@@ -86,7 +97,7 @@ namespace NacollectorSpiders.Business
             int addedCount = 0;
             foreach (var item in items)
             {
-                if (IgnoreTmall && item["isTmall"].ToString().Trim().ToLower() == "true")
+                if (_IgnoreTmall && item["isTmall"].ToString().Trim().ToLower() == "true")
                     continue;
 
                 var seller = item["nick"].ToString().Trim();

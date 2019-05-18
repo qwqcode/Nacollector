@@ -21,6 +21,7 @@ namespace Nacollector.Browser
         private MainForm _form;
         private ChromiumWebBrowser browser;
         private DownloadManager downloadManager;
+        public bool CheckIsAppUrl(string url) => url.IndexOf("http://127.0.0.1") == 0 || url.IndexOf("nacollector://") == 0;
 
         public CrBrowser(MainForm form, string address)
         {
@@ -48,8 +49,9 @@ namespace Nacollector.Browser
             browser.LoadHandler = new LoadHandler();
             browser.DragHandler = new DragDropHandler();
 
-            browser.FrameLoadEnd += new EventHandler<FrameLoadEndEventArgs>(Browser_onFrameLoadEnd);
-            browser.IsBrowserInitializedChanged += new EventHandler<IsBrowserInitializedChangedEventArgs>(Browser_onIsBrowserInitializedChanged);
+            browser.FrameLoadStart += Browser_FrameLoadStart;
+            browser.FrameLoadEnd += Browser_onFrameLoadEnd;
+            browser.IsBrowserInitializedChanged += Browser_onIsBrowserInitializedChanged;
 
             // 向前端暴露 C# 函数
             CefSharpSettings.LegacyJavascriptBindingEnabled = true; // Need Update: https://github.com/cefsharp/CefSharp/issues/2246
@@ -59,19 +61,17 @@ namespace Nacollector.Browser
             downloadManager = new DownloadManager(this);
         }
 
-        public bool CheckIsAppUrl(string url)
+        // Frame 开始加载时
+        private void Browser_FrameLoadStart(object sender, FrameLoadStartEventArgs e)
         {
-            return url.IndexOf("http://127.0.0.1") == 0 || url.IndexOf("nacollector://") == 0;
+            string url = e.Frame.Url;
+            ((DragDropHandler)browser.DragHandler).Enable = CheckIsAppUrl(url); // 开启 / 关闭拖拽功能
         }
 
         // Frame 加载完毕时执行
         private void Browser_onFrameLoadEnd(object sender, FrameLoadEndEventArgs e)
         {
             string url = e.Frame.Url;
-            if (CheckIsAppUrl(url))
-            {
-                ((DragDropHandler)browser.DragHandler).Enable = true; // 开启拖拽功能
-            }
         }
         
         // 浏览器初始化完毕时执行

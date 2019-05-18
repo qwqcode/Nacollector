@@ -38,8 +38,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="GenForm.cs" />
-    <Compile Include="GenFormList.cs" />
     <Compile Include="GlobalConstant.cs" />
     <Compile Include="HttpHelper.cs" />
     <Compile Include="IniFile.cs" />
