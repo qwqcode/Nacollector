@@ -12,15 +12,18 @@ using System.Threading;
 using System.IO;
 using NacollectorUtils;
 using NacollectorUtils.Settings;
+using System.Reflection;
+using System.Diagnostics;
+using System.Text.RegularExpressions;
 
-namespace NacollectorSpiders
+namespace NacollectorSpiders.Lib
 {
     public class Spider
     {
         protected string TaskId = null; // 任务ID
         protected Hashtable parms = new Hashtable(); // 参数哈希表
         protected SpiderSettings spiderSettings = null;
-        protected SpiderCallback spiderCallback = null;
+        protected SpiderCallback spiderCallback = null; // 回调方式类
 
         public SpiderSettings GetSpiderSettings()
         {
@@ -37,11 +40,11 @@ namespace NacollectorSpiders
             DateTime beforWorkDt = DateTime.Now;
 
             this.spiderCallback = callback;
-            ImportSettings(settings);
 
             // 开始任务工作
             try
             {
+                ImportSettings(settings); // 导入配置
                 BeginWork();
             }
             catch (ThreadAbortException)
@@ -74,13 +77,36 @@ namespace NacollectorSpiders
         {
             this.spiderSettings = spiderSettings;
             TaskId = spiderSettings.TaskId;
-
+            
             JArray ja = (JArray)JsonConvert.DeserializeObject(spiderSettings.ParmsJsonStr);
             foreach (JObject item in ja)
             {
                 string parmName = item["name"].ToString();
                 string parmValue = item["value"].ToString();
                 parms[parmName] = parmValue;
+
+                // 将配置赋值到同名字段
+                var fields = this.GetType().GetRuntimeFields().Where((t) => t.Name == parmName).ToArray();
+                if (fields.Length > 0)
+                {
+                    var field = fields[0];
+                    if (field.FieldType.Equals(typeof(int)))
+                    {
+                        int parmValueNnum;
+                        if (int.TryParse(parmValue, out parmValueNnum))
+                        {
+                            field.SetValue(this, parmValueNnum);
+                        }
+                        else
+                        {
+                            throw new Exception("输入的数据无法转换为字段的 int 类型");
+                        }
+                    }
+                    else
+                    {
+                        field.SetValue(this, parmValue);
+                    }
+                }
             }
         }
 
@@ -89,7 +115,7 @@ namespace NacollectorSpiders
         /// </summary>
         public virtual void BeginWork()
         {
-            Thread.Sleep(900); // 开始得太快 感觉违和感强...
+            //Thread.Sleep(900); // 开始得太快 感觉违和感强...
             Log(string.Format("ThreadID=\"{0}\"; SpiderObj=\"{1}\";", Thread.CurrentThread.ManagedThreadId, this.GetType().ToString()));
             Log("&gt;&gt; 任务执行开始");
             Log("\n");

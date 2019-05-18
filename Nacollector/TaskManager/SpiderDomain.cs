@@ -9,6 +9,7 @@ using System.Windows.Forms;
 using NacollectorUtils.Settings;
 using System.Diagnostics;
 using NacollectorSpiders;
+using NacollectorSpiders.Lib;
 
 namespace Nacollector.TaskManager
 {
@@ -36,6 +37,11 @@ namespace Nacollector.TaskManager
             Type tp = assembly.GetType(fullClassName);
             Spider spider = (Spider)Activator.CreateInstance(tp);
             spider.NewTask(settings, callback);
+        }
+
+        public string GetFormGenJsCode()
+        {
+            return SpiderIndex.BuildAllSpiderFormJsCode();
         }
     }
 }

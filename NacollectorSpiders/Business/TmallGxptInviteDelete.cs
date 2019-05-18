@@ -8,32 +8,35 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using NacollectorSpiders.Lib;
 
 namespace NacollectorSpiders.Business
 {
     /// <summary>
     /// 天猫供销平台分销商一键撤回
     /// </summary>
-    class TmallGxptInviteDelete : Spider
+    [SpiderRegister(Label = "天猫供销平台分销商一键撤回")]
+    public class TmallGxptInviteDelete : Spider
     {
         // 参数
-        int DeleteBeginPage = 0;
-        int DeleteEndPage = 0;
+        [FormTextInput(Label = "撤回开始页码", Type = "numberInput", Parms = "1, 1")]
+        public int DeleteBeginPage;
 
-        string cookieStr = null;
+        [FormTextInput(Label = "撤回结束页码", Type = "numberInput", Parms = "undefined, 1")]
+        public int DeleteEndPage;
 
-        List<string> errorSeller = new List<string>(); // 未撤回成功的卖家
-        int maxErrorThreshold = 5; // 最多错误阈值
+        private string cookieStr = null;
+
+        private List<string> errorSeller = new List<string>(); // 未撤回成功的卖家
+        private int maxErrorThreshold = 5; // 最多错误阈值
 
         public override void BeginWork()
         {
             base.BeginWork();
+
             // 参数设定
-            bool DeleteBeginPageIsInt = Int32.TryParse(GetParm("DeleteBeginPage"), out DeleteBeginPage);
-            if (!DeleteBeginPageIsInt) throw new Exception("参数 DeleteBeginPage 不是数字");
-            bool DeleteEndPageIsInt = Int32.TryParse(GetParm("DeleteEndPage"), out DeleteEndPage);
-            if (!DeleteEndPageIsInt) throw new Exception("参数 DeleteEndPage 不是数字");
             if (DeleteBeginPage <= 0 || DeleteEndPage <= 0 || DeleteBeginPage > DeleteEndPage) throw new Exception("老铁，你输入的参数是什么鬼？");
+
             // 获取 Cookie
             var cgSettings = new NacollectorUtils.Settings.CookieGetterSettings
             {

@@ -14,35 +14,54 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Web;
+using NacollectorSpiders.Lib;
 
 namespace NacollectorSpiders.Business
 {
     /// <summary>
     /// 商品详情页图片解析
     /// </summary>
+    [SpiderRegister(Label = "商品详情页图片解析")]
     public class CollItemDescImg : Spider
     {
         // 参数
-        string PageUrl = "";
-        string PageType = "";
-        string ImgType = "";
-        string CollType = "";
+        [FormTextInput(Label = "详情页链接", Type = "textInput", Parms = "'', InputValidators.isUrl")]
+        public string PageUrl; // 不要使用 new Uri()，因为会把 urlencode 的参数自动 decode
+
+        [FormTextInput(Label = "链接类型", Type = "selectInput", Parms = @"{
+          'Tmall': '天猫',
+          'Taobao': '淘宝',
+          'Alibaba': '阿里巴巴',
+          'Suning': '苏宁易购',
+          'Gome': '国美在线'
+        }")]
+        public string PageType;
+
+        [FormTextInput(Label = "图片类型", Type = "selectInput", Parms = @"{
+          'Thumb': '主图',
+          'Category': '分类图',
+          'Desc': '详情图'
+        }")]
+        public string ImgType;
+
+        [FormTextInput(Label = "采集模式", Type = "selectInput", Parms = @"{
+          'collImgSrcUrl': '显示图片链接',
+          'collDownloadImgSrc': '显示图片链接 并 下载打包保存'
+        }")]
+        public string CollType;
+
         // 页面内容
-        string pageContent;
+        private string pageContent;
+
         // CsQuery Dom
-        CQ pageDom;
+        private CQ pageDom;
+
         // 图片链接池
-        Dictionary<string, ArrayList> imgUrlPool = new Dictionary<string, ArrayList>();
+        private Dictionary<string, ArrayList> imgUrlPool = new Dictionary<string, ArrayList>();
 
         public override void BeginWork()
         {
             base.BeginWork();
-
-            // 参数设定
-            PageUrl = GetParm("PageUrl"); // 若使用 new Uri() 会把 urlencode 的参数自动 decode
-            PageType = GetParm("PageType");
-            ImgType = GetParm("ImgType");
-            CollType = GetParm("CollType");
 
             // 下载页面
             LogInfo("开始下载：" + PageUrl);
