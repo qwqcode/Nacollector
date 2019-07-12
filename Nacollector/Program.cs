@@ -11,6 +11,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using NacollectorUtils;
+using System.Web;
+using System.Text;
 
 namespace Nacollector
 {
@@ -130,31 +132,49 @@ namespace Nacollector
         }
         
         private static int exited = 0;
-        
+
         private static void Application_ThreadException(object sender, ThreadExceptionEventArgs e)
         {
-            if (Interlocked.Increment(ref exited) == 1)
+            if (Interlocked.Increment(ref Program.exited) == 1)
             {
-                string errorMsg = $"异常细节: {Environment.NewLine}{e.Exception}";
-                Logging.Error(errorMsg);
-                MessageBox.Show(
-                    $"意外的错误，Nacollector 将退出，请上QQ告诉我 1149527164 {Environment.NewLine}{errorMsg}",
-                    "Nacollector UI Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                // Application.Exit();
+                string errMsg = $"异常细节: {Environment.NewLine}{e.Exception}";
+                ErrorCatchAction("UI Error", errMsg, e.Exception.GetType().FullName);
+                Logging.Error(errMsg);
+                Application.Exit();
             }
         }
 
         private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
-            if (Interlocked.Increment(ref exited) == 1)
+            if (Interlocked.Increment(ref Program.exited) == 1)
             {
-                string errMsg = e.ExceptionObject.ToString();
+                string errMsg = $"异常细节: {Environment.NewLine}{e.ExceptionObject.ToString()}";
+                ErrorCatchAction("non-UI Error", errMsg, e.ExceptionObject.GetType().FullName);
                 Logging.Error(errMsg);
-                MessageBox.Show(
-                    $"意外的错误，Nacollector 将退出，请上QQ告诉我 1149527164 \n {Environment.NewLine}{errMsg}",
-                    "Nacollector non-UI Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                // Application.Exit();
+                Application.Exit();
             }
+        }
+
+        private static void ErrorCatchAction(string type, string errorMsg, string eType)
+        {
+            string title = $"Nacollector 意外错误 {eType}";
+            MessageBox.Show(
+                $"{title} 程序即将退出， {Environment.NewLine}{errorMsg}",
+                $"{Application.ProductName} {type}", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            ReportErrorGithub(type + "\n" + errorMsg, eType);
+        }
+
+        public static void ReportErrorGithub(string body, string title = null)
+        {
+            DialogResult dr = MessageBox.Show("是否将错误信息提交到 GitHub？", "提交 issue 以反馈错误", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (dr == DialogResult.No) return;
+
+            title = $"[{Application.ProductName}] 意外错误 " + title;
+
+            Process.Start(
+                "https://github.com/qwqcode/Nacollector/issues/new"
+                + $"?title={ HttpUtility.UrlEncode(title, Encoding.UTF8) }"
+                + $"&body={ HttpUtility.UrlEncode(body + "\n\n---\n" + $"{Application.ProductName} v{Application.ProductVersion}", Encoding.UTF8) }");
         }
 
         private static void Application_ApplicationExit(object sender, EventArgs e)
