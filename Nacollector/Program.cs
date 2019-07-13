@@ -84,7 +84,7 @@ namespace Nacollector
         }
 
         // The subfolder, where the cefsharp files will be moved to
-        private static string cefSubFolder = @"Resources\cef_sharp";
+        public static readonly string CefBasePath = @"Resources\cef_sharp";
         // If the assembly resolver loads cefsharp from another folder, set this to true
         private static bool resolved = false;
 
@@ -98,7 +98,7 @@ namespace Nacollector
                 resolved = true; // Set to true, so BrowserSubprocessPath will be set
 
                 string assemblyName = args.Name.Split(new[] { ',' }, 2)[0] + ".dll";
-                string subfolderPath = Path.Combine(Application.StartupPath, cefSubFolder, assemblyName);
+                string subfolderPath = Path.Combine(Application.StartupPath, CefBasePath, assemblyName);
                 return File.Exists(subfolderPath) ? Assembly.LoadFile(subfolderPath) : null;
             }
 

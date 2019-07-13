@@ -121,6 +121,7 @@
     <Compile Include="Browser\Handler\MenuHandler.cs" />
     <Compile Include="Browser\Handler\ResourceSchemeHandler .cs" />
     <Compile Include="Browser\Handler\ResourceSchemeHandlerFactory.cs" />
+    <Compile Include="Browser\JsActions\UpdateAction.cs" />
     <Compile Include="Browser\JsActions\TaskControllerAction.cs" />
     <Compile Include="TaskManager\SpiderDomain.cs" />
     <Compile Include="TaskManager\TaskRunner.cs" />
@@ -155,7 +156,7 @@
       <Link>README.md</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <EmbeddedResource Include="..\NacollectorFrontend\dist\**\*.*">
+    <EmbeddedResource Include="..\NacollectorFrontendDist\**\*.*">
       <Link>Resources\html_res\%(RecursiveDir)%(Filename)%(Extension)</Link>
     </EmbeddedResource>
     <Content Include="..\CefSharp\**\*.*">
@@ -212,6 +213,10 @@
       <Project>{a14a1a19-db06-4ae8-b518-3156629b4862}</Project>
       <Name>NacollectorSpiders</Name>
       <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\NacollectorUpdater\NacollectorUpdater.csproj">
+      <Project>{5840fd50-936f-4b57-9c88-01dff56e9bb6}</Project>
+      <Name>NacollectorUpdater</Name>
     </ProjectReference>
     <ProjectReference Include="..\NacollectorUtils\NacollectorUtils.csproj">
       <Project>{34410408-bde1-4700-a317-bd455ca550eb}</Project>
