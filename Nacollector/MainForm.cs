@@ -36,7 +36,6 @@ namespace Nacollector
         /// </summary>
         private void InitBrowser()
         {
-#warning 记得修改
 #if !DEBUG
             string htmlPath = "nacollector://html_res/index.html";
 #else

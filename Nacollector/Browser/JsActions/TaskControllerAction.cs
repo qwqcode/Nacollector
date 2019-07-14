@@ -30,7 +30,7 @@ namespace Nacollector.Browser.JsActions
         }
         
         // 创建新任务
-        public void createTask(string taskId, string className, string classLabel, string parmsJsonStr)
+        public void CreateTask(string taskId, string className, string classLabel, string parmsJsonStr)
         {
             // 配置
             var settings = new SpiderSettings
@@ -45,7 +45,7 @@ namespace Nacollector.Browser.JsActions
         }
 
         // 终止任务
-        public bool abortTask(string taskId)
+        public bool AbortTask(string taskId)
         {
             _form.taskRunner.AbortTask(taskId);
 

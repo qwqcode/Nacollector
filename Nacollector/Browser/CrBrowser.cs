@@ -57,6 +57,7 @@ namespace Nacollector.Browser
             CefSharpSettings.LegacyJavascriptBindingEnabled = true; // Need Update: https://github.com/cefsharp/CefSharp/issues/2246
             browser.RegisterAsyncJsObject("AppAction", new AppAction(_form, this));
             browser.RegisterAsyncJsObject("TaskController", new TaskControllerAction(_form, this));
+            browser.RegisterAsyncJsObject("UpdateAction", new UpdateAction(_form, this));
 
             downloadManager = new DownloadManager(this);
         }
@@ -77,6 +78,9 @@ namespace Nacollector.Browser
         // 浏览器初始化完毕时执行
         private void Browser_onIsBrowserInitializedChanged(object sender, IsBrowserInitializedChangedEventArgs args)
         {
+#if DEBUG
+            browser.ShowDevTools();
+#endif
             if (args.IsBrowserInitialized)
             {
                 // 监听 CefSharp 的 Windows Message

@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using NacollectorUtils;
+using Newtonsoft.Json;
 
 namespace Nacollector.Browser.JsActions
 {
@@ -27,21 +28,21 @@ namespace Nacollector.Browser.JsActions
             this._crBrowser = crBrowser;
         }
 
-        public void appClose()
+        public void AppClose()
         {
             _form.Invoke((MethodInvoker)delegate {
                 Application.Exit();
             });
         }
 
-        public void appMaxMini()
+        public void AppMaxMini()
         {
             _form.Invoke((MethodInvoker)delegate {
                 _form.ToggleMaximize();
             });
         }
 
-        public void appMin()
+        public void AppMin()
         {
             _form.Invoke((MethodInvoker)delegate {
                 if (!_form.ShowInTaskbar)
@@ -56,13 +57,12 @@ namespace Nacollector.Browser.JsActions
         }
 
         // 获取程序版本
-        public string getVersion()
+        public string GetVersion()
         {
-            _crBrowser.RunJS($"AppConfig.updateCheckUrl=\"{GlobalConstant.UpdateCheckUrl}\";AppConfig.updateCheckToken=\"{GlobalConstant.UpdateCheckToken}\"");
             return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
         }
 
-        public void showDevTools()
+        public void ShowDevTools()
         {
             _crBrowser.GetBrowser().ShowDevTools();
         }
@@ -74,19 +74,19 @@ namespace Nacollector.Browser.JsActions
         }
 
         // 日志文件清理
-        public void logFileClear()
+        public void LogFileClear()
         {
             Logging.Clear();
         }
 
         // 调用浏览器下载文件
-        public void downloadUrl(string url)
+        public void DownloadUrl(string url)
         {
             _crBrowser.DownloadUrl(url);
         }
 
         // 升级操作
-        public void appUpdateAction(string srcUrl, string updateType)
+        public void AppUpdateAction(string srcUrl, string updateType)
         {
             if (!File.Exists(Path.Combine(Application.StartupPath, "Naupdater.exe")))
             {

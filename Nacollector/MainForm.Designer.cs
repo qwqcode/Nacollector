@@ -38,16 +38,18 @@
             this.ContentPanel.Location = new System.Drawing.Point(0, 0);
             this.ContentPanel.Margin = new System.Windows.Forms.Padding(0);
             this.ContentPanel.Name = "ContentPanel";
-            this.ContentPanel.Size = new System.Drawing.Size(1150, 698);
+            this.ContentPanel.Size = new System.Drawing.Size(1144, 676);
+            this.ContentPanel.TabIndex = 0;
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1150, 698);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Sizable;
+            this.ClientSize = new System.Drawing.Size(1144, 676);
             this.Controls.Add(this.ContentPanel);
             this.Icon = global::Nacollector.Properties.Resources.app_ico;
+            this.Location = new System.Drawing.Point(0, 0);
+            this.MinimumSize = new System.Drawing.Size(500, 550);
             this.Name = "MainForm";
             this.Opacity = 0D;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
