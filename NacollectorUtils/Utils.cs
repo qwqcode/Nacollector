@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -291,6 +292,51 @@ namespace NacollectorUtils
         private static extern bool SetProcessWorkingSetSize(IntPtr process,
             UIntPtr minimumWorkingSetSize, UIntPtr maximumWorkingSetSize);
 
+        /// <summary>
+        /// 关闭进程
+        /// </summary>
+        /// <param name="processName">进程名</param>
+        public static void KillProcess(string processName)
+        {
+            Process[] myproc = Process.GetProcesses();
+            foreach (Process item in myproc)
+            {
+                if (item.ProcessName == processName)
+                {
+                    item.Kill();
+                }
+            }
+        }
+
+        /// <summary>
+        /// 获取文件 MD5 值
+        /// </summary>
+        /// <param name="filename"></param>
+        /// <returns></returns>
+        public static string CalculateMD5(string filename)
+        {
+            using (var md5 = MD5.Create())
+            {
+                using (var stream = File.OpenRead(filename))
+                {
+                    var hash = md5.ComputeHash(stream);
+                    return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+                }
+            }
+        }
+
+        /// <summary>
+        /// 生成一个临时文件路径
+        /// </summary>
+        /// <param name="extension"></param>
+        /// <returns></returns>
+        public static string GetTempFilePathWithExtension(string extension)
+        {
+            var path = Path.GetTempPath();
+            var fileName = Guid.NewGuid().ToString() + extension;
+            return Path.Combine(path, fileName);
+        }
+        
         public static string FormatBytes(long bytes)
         {
             const long K = 1024L;

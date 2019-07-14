@@ -168,6 +168,22 @@ namespace NacollectorUpdater
             Environment.Exit(Environment.ExitCode);
         }
 
+        /// <summary>
+        /// 关闭进程
+        /// </summary>
+        /// <param name="processName">进程名</param>
+        public static void KillProcess(string processName)
+        {
+            Process[] myproc = Process.GetProcesses();
+            foreach (Process item in myproc)
+            {
+                if (item.ProcessName == processName)
+                {
+                    item.Kill();
+                }
+            }
+        }
+
         public static string FormatBytes(long bytes)
         {
             const long K = 1024L;

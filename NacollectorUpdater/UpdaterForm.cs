@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -16,6 +17,8 @@ namespace NacollectorUpdater
 {
     public partial class UpdaterForm : Form
     {
+        private static readonly string AppProcessName = "Nacollector";
+
         private static readonly string AppRootPath = Application.StartupPath; // 程序根目录
         private static List<string> DelFiles; // 待删除的文件
         private static List<string> PkgFiles; // 待解压压缩包
@@ -55,6 +58,9 @@ namespace NacollectorUpdater
                 Environment.Exit(0);
 
             InitializeComponent();
+
+            // 杀掉相关进程
+            Program.KillProcess(AppProcessName);
         }
 
         private void UpdaterForm_Load(object sender, EventArgs e)
@@ -168,7 +174,7 @@ namespace NacollectorUpdater
 
                     copyed++;
 
-                    double percentage = ((double)copyed / DelFiles.Count) * 100;
+                    double percentage = ((double)copyed / CopyFiles.Count) * 100;
                     SetCurrentProgram(percentage, $"已完成 {string.Format("{0:0.##}", percentage)}% - {Path.GetFileName(path)}");
                 }
             }
@@ -179,7 +185,23 @@ namespace NacollectorUpdater
                 Program.ReportErrorAndExit(string.Join("\n", ErrMsgs.ToArray()));
             }
 
+            LauchProgram();
             Environment.Exit(0);
+        }
+
+        /// <summary>
+        /// 运行程序
+        /// </summary>
+        private void LauchProgram()
+        {
+            string path = Path.Combine(Application.StartupPath, $"{AppProcessName}.exe");
+            if (!File.Exists(path))
+            {
+                string str = $"无法启动程序，未找到程序文件: {path}";
+                Program.ReportErrorAndExit(str);
+                return;
+            }
+            Process.Start(path);
         }
 
         /// <summary>
