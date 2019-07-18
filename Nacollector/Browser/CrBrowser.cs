@@ -21,7 +21,7 @@ namespace Nacollector.Browser
         private MainForm _form;
         private ChromiumWebBrowser browser;
         private DownloadManager downloadManager;
-        public bool CheckIsAppUrl(string url) => url.IndexOf("http://127.0.0.1") == 0 || url.IndexOf("nacollector://") == 0;
+        public bool CheckIsAppUrl(string url) => url.IndexOf("http://localhost") == 0 || url.IndexOf("nacollector://") == 0;
 
         public CrBrowser(MainForm form, string address)
         {

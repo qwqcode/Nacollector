@@ -29,6 +29,17 @@ namespace Nacollector.TaskManager
         /// 任务执行
         ///
 
+        
+        public void RefreshFrontendSpiderList()
+        {
+            _form.BeginInvoke((MethodInvoker)delegate
+            {
+                var spiderDomain = GetLoadSpiderDomain();
+                MainForm.crBrowser.RunJS(spiderDomain.GetFormGenJsCode());
+                UnloadSpiderDomain();
+            });
+        }
+
         public AppDomain _spiderRawDomain = null;
         public SpiderDomain _spiderDomain = null;
 

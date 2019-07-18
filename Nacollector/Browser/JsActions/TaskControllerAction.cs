@@ -41,13 +41,13 @@ namespace Nacollector.Browser.JsActions
                 ParmsJsonStr = parmsJsonStr
             };
 
-            _form.taskRunner.NewTaskThread(settings);
+            MainForm.taskRunner.NewTaskThread(settings);
         }
 
         // 终止任务
         public bool AbortTask(string taskId)
         {
-            _form.taskRunner.AbortTask(taskId);
+            MainForm.taskRunner.AbortTask(taskId);
 
             return true;
         }
