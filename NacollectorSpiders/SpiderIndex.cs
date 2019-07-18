@@ -15,12 +15,12 @@ namespace NacollectorSpiders
         {
             new SpiderTypeAttribute(){
                 Name = "Business",
-                Label = "电商",
+                Label = "EC",
                 NameSpace = "NacollectorSpiders.Business"
             },
             new SpiderTypeAttribute(){
                 Name = "Picture",
-                Label = "图片",
+                Label = "Picture",
                 NameSpace = "NacollectorSpiders.Picture"
             }
         };

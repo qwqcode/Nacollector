@@ -11,6 +11,7 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 using System.Windows.Forms;
 
 namespace NacollectorUtils
@@ -336,7 +337,58 @@ namespace NacollectorUtils
             var fileName = Guid.NewGuid().ToString() + extension;
             return Path.Combine(path, fileName);
         }
-        
+
+
+        [DllImport("User32.dll")]
+        private static extern bool ShowWindowAsync(IntPtr hWnd, int cmdShow);
+
+        [DllImport("User32.dll")]
+        private static extern bool SetForegroundWindow(IntPtr hWnd);
+        private const int WS_SHOWNORMAL = 1;
+
+        /// <summary>
+        /// 显示已运行的程序
+        /// </summary>
+        public static void ShowRunningInstance(Process process)
+        {
+            // 显示已经打开的程序
+            ShowWindowAsync(process.MainWindowHandle, WS_SHOWNORMAL);
+            SetForegroundWindow(process.MainWindowHandle);
+        }
+
+        /// <summary>
+        /// 错误处理操作
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="errorMsg"></param>
+        /// <param name="eType"></param>
+        public static void ErrorHandlingAction(string type, string errorMsg, string errObjType = "")
+        {
+            string title = $"Nacollector 意外错误 {errObjType}";
+
+            MessageBox.Show($"{title} 程序即将退出， {Environment.NewLine}{errorMsg}",
+                $"{Application.ProductName} {type}", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            Logging.Error($"{type}\n{errorMsg}"); // 日志文件记录错误
+
+            ReportErrorOnGithub($"{type}\n{errorMsg}", errObjType);
+        }
+
+        /// <summary>
+        /// 打开浏览器 并创建 GitHub issue
+        /// </summary>
+        /// <param name="body"></param>
+        /// <param name="title"></param>
+        public static void ReportErrorOnGithub(string body, string title = "")
+        {
+            if (MessageBox.Show("是否将错误信息提交到 GitHub？", "提交 issue 以反馈错误", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
+                return;
+
+            title = $"[{Application.ProductName}] 意外错误 {title}";
+            Process.Start("https://github.com/qwqcode/Nacollector/issues/new"
+                + $"?title={ HttpUtility.UrlEncode(title, Encoding.UTF8) }"
+                + $"&body={ HttpUtility.UrlEncode($"{body}\n\n---\n{Application.ProductName} v{Application.ProductVersion}", Encoding.UTF8) }");
+        }
+
         public static string FormatBytes(long bytes)
         {
             const long K = 1024L;
