@@ -11,11 +11,11 @@ namespace Nacollector
 {
     public partial class MainForm : FormBase
     {
-        public static MainForm _mainForm;
-        public static SplashScreen _splashScreen;
-        public static CrBrowser crBrowser;
-        public static CookieGetterBrowser cookieGetterBrowser;
-        public static TaskRunner taskRunner;
+        public MainForm _mainForm;
+        public SplashScreen _splashScreen;
+        public CrBrowser crBrowser;
+        public CookieGetterBrowser cookieGetterBrowser;
+        public TaskRunner taskRunner;
 
         public MainForm()
         {

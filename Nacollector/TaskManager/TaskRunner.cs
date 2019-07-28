@@ -35,7 +35,7 @@ namespace Nacollector.TaskManager
             _form.BeginInvoke((MethodInvoker)delegate
             {
                 var spiderDomain = GetLoadSpiderDomain();
-                MainForm.crBrowser.RunJS(spiderDomain.GetFormGenJsCode());
+                _form.crBrowser.RunJS(spiderDomain.GetFormGenJsCode());
                 UnloadSpiderDomain();
             });
         }

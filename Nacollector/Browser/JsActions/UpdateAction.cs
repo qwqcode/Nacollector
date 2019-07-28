@@ -103,7 +103,7 @@ namespace Nacollector.Browser.JsActions
 
                         // 刷新 SpiderList
                         if (moduleName == "NacollectorSpiders")
-                            MainForm.taskRunner.RefreshFrontendSpiderList();
+                            _form.taskRunner.RefreshFrontendSpiderList();
                     }
                     else
                     {
