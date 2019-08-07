@@ -96,6 +96,10 @@ namespace NacollectorUtils
                     {
                         item.Cookie = headers[key];
                     }
+                    else if (key.ToLower() == "user-agent")
+                    {
+                        item.UserAgent = headers[key];
+                    }
                     else
                     {
                         item.Header.Add(key, headers[key]);
