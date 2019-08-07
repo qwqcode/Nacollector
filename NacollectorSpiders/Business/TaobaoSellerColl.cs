@@ -61,7 +61,7 @@ namespace NacollectorSpiders.Business
             txtFileStr = txtFileStr.Trim();
             File.WriteAllText(txtFilePath, txtFileStr);
             Log("\n");
-            LogInfo($"<a href=\"{txtFilePath}\" onclick=\"downloadFile($(this).attr('href'));return false;\">点击保存卖家ID名文本文件</a>");
+            LogInfo($"<a href=\"{txtFilePath}\" onclick=\"saveLocalFile($(this).attr('href'));return false;\">点击保存卖家ID名文本文件</a>");
         }
         
         /// <summary>

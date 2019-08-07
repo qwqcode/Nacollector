@@ -100,6 +100,10 @@ namespace Nacollector.Browser.JsActions
                     {
                         // 直接复制文件并覆盖
                         File.Copy(filePath, Path.Combine(Application.StartupPath, moduleName + Path.GetExtension(filePath)), true);
+
+                        // 刷新 SpiderList
+                        if (moduleName == "NacollectorSpiders")
+                            _form.taskRunner.RefreshFrontendSpiderList();
                     }
                     else
                     {

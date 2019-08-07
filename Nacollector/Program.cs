@@ -13,6 +13,7 @@ using System.Windows.Forms;
 using NacollectorUtils;
 using System.Web;
 using System.Text;
+using System.Runtime.InteropServices;
 
 namespace Nacollector
 {
@@ -37,13 +38,12 @@ namespace Nacollector
             {
                 MessageBox.Show("当前 .NET Framework 版本过低，请升级至 4.6.2 或更新版本",
                 "Nacollector 无法运行", MessageBoxButtons.OK, MessageBoxIcon.Error);
-
-                Process.Start(
-                    "https://www.microsoft.com/zh-cn/download/details.aspx?id=53344");
+                Process.Start("https://www.microsoft.com/zh-cn/download/details.aspx?id=53344");
                 return;
             }
 
             Utils.ReleaseMemory(true);
+
             using (Mutex mutex = new Mutex(false, $"Global\\Nacollector_{Application.StartupPath.GetHashCode()}"))
             {
                 AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
@@ -59,44 +59,37 @@ namespace Nacollector
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
 
+                // 检测程序是否已在运行
                 if (!mutex.WaitOne(0, false))
                 {
                     Process[] oldProcesses = Process.GetProcessesByName("Nacollector");
                     if (oldProcesses.Length > 0)
                     {
                         Process oldProcess = oldProcesses[0];
+                        Utils.ShowRunningInstance(oldProcess); // 显示已运行的程序
                     }
-                    MessageBox.Show("请在任务栏里寻找 Nacollector 图标"
-                        + Environment.NewLine
-                        + "如果想同时启动多个，可以另外复制一份程序到别的目录");
                     return;
                 }
 
                 Directory.SetCurrentDirectory(Application.StartupPath);
-                Logging.OpenLogFile();
-
-                // 初始化 CEF
-                InitCef();
+                Logging.OpenLogFile(); // 初始化日志
+                InitCef(); // 初始化 CEF
 
                 // 启动主界面
                 Application.Run(new MainForm());
             }
         }
 
-        // The subfolder, where the cefsharp files will be moved to
+        // Cef 依赖文件存放目录
         public static readonly string CefBasePath = @"Resources\cef_sharp";
-        // If the assembly resolver loads cefsharp from another folder, set this to true
-        private static bool resolved = false;
 
         /// <summary>
-        /// Will attempt to load missing assemblys from subfolder
+        /// 从文件载入依赖
         /// </summary>
         private static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
         {
             if (args.Name.StartsWith("CefSharp"))
             {
-                resolved = true; // Set to true, so BrowserSubprocessPath will be set
-
                 string assemblyName = args.Name.Split(new[] { ',' }, 2)[0] + ".dll";
                 string subfolderPath = Path.Combine(Application.StartupPath, CefBasePath, assemblyName);
                 return File.Exists(subfolderPath) ? Assembly.LoadFile(subfolderPath) : null;
@@ -123,11 +116,14 @@ namespace Nacollector
             settings.ResourcesDirPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Resources\cef_sharp\");
             CefSharpSettings.SubprocessExitIfParentProcessClosed = true; // default is false, see https://github.com/cefsharp/CefSharp/issues/2359
             //settings.RemoteDebuggingPort = 51228;
+
+            // 注册 "nacollector://"
             settings.RegisterScheme(new CefCustomScheme()
             {
                 SchemeName = ResourceSchemeHandlerFactory.SchemeName,
                 SchemeHandlerFactory = new ResourceSchemeHandlerFactory()
             });
+
             Cef.Initialize(settings, performDependencyCheck: true, browserProcessHandler: null);
         }
         
@@ -137,9 +133,8 @@ namespace Nacollector
         {
             if (Interlocked.Increment(ref Program.exited) == 1)
             {
-                string errMsg = $"异常细节: {Environment.NewLine}{e.Exception}";
-                ErrorCatchAction("UI Error", errMsg, e.Exception.GetType().FullName);
-                Logging.Error(errMsg);
+                Utils.ErrorHandlingAction("UI Error", $"异常细节: {Environment.NewLine}{e.Exception}", e.Exception.GetType().FullName);
+
                 Application.Exit();
             }
         }
@@ -148,33 +143,10 @@ namespace Nacollector
         {
             if (Interlocked.Increment(ref Program.exited) == 1)
             {
-                string errMsg = $"异常细节: {Environment.NewLine}{e.ExceptionObject.ToString()}";
-                ErrorCatchAction("non-UI Error", errMsg, e.ExceptionObject.GetType().FullName);
-                Logging.Error(errMsg);
+                Utils.ErrorHandlingAction("non-UI Error", $"异常细节: {Environment.NewLine}{e.ExceptionObject.ToString()}", e.ExceptionObject.GetType().FullName);
+
                 Application.Exit();
             }
-        }
-
-        private static void ErrorCatchAction(string type, string errorMsg, string eType)
-        {
-            string title = $"Nacollector 意外错误 {eType}";
-            MessageBox.Show(
-                $"{title} 程序即将退出， {Environment.NewLine}{errorMsg}",
-                $"{Application.ProductName} {type}", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            ReportErrorGithub(type + "\n" + errorMsg, eType);
-        }
-
-        public static void ReportErrorGithub(string body, string title = null)
-        {
-            DialogResult dr = MessageBox.Show("是否将错误信息提交到 GitHub？", "提交 issue 以反馈错误", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-            if (dr == DialogResult.No) return;
-
-            title = $"[{Application.ProductName}] 意外错误 " + title;
-
-            Process.Start(
-                "https://github.com/qwqcode/Nacollector/issues/new"
-                + $"?title={ HttpUtility.UrlEncode(title, Encoding.UTF8) }"
-                + $"&body={ HttpUtility.UrlEncode(body + "\n\n---\n" + $"{Application.ProductName} v{Application.ProductVersion}", Encoding.UTF8) }");
         }
 
         private static void Application_ApplicationExit(object sender, EventArgs e)
@@ -183,6 +155,7 @@ namespace Nacollector
             Application.ApplicationExit -= Application_ApplicationExit;
             Application.ThreadException -= Application_ThreadException;
 
+            // kill cef process
             Cef.Shutdown();
         }
     }

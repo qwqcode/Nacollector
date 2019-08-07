@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Web;
 using NacollectorSpiders.Lib;
+using System.Diagnostics;
 
 namespace NacollectorSpiders.Business
 {
@@ -31,6 +32,7 @@ namespace NacollectorSpiders.Business
         [FormTextInput(Label = "链接类型", Type = "selectInput", Parms = @"{
           'Tmall': '天猫',
           'Taobao': '淘宝',
+          'TaobaoMobile': '淘宝/天猫 手机网页',
           'Alibaba': '阿里巴巴',
           'Suning': '苏宁易购',
           'Gome': '国美在线'
@@ -59,16 +61,25 @@ namespace NacollectorSpiders.Business
         // 图片链接池
         private Dictionary<string, ArrayList> imgUrlPool = new Dictionary<string, ArrayList>();
 
+        private readonly string MobileUA = "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1";
+
         public override void BeginWork()
         {
             base.BeginWork();
 
-            // 下载页面
-            LogInfo("开始下载：" + PageUrl);
-
             // 选择页面格式
             Dictionary<string, string> headers = new Dictionary<string, string> { };
             Encoding encoding = Encoding.GetEncoding("UTF-8");
+
+            // 淘宝天猫手机端采集
+            if (PageType.Equals("TaobaoMobile"))
+            {
+                // 直接下一步，不下载初始页
+                NextStep();
+                return;
+            }
+
+            // 阿里巴巴获取 Cookie 再采集
             if (PageType.Equals("Alibaba"))
             {
                 // 获取 Cookie
@@ -88,12 +99,29 @@ namespace NacollectorSpiders.Business
                 headers.Add("cookie", alibabaCookieStr);
             }
 
+            // 手机端修改 UA
+            if (PageType.EndsWith("Mobile"))
+            {
+                headers.Add("user-agent", MobileUA);
+            }
+
+            // 下载页面
+            LogInfo("开始下载：" + PageUrl);
+
             var downloadPage = Utils.GetPageByUrl(PageUrl, headers, null, encoding);
             if (downloadPage.StatusCode != System.Net.HttpStatusCode.OK) { throw new Exception("下载失败 [" + downloadPage.StatusCode + "] " + downloadPage.StatusDescription); }
             pageContent = downloadPage.Html;
             LogSuccess("下载完毕");
             pageDom = CQ.CreateDocument(pageContent);
 
+            NextStep();
+        }
+
+        /// <summary>
+        /// BeginWork 后执行下一步
+        /// </summary>
+        private void NextStep()
+        {
             // 调用指定方法
             this.GetType().GetMethod(PageType + ImgType, BindingFlags.NonPublic | BindingFlags.Instance).Invoke(this, new object[] { });
 
@@ -192,6 +220,76 @@ namespace NacollectorSpiders.Business
                 string picSrcUrl = e.GetAttribute("src");
                 AddImgUrl("详情图", picSrcUrl);
             });
+        }
+        #endregion
+
+        #region 淘宝手机端
+        private JObject TaobaoMobileGetInfoJson(bool isDesc = false)
+        {
+            string itemNumId = new Regex(@"(?smi)\??id=(\d+)&?").Match(PageUrl).Groups[1].Value.Trim();
+            LogInfo($"itemNumId = \"{itemNumId}\"");
+            string apiUrl;
+            if (!isDesc)
+                apiUrl = "https://h5api.m.taobao.com/h5/mtop.taobao.detail.getdetail/6.0/"
+                    + "?jsv=2.4.11&appKey=12574478&api=mtop.taobao.detail.getdetail&v=6.0&ttid=2017%40htao_h5_1.0.0&type=jsonp&dataType=jsonp&callback=mtopjsonp1"
+                    + $"&data=%7B\"exParams\"%3A\" % 7B % 5C\"countryCode%5C\" % 3A % 5C\"CN%5C\" % 7D\"%2C\"itemNumId\"%3A\"{itemNumId}\"%7D";
+            else
+                apiUrl = "https://h5api.m.taobao.com/h5/mtop.wdetail.getitemdescx/4.9/"
+                    + "?jsv=2.4.11&appKey=12574478&api=mtop.wdetail.getItemDescx&v=4.9&type=jsonp&dataType=jsonp&callback=mtopjsonp2"
+                    + $"&data=%7B\"item_num_id\"%3A\"{itemNumId}\"%7D"; // 这个 API 需要 sign 和 t 才能正常请求 md5(cookie['_m_h5_tk'] + "&" + new Date().getTime() + "&" + appKey + "&" + c.data)
+            Log("\n");
+            LogInfo("开始下载商品数据：" + apiUrl);
+            string descContent;
+            JObject jsonConf;
+            try
+            {
+                descContent = Utils.GetPageByUrl(apiUrl, new Dictionary<string, string> { { "user-agent", MobileUA }, { "Referer", PageUrl } }).Html;
+                descContent = new Regex(@"(?smi)^mtopjsonp\d?\((.*?)\)$").Match(descContent.Trim()).Groups[1].Value.Trim();
+                if (descContent == "")
+                    throw new Exception("商品数据为空");
+                jsonConf = JObject.Parse(descContent);
+            }
+            catch (Exception e) { throw new Exception("商品数据下载失败：" + e.Message); }
+            LogSuccess("商品数据下载完毕");
+            return jsonConf;
+        }
+
+        private void TaobaoMobileThumb()
+        {
+            JObject infoJson = TaobaoMobileGetInfoJson();
+            foreach(var item in infoJson["data"]["item"]["images"])
+            {
+                AddImgUrl("主图", item.ToString());
+            }
+        }
+
+        private void TaobaoMobileCategory()
+        {
+            JObject infoJson = TaobaoMobileGetInfoJson();
+            JObject innerInfoJson;
+            try
+            {
+                string innerInfoJsonStr = infoJson["data"]["apiStack"][0]["value"].ToString().Trim();
+                if (innerInfoJsonStr == "") throw new Exception("数据为空");
+                innerInfoJson = JObject.Parse(innerInfoJsonStr);
+            }
+            catch (Exception e) { throw new Exception("商品分类数据读取失败：" + e.Message); }
+            var categories = innerInfoJson["skuBase"]["props"].FirstOrDefault((item) => (string)item["name"] == "颜色分类");
+            foreach (var item in categories["values"])
+            {
+                AddImgUrl("分类图", item["image"].ToString());
+            }
+        }
+
+        private void TaobaoMobileDesc()
+        {
+            LogWarning("详情页暂时无法采集，新版将会更新，敬请期待");
+            return;
+            JObject infoJson = TaobaoMobileGetInfoJson(isDesc: true);
+            foreach (var item in infoJson["data"]["images"])
+            {
+                AddImgUrl("详情图", item.ToString());
+            }
         }
         #endregion
 
@@ -398,7 +496,7 @@ namespace NacollectorSpiders.Business
             DeleteTempDirPath(donwloadTempDirTag);
             LogSuccess("临时文件清理完毕");
             Log("\n");
-            LogInfo($"<a href=\"{zipFilePath}\" onclick=\"downloadFile($(this).attr('href'));return false;\">点击保存图片打包文件</a>");
+            LogInfo($"<a href=\"{zipFilePath}\" onclick=\"saveLocalFile($(this).attr('href'));return false;\">点击保存图片打包文件</a>");
         }
 
         /// <summary>

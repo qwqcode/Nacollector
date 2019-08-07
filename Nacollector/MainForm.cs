@@ -39,7 +39,7 @@ namespace Nacollector
 #if !DEBUG
             string htmlPath = "nacollector://html_res/index.html";
 #else
-            string htmlPath = "http://127.0.0.1:8080";
+            string htmlPath = "http://localhost:8080";
 #endif
             crBrowser = new CrBrowser(this, htmlPath);
             
@@ -48,12 +48,7 @@ namespace Nacollector
                 if (crBrowser.CheckIsAppUrl(url))
                 {
                     // 获取并前端执行表单生成代码
-                    _mainForm.BeginInvoke((MethodInvoker)delegate
-                    {
-                        var spiderDomain = taskRunner.GetLoadSpiderDomain();
-                        crBrowser.RunJS(spiderDomain.GetFormGenJsCode());
-                        taskRunner.UnloadSpiderDomain();
-                    });
+                    taskRunner.RefreshFrontendSpiderList();
                 }
                 _splashScreen.Hide();
                 this.Invoke((MethodInvoker)delegate
