@@ -398,7 +398,7 @@ namespace NacollectorSpiders.Business
             DeleteTempDirPath(donwloadTempDirTag);
             LogSuccess("临时文件清理完毕");
             Log("\n");
-            LogInfo($"<a href=\"{zipFilePath}\" onclick=\"downloadFile($(this).attr('href'));return false;\">点击保存图片打包文件</a>");
+            LogInfo($"<a href=\"{zipFilePath}\" onclick=\"saveLocalFile($(this).attr('href'));return false;\">点击保存图片打包文件</a>");
         }
 
         /// <summary>

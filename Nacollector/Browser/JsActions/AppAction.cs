@@ -85,6 +85,29 @@ namespace Nacollector.Browser.JsActions
             _crBrowser.DownloadUrl(url);
         }
 
+        // 另存为文件
+        public void SaveLocalFile(string path, string downloadKey)
+        {
+            _form.BeginInvoke((MethodInvoker)delegate
+            {
+                SaveFileDialog savefile = new SaveFileDialog();
+                savefile.FileName = Path.GetFileName(path);
+                savefile.Filter = $"*{Path.GetExtension(path)} | *.*";
+                string dStatus;
+
+                if (savefile.ShowDialog() == DialogResult.OK)
+                {
+                    File.Copy(path, savefile.FileName, true);
+                    dStatus = "3";
+                }
+                else
+                {
+                    dStatus = "4";
+                }
+                _crBrowser.RunJS($"Downloads.updateTask({{ key: \"{downloadKey}\", receivedBytes: 0, currentSpeed: 0, status: {dStatus}, fullPath: String.raw`{savefile.FileName}`, downloadUrl: \"\" }})");
+            });
+        }
+
         // 升级操作
         public void AppUpdateAction(string srcUrl, string updateType)
         {
