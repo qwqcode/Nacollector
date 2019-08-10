@@ -109,12 +109,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Browser\CookieGetterBrowser.cs" />
-    <Compile Include="Browser\DownloadManager.cs" />
     <Compile Include="Browser\CrBrowser.cs" />
-    <Compile Include="Browser\Handler\BeforeDownloadUpdatedEventArgs.cs" />
+    <Compile Include="Browser\DownloadManager.cs" />
     <Compile Include="Browser\Handler\ChromeWidgetMessageInterceptor.cs" />
     <Compile Include="Browser\Handler\DownloadHandler.cs" />
-    <Compile Include="Browser\Handler\DownloadUpdatedEventArgs.cs" />
+    <Compile Include="Browser\Handler\DownloadEventArgs.cs" />
     <Compile Include="Browser\Handler\DragDropHandler.cs" />
     <Compile Include="Browser\Handler\LifeSpanHandler.cs" />
     <Compile Include="Browser\Handler\LoadHandler.cs" />

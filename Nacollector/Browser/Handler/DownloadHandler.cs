@@ -10,24 +10,22 @@ namespace Nacollector.Browser.Handler
     public class DownloadHandler : IDownloadHandler
     {
 
-        public event EventHandler<BeforeDownloadUpdatedEventArgs> OnBeforeDownloadFired;
+        public event EventHandler<BeforeDownloadEventArgs> OnBeforeDownloadFired;
 
         public event EventHandler<DownloadUpdatedEventArgs> OnDownloadUpdatedFired;
 
-        // 下载之前（单个下载任务 只会执行一次，从这里获取 downloadItem.SuggestedFileName）
+        /// <summary>
+        /// 下载之前（一个下载任务 只会执行一次，从这里获取 downloadItem.SuggestedFileName）
+        /// </summary>
         public void OnBeforeDownload(IWebBrowser chromiumWebBrowser, IBrowser browser, DownloadItem downloadItem, IBeforeDownloadCallback callback)
         {
-            var handler = OnBeforeDownloadFired;
-            if (handler != null)
+            OnBeforeDownloadFired?.Invoke(this, new BeforeDownloadEventArgs
             {
-                var eventArgs = new BeforeDownloadUpdatedEventArgs();
-                eventArgs.downloadItem = downloadItem; // DownloadItem 用来获取下载任务信息至关重要
-                eventArgs.callback = callback;
+                downloadItem = downloadItem, // DownloadItem 用来获取下载任务信息至关重要
+                callback = callback
+            });
 
-                // 调用事件
-                handler(this, eventArgs);
-            }
-
+            // 下载前显示对话框
             string downloadPath = @"";
             if (!callback.IsDisposed)
             {
@@ -38,18 +36,16 @@ namespace Nacollector.Browser.Handler
             }
         }
 
-        // 当下载任务信息更新
+        /// <summary>
+        /// 当下载任务信息更新
+        /// </summary>
         public void OnDownloadUpdated(IWebBrowser chromiumWebBrowser, IBrowser browser, DownloadItem downloadItem, IDownloadItemCallback callback)
         {
-            var handler = OnDownloadUpdatedFired;
-            if (handler != null)
+            OnDownloadUpdatedFired?.Invoke(this, new DownloadUpdatedEventArgs
             {
-                var eventArgs = new DownloadUpdatedEventArgs();
-                eventArgs.downloadItem = downloadItem;
-                eventArgs.callback = callback; // IDownloadItemCallback 可以控制下载任务，用于暂停下载任务、取消下载任务等
-
-                handler(this, eventArgs);
-            }
+                downloadItem = downloadItem,
+                callback = callback // IDownloadItemCallback 可以控制下载任务，用于暂停下载任务、取消下载任务等
+            });
         }
     }
 }
