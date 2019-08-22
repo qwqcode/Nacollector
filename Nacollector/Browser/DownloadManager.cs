@@ -15,183 +15,214 @@ using System.Threading.Tasks;
 namespace Nacollector.Browser
 {
     /// <summary>
-    /// 浏览器下载管理器
-    /// 配合 JS
+    /// 浏览器 - 下载管理器
     /// </summary>
-    public class DownloadManager
+    class DownloadManager
     {
-        public CrBrowser _crBrowser;
-        public static DownloadHandler downloadHandler;
-        
-        private static Dictionary<int, string> dlTaskIndex = new Dictionary<int, string>();
-        private static Dictionary<string, int> dlTaskAction = new Dictionary<string, int>();
+        private CrBrowser _crBrowser;
+        private ChromiumWebBrowser browser;
+
+        private Dictionary<int, DownloadTask> dlTaskDict = new Dictionary<int, DownloadTask>(); // key 为 dlItem.id
+
+        /// NOTE: 任务ID (taskId, 前端使用) 区别于 下载ID (dlItem.Id)
+
+        // 前端状态
+        public enum Status
+        {
+            Downloading = 1, // 下载中
+            Pause = 2, // 暂停
+            Done = 3, // 下载完毕
+            Cancelled = 4, // 已取消
+            Fail = 5, // 下载错误
+        }
+
+        // 前端操作
+        public enum Action
+        {
+            Pause = 1, // 暂停
+            Resume = 2, // 恢复
+            Cancel = 3 // 取消
+        }
 
         public DownloadManager(CrBrowser crBrowser)
         {
             _crBrowser = crBrowser;
+            browser = _crBrowser.GetBrowser();
 
-            downloadHandler = new DownloadHandler();
-            downloadHandler.OnBeforeDownloadFired += (s, e) =>
-            {
-                DownloadDo("add", _crBrowser.GetBrowser(), e);
-            };
-            downloadHandler.OnDownloadUpdatedFired += (s, e) =>
-            {
-                DownloadDo("update", _crBrowser.GetBrowser(), e);
-            };
+            var handler = new DownloadHandler();
+            handler.OnBeforeDownloadFired += (s, e) => OnBeforeDownload(e, e.downloadItem);
+            handler.OnDownloadUpdatedFired += (s, e) => OnDownloadUpdated(e, e.downloadItem);
 
-            _crBrowser.GetBrowser().DownloadHandler = downloadHandler;
-            _crBrowser.GetBrowser().RegisterAsyncJsObject("CrDownloadsCallBack", new CrDownloadsCallBack());
+            _crBrowser.GetBrowser().DownloadHandler = handler;
+            _crBrowser.GetBrowser().RegisterAsyncJsObject("CrDownloadsCallBack", new CrDownloadsCallBack(this));
         }
 
+        // 每个 dlItem 仅会调用一次；不一定在 OnDownloadUpdated 被调用前调用
+        private void OnBeforeDownload(BeforeDownloadEventArgs e, DownloadItem dlItem)
+        {
+            DownloadTask dlTask = TryGetDlTask(dlItem);
+        }
+
+        private void OnDownloadUpdated(DownloadUpdatedEventArgs e, DownloadItem dlItem)
+        {
+            DownloadTask dlTask = TryGetDlTask(dlItem);
+            dlTask.Update(dlItem, e.callback);
+        }
+
+        /// <summary>
+        /// 获取 dlTask，若为 新dlItem，则通知前端并创建 新dlTask
+        /// </summary>
+        private DownloadTask TryGetDlTask(DownloadItem dlItem)
+        {
+            // 若不存在，则实例化一个新的
+            if (!dlTaskDict.ContainsKey(dlItem.Id))
+                dlTaskDict[dlItem.Id] = new DownloadTask(this, dlItem);
+
+            return dlTaskDict[dlItem.Id];
+        }
+
+        /// <summary>
+        /// 下载任务
+        /// </summary>
+        public class DownloadTask
+        {
+            private readonly DownloadManager DownloadManager;
+
+            public string Id { get; }
+
+            public DownloadItem DlItem { get; set; }
+
+            public IDownloadItemCallback Callback { get; set; } = null; // Callback 用于执行 Cancel, Pause 等操作
+
+            public Status Status { get; set; } // set 过后记得调用 CallFrontendUpdate
+
+            /// <summary>
+            /// 初始化
+            /// </summary>
+            public DownloadTask(DownloadManager downloadManager, DownloadItem dlItem)
+            {
+                DownloadManager = downloadManager;
+                Id = Utils.GetTimeStamp();
+                DlItem = dlItem;
+                CallFrontendCreate();
+            }
+
+            /// <summary>
+            /// 更新
+            /// </summary>
+            public void Update(DownloadItem dlItem = null, IDownloadItemCallback callback = null, Status ?status = null)
+            {
+                if (dlItem != null) DlItem = dlItem;
+                if (callback != null) Callback = callback;
+
+                if (status == null)
+                {
+                    if (dlItem.IsInProgress) Status = Status.Downloading;
+                    else if (dlItem.IsComplete) Status = Status.Done;
+                    else if (dlItem.IsCancelled) Status = Status.Cancelled;
+                    else Status = Status.Fail;
+                }
+                else Status = (Status)status;
+
+                CallFrontendUpdate();
+            }
+
+            /// <summary>
+            /// 操作
+            /// </summary>
+            public void Handle(Action action)
+            {
+                if (action == Action.Cancel)
+                {
+                    Callback.Cancel();
+                    Update(status: Status.Cancelled);
+                }
+                else if (action == Action.Pause)
+                {
+                    Callback.Pause();
+                    Update(status: Status.Pause);
+                }
+                else if (action == Action.Resume)
+                {
+                    Callback.Resume(); // 命令仅需下达一次
+                    Update(status: Status.Downloading);
+                }
+            }
+
+            /// <summary>
+            /// 通知前端 更新任务
+            /// </summary>
+            public void CallFrontendUpdate()
+            {
+                string callbackObj = JsonConvert.SerializeObject(new
+                {
+                    key = Id,
+                    receivedBytes = DlItem.ReceivedBytes,
+                    currentSpeed = DlItem.CurrentSpeed,
+                    status = Status,
+                    fullPath = DlItem.FullPath,
+                    downloadUrl = DlItem.Url
+                });
+                DownloadManager.browser.ExecuteScriptAsync($"Downloads.updateTask({callbackObj})");
+            }
+
+            /// <summary>
+            /// 通知前端 创建新任务
+            /// </summary>
+            public void CallFrontendCreate()
+            {
+                string callbackObj = JsonConvert.SerializeObject(new
+                {
+                    key = Id,
+                    fullPath = DlItem.SuggestedFileName,
+                    downloadUrl = DlItem.OriginalUrl,
+                    totalBytes = DlItem.TotalBytes,
+                });
+                DownloadManager.browser.ExecuteScriptAsync($"Downloads.addTask({callbackObj})");
+            }
+        }
+
+        /// <summary>
+        /// 暴露给前端的 methods
+        /// </summary>
         public class CrDownloadsCallBack
         {
-            // 文件在资源管理器中显示
-            public bool fileShowInExplorer(string fileFullPath)
+            private DownloadManager _DownloadManager;
+
+            public CrDownloadsCallBack(DownloadManager downloadManager)
             {
-                if (string.IsNullOrEmpty(fileFullPath))
-                    return false;
-
-                if (!File.Exists(fileFullPath))
-                    return false;
-
-                string argument = "/select, \"" + fileFullPath + "\"";
-                Process.Start("explorer.exe", argument);
-                return true;
+                _DownloadManager = downloadManager;
             }
 
             // 文件启动
-            public bool fileLaunch(string fileFullPath)
+            public bool FileLaunch(string fileFullPath)
             {
-                if (string.IsNullOrEmpty(fileFullPath))
-                    return false;
-
-                if (!File.Exists(fileFullPath))
-                    return false;
-
+                if (string.IsNullOrEmpty(fileFullPath) || !File.Exists(fileFullPath)) return false;
                 Process.Start(fileFullPath);
                 return true;
             }
 
+            // 文件在资源管理器中显示
+            public bool FileShowInExplorer(string fileFullPath)
+            {
+                if (string.IsNullOrEmpty(fileFullPath) || !File.Exists(fileFullPath)) return false;
+                Process.Start("explorer.exe", "/select, \"" + fileFullPath + "\"");
+                return true;
+            }
+
             // URL 在系统默认浏览器中打开
-            public void urlOpenInDefaultBrowser(string url)
+            public void UrlOpenInDefaultBrowser(string url)
             {
                 Process.Start("explorer.exe", url);
             }
 
             // 下达任务操作命令
-            public void downloadingTaskAction(string key, int action)
+            public void DownloadingTaskAction(string dlTaskId, Action action)
             {
-                dlTaskAction[key] = action;
-            }
-        }
-
-        private void DownloadDo(string doType, ChromiumWebBrowser browser, EventArgs e)
-        {
-            DownloadItem downloadItem = null;
-            if (doType == "add")
-                downloadItem = ((BeforeDownloadUpdatedEventArgs)e).downloadItem;
-            else if (doType == "update")
-                downloadItem = ((DownloadUpdatedEventArgs)e).downloadItem;
-
-            // Key
-            string key;
-            if (!dlTaskIndex.ContainsKey(downloadItem.Id) && doType == "update")
-            { // 若在索引中找不到 并且 doType = update
-                return;
-            }
-            else if (!dlTaskIndex.ContainsKey(downloadItem.Id) && doType == "add")
-            {
-                key = Utils.GetTimeStamp();
-                dlTaskIndex.Add(downloadItem.Id, key);
-            }
-            else
-            {
-                key = dlTaskIndex[downloadItem.Id];
-            }
-
-            // 状态
-            var statusList = new
-            {
-                downloading = 1, // 下载中
-                pause = 2, // 暂停
-                done = 3, // 下载完毕
-                cancelled = 4, // 已取消
-                fail = 5, // 下载错误
-            };
-
-            int status;
-            if (downloadItem.IsInProgress)
-                status = statusList.downloading;
-            else if (downloadItem.IsComplete)
-                status = statusList.done;
-            else if (downloadItem.IsCancelled)
-                status = statusList.cancelled;
-            else
-                status = statusList.fail;
-
-            // 任务操作
-            if (doType == "update")
-            {
-                var actionList = new
-                {
-                    pause = 1,
-                    resume = 2,
-                    cancel = 3
-                };
-
-                var callback = ((DownloadUpdatedEventArgs)e).callback;
-
-                int action = 0;
-                if (dlTaskAction.ContainsKey(key))
-                {
-                    action = dlTaskAction[key];
+                DownloadTask dlTask = _DownloadManager.dlTaskDict.Where(o => o.Value.Id.Equals(dlTaskId)).FirstOrDefault().Value;
+                if (dlTask != null) {
+                    dlTask.Handle(action);
                 }
-
-                if (action == actionList.pause) // 暂停
-                {
-                    status = statusList.pause;
-                    callback.Pause();
-                }
-
-                if (action == actionList.resume) // 恢复
-                {
-                    status = statusList.downloading;
-                    callback.Resume();
-                    dlTaskAction[key] = 0; // 命令下达一次就够了！
-                }
-
-                if (action == actionList.cancel) // 取消
-                {
-                    status = statusList.cancelled;
-                    callback.Cancel();
-                }
-            }
-
-            // 回调
-            if (doType == "add")
-            {
-                string callbackObj = JsonConvert.SerializeObject(new
-                {
-                    key = key,
-                    fullPath = downloadItem.SuggestedFileName,
-                    downloadUrl = downloadItem.OriginalUrl,
-                    totalBytes = downloadItem.TotalBytes,
-                });
-                browser.ExecuteScriptAsync($"Downloads.addTask({callbackObj})");
-            }
-            else if (doType == "update")
-            {
-                string callbackObj = JsonConvert.SerializeObject(new
-                {
-                    key = key,
-                    receivedBytes = downloadItem.ReceivedBytes,
-                    currentSpeed = downloadItem.CurrentSpeed,
-                    status = status,
-                    fullPath = downloadItem.FullPath,
-                    downloadUrl = downloadItem.Url
-                });
-                browser.ExecuteScriptAsync($"Downloads.updateTask({callbackObj})");
             }
         }
     }

@@ -12,4 +12,10 @@ namespace Nacollector.Browser.Handler
         public DownloadItem downloadItem { get; set; }
         public IDownloadItemCallback callback { get; set; }
     }
+
+    public class BeforeDownloadEventArgs : EventArgs
+    {
+        public DownloadItem downloadItem { get; set; }
+        public IBeforeDownloadCallback callback { get; set; }
+    }
 }

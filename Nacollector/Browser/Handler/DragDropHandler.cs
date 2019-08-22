@@ -21,7 +21,7 @@ namespace Nacollector.Browser.Handler
 
         public bool OnDragEnter(IWebBrowser browserControl, IBrowser browser, IDragData dragData, DragOperationsMask mask)
         {
-            return false;
+            return true; // return true 禁止拖入文件
         }
 
         public void OnDraggableRegionsChanged(IWebBrowser browserControl, IBrowser browser, IList<DraggableRegion> regions)

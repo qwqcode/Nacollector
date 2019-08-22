@@ -87,6 +87,10 @@ namespace Nacollector.TaskManager
         /// </summary>
         public Dictionary<string, Thread> taskThreads = new Dictionary<string, Thread>();
 
+        /// <summary>
+        /// 中止任务
+        /// </summary>
+        /// <param name="taskId">任务 ID</param>
         public void AbortTask(string taskId)
         {
             if (!taskThreads.ContainsKey(taskId))
@@ -108,6 +112,17 @@ namespace Nacollector.TaskManager
             });
 
             return;
+        }
+
+        /// <summary>
+        /// 中止所有任务
+        /// </summary>
+        public void AbortAllTask()
+        {
+            foreach (var item in taskThreads)
+            {
+                AbortTask(item.Key);
+            }
         }
 
         public void NewTaskThread(SpiderSettings settings)

@@ -109,17 +109,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Browser\CookieGetterBrowser.cs" />
-    <Compile Include="Browser\DownloadManager.cs" />
     <Compile Include="Browser\CrBrowser.cs" />
-    <Compile Include="Browser\Handler\BeforeDownloadUpdatedEventArgs.cs" />
+    <Compile Include="Browser\DownloadManager.cs" />
     <Compile Include="Browser\Handler\ChromeWidgetMessageInterceptor.cs" />
     <Compile Include="Browser\Handler\DownloadHandler.cs" />
-    <Compile Include="Browser\Handler\DownloadUpdatedEventArgs.cs" />
+    <Compile Include="Browser\Handler\DownloadEventArgs.cs" />
     <Compile Include="Browser\Handler\DragDropHandler.cs" />
     <Compile Include="Browser\Handler\LifeSpanHandler.cs" />
     <Compile Include="Browser\Handler\LoadHandler.cs" />
     <Compile Include="Browser\Handler\MenuHandler.cs" />
-    <Compile Include="Browser\Handler\ResourceSchemeHandler .cs" />
+    <Compile Include="Browser\Handler\RequestHandler.cs" />
+    <Compile Include="Browser\Handler\ResourceSchemeHandler.cs" />
     <Compile Include="Browser\Handler\ResourceSchemeHandlerFactory.cs" />
     <Compile Include="Browser\JsActions\UpdateAction.cs" />
     <Compile Include="Browser\JsActions\TaskControllerAction.cs" />

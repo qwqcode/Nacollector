@@ -45,7 +45,7 @@ namespace Nacollector
             
             crBrowser.GetBrowser().FrameLoadEnd += new EventHandler<FrameLoadEndEventArgs>((obj, e) => {
                 string url = e.Frame.Url;
-                if (crBrowser.CheckIsAppUrl(url))
+                if (CrBrowser.CheckIsAppUrl(url))
                 {
                     // 获取并前端执行表单生成代码
                     taskRunner.RefreshFrontendSpiderList();
