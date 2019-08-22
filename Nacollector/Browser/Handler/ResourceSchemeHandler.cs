@@ -41,6 +41,9 @@ public class ResourceSchemeHandler : ResourceHandler
                         case ".png":
                             mimeType = "image/png";
                             break;
+                        case ".svg":
+                            mimeType = "image/svg+xml";
+                            break;
                         case ".appcache":
                             break;
                         case ".manifest":

@@ -21,7 +21,7 @@ namespace Nacollector.Browser
         private MainForm _form;
         private ChromiumWebBrowser browser;
         private DownloadManager downloadManager;
-        public bool CheckIsAppUrl(string url) => url.IndexOf("http://localhost") == 0 || url.IndexOf("nacollector://") == 0;
+        public static bool CheckIsAppUrl(string url) => url.StartsWith("http://localhost") || url.StartsWith("nacollector://") || url.StartsWith("chrome-devtools://");
 
         public CrBrowser(MainForm form, string address)
         {
@@ -48,6 +48,7 @@ namespace Nacollector.Browser
             browser.LifeSpanHandler = new LifeSpanHandler();
             browser.LoadHandler = new LoadHandler();
             browser.DragHandler = new DragDropHandler();
+            browser.RequestHandler = new RequestHandler();
 
             browser.FrameLoadStart += Browser_FrameLoadStart;
             browser.FrameLoadEnd += Browser_onFrameLoadEnd;

@@ -65,6 +65,13 @@ namespace Nacollector.Browser.JsActions
         // 执行任务下载
         public void StartUpdateWork(string updateModulesJsonStr)
         {
+            // 更新前结束所有 TASK
+            if (_form.taskRunner.taskThreads.Count > 0)
+            {
+                SetUpdateProgress(0, "正在结束所有正在运行的任务...");
+                _form.taskRunner.AbortAllTask();
+            }
+
             var updateModules = JArray.Parse(updateModulesJsonStr);
 
             var updaterUnpackFileList = new List<string> { };
@@ -226,7 +233,7 @@ namespace Nacollector.Browser.JsActions
 
         private string PurifyStrForJS(string str)
         {
-            return str.Replace("\"", "\\\"").Replace(" ", "\\&nbsp;").Replace(Environment.NewLine, "<br/>");
+            return str.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace(" ", "\\&nbsp;").Replace(Environment.NewLine, "<br/>");
         }
     }
 }

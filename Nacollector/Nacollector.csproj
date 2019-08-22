@@ -118,7 +118,8 @@
     <Compile Include="Browser\Handler\LifeSpanHandler.cs" />
     <Compile Include="Browser\Handler\LoadHandler.cs" />
     <Compile Include="Browser\Handler\MenuHandler.cs" />
-    <Compile Include="Browser\Handler\ResourceSchemeHandler .cs" />
+    <Compile Include="Browser\Handler\RequestHandler.cs" />
+    <Compile Include="Browser\Handler\ResourceSchemeHandler.cs" />
     <Compile Include="Browser\Handler\ResourceSchemeHandlerFactory.cs" />
     <Compile Include="Browser\JsActions\UpdateAction.cs" />
     <Compile Include="Browser\JsActions\TaskControllerAction.cs" />

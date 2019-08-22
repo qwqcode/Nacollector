@@ -93,18 +93,26 @@ namespace Nacollector.Browser.JsActions
                 SaveFileDialog savefile = new SaveFileDialog();
                 savefile.FileName = Path.GetFileName(path);
                 savefile.Filter = $"*{Path.GetExtension(path)} | *.*";
-                string dStatus;
 
                 if (savefile.ShowDialog() == DialogResult.OK)
                 {
-                    File.Copy(path, savefile.FileName, true);
-                    dStatus = "3";
+                    string dStatus;
+                    try
+                    {
+                        File.Copy(path, savefile.FileName, true);
+                        dStatus = "3";
+                        _crBrowser.RunJS($"$app.$set($app.$downloads.get(\"{downloadKey}\"), 'localPath', `{savefile.FileName.Replace("\\", "\\\\")}`);");
+                    }
+                    catch
+                    {
+                        dStatus = "5";
+                    }
+                    _crBrowser.RunJS($"$app.$set($app.$downloads.get(\"{downloadKey}\"), 'status', {dStatus});");
                 }
                 else
                 {
-                    dStatus = "4";
+                    _crBrowser.RunJS($"$app.$downloads.remove($app.$downloads.get(\"{downloadKey}\"));");
                 }
-                _crBrowser.RunJS($"Downloads.updateTask({{ key: \"{downloadKey}\", receivedBytes: 0, currentSpeed: 0, status: {dStatus}, fullPath: String.raw`{savefile.FileName}`, downloadUrl: \"\" }})");
             });
         }
 

@@ -40,7 +40,7 @@ namespace Nacollector.Browser
         public enum Action
         {
             Pause = 1, // 暂停
-            Resume = 2, // 重试
+            Resume = 2, // 恢复
             Cancel = 3 // 取消
         }
 
@@ -220,7 +220,9 @@ namespace Nacollector.Browser
             public void DownloadingTaskAction(string dlTaskId, Action action)
             {
                 DownloadTask dlTask = _DownloadManager.dlTaskDict.Where(o => o.Value.Id.Equals(dlTaskId)).FirstOrDefault().Value;
-                dlTask.Handle(action);
+                if (dlTask != null) {
+                    dlTask.Handle(action);
+                }
             }
         }
     }

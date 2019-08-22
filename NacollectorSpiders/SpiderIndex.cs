@@ -22,7 +22,14 @@ namespace NacollectorSpiders
                 Name = "Picture",
                 Label = "Picture",
                 NameSpace = "NacollectorSpiders.Picture"
+            },
+#if DEBUG
+            new SpiderTypeAttribute(){
+                Name = "Debug",
+                Label = "Debug",
+                NameSpace = "NacollectorSpiders.Debug"
             }
+#endif
         };
 
         public static string BuildAllSpiderFormJsCode()
