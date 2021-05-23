@@ -108,6 +108,10 @@ If you are enjoying this app, please consider making a donation to keep it alive
 
 禁止擅自以任何收费形式盈利，禁止擅自修改版权信息，侵权必究！
 
+## Stargazers over time
+
+[![Stargazers over time](https://starchart.cc/qwqcode/Nacollector.svg)](https://starchart.cc/qwqcode/Nacollector)
+
 ## Screenshots
 <p align="center">
 <img src="./docs/screenshots/home.png">
